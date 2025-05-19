@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/logger_service.dart';
 
 class AuthService {
   final FirebaseService _firebaseService;
@@ -15,7 +16,7 @@ class AuthService {
   // Connexion avec email et mot de passe
   Future<User> signInWithEmailAndPassword(String email, String password) async {
     try {
-      print('Tentative de connexion avec email: $email');
+      LoggerService.info('Tentative de connexion avec email: $email');
       
       // Vérifier d'abord les données dans Firestore
       final querySnapshot = await _firebaseService.firestore
@@ -23,10 +24,10 @@ class AuthService {
           .where('email', isEqualTo: email)
           .get();
       
-      print('Données Firestore trouvées: ${querySnapshot.docs.length} document(s)');
+      LoggerService.debug('Données Firestore trouvées: ${querySnapshot.docs.length} document(s)');
       if (querySnapshot.docs.isNotEmpty) {
         final userData = querySnapshot.docs.first.data();
-        print('Données utilisateur trouvées: $userData');
+        LoggerService.debug('Données utilisateur trouvées: $userData');
       }
       
       final userCredential = await _firebaseService.auth.signInWithEmailAndPassword(
@@ -35,19 +36,19 @@ class AuthService {
       );
       
       if (userCredential.user == null) {
-        print('Échec de connexion: userCredential.user est null');
+        LoggerService.error('Échec de connexion: userCredential.user est null');
         throw Exception('Échec de connexion');
       }
       
-      print('Connexion réussie pour l\'utilisateur: ${userCredential.user!.uid}');
+      LoggerService.info('Connexion réussie pour l\'utilisateur: ${userCredential.user!.uid}');
       return userCredential.user!;
     } catch (e) {
-      print('Erreur lors de la connexion: $e');
+      LoggerService.error('Erreur lors de la connexion', e);
       
       // Si l'utilisateur n'existe pas, essayer de le créer
       if (e is FirebaseAuthException && 
           (e.code == 'invalid-credential' || e.code == 'user-not-found')) {
-        print('Tentative de création de l\'utilisateur...');
+        LoggerService.info('Tentative de création de l\'utilisateur...');
         return await createUserFromFirestore(email, password);
       }
       
@@ -94,13 +95,17 @@ class AuthService {
   // Déconnexion
   Future<void> signOut() async {
     await _firebaseService.auth.signOut();
+    LoggerService.info('Utilisateur déconnecté');
   }
   
   // Réinitialisation du mot de passe
   Future<void> resetPassword(String email) async {
     try {
+      LoggerService.info('Tentative de réinitialisation du mot de passe pour: $email');
       await _firebaseService.auth.sendPasswordResetEmail(email: email);
+      LoggerService.info('Email de réinitialisation envoyé avec succès');
     } catch (e) {
+      LoggerService.error('Erreur lors de la réinitialisation du mot de passe', e);
       throw _handleAuthException(e);
     }
   }
@@ -132,7 +137,7 @@ class AuthService {
   // Créer un utilisateur Firebase Auth à partir des données Firestore
   Future<User> createUserFromFirestore(String email, String password) async {
     try {
-      print('Tentative de création d\'un utilisateur avec email: $email');
+      LoggerService.info('Tentative de création d\'un utilisateur avec email: $email');
       
       // Vérifier d'abord si l'utilisateur existe dans Firestore
       final querySnapshot = await _firebaseService.firestore
@@ -145,7 +150,7 @@ class AuthService {
       }
       
       final userData = querySnapshot.docs.first.data();
-      print('Données Firestore pour création: $userData');
+      LoggerService.debug('Données Firestore pour création: $userData');
       
       try {
         // Essayer de créer l'utilisateur
@@ -157,14 +162,14 @@ class AuthService {
         if (userCredential.user != null) {
           // Mettre à jour le profil utilisateur
           await userCredential.user!.updateDisplayName(userData['nom'] ?? '');
-          print('Compte créé avec succès pour l\'utilisateur: ${userCredential.user!.uid}');
+          LoggerService.info('Compte créé avec succès pour l\'utilisateur: ${userCredential.user!.uid}');
           return userCredential.user!;
         }
       } catch (authError) {
-        print('Erreur lors de la création: $authError');
+        LoggerService.error('Erreur lors de la création', authError);
         // Si l'utilisateur existe déjà, essayer de se connecter directement
         if (authError is FirebaseAuthException && authError.code == 'email-already-in-use') {
-          print('L\'utilisateur existe déjà, tentative de connexion directe');
+          LoggerService.info('L\'utilisateur existe déjà, tentative de connexion directe');
           final signInCredential = await _firebaseService.auth.signInWithEmailAndPassword(
             email: email,
             password: password,
@@ -176,7 +181,7 @@ class AuthService {
       
       throw Exception('Échec de création du compte');
     } catch (e) {
-      print('Erreur lors de la création du compte: $e');
+      LoggerService.error('Erreur lors de la création du compte', e);
       throw _handleAuthException(e);
     }
   }
@@ -184,6 +189,7 @@ class AuthService {
   // Gestion des exceptions Firebase Auth
   Exception _handleAuthException(dynamic e) {
     if (e is FirebaseAuthException) {
+      LoggerService.warning('FirebaseAuthException: ${e.code}');
       switch (e.code) {
         case 'user-not-found':
           return Exception('Aucun utilisateur trouvé avec cet email');

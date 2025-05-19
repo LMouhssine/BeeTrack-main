@@ -80,7 +80,7 @@ class StatsScreen extends StatelessWidget {
                       dotData: FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Theme.of(context).primaryColor.withOpacity(0.2),
+                        color: Theme.of(context).primaryColor.withAlpha(51),
                       ),
                     ),
                   ],

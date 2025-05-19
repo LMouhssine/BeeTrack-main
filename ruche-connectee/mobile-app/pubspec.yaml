@@ -36,7 +36,7 @@ dependencies:
   intl: ^0.18.1
   shared_preferences: ^2.2.1
   connectivity_plus: ^4.0.2
-  logger: ^2.0.1
+  logger: ^2.0.2
   uuid: ^3.0.7
   
   # Injection de dépendances

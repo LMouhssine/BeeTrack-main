@@ -93,8 +93,8 @@ class RucheCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
+                      color: statusColor.withAlpha(51),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
