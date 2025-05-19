@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:ruche_connectee/config/router.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'package:ruche_connectee/screens/splash_screen.dart';
+import 'package:ruche_connectee/firebase_options.dart';
 
 // Instance singleton pour l'injection de dépendances
 final GetIt getIt = GetIt.instance;
@@ -14,8 +15,10 @@ void main() async {
   // Assure que les widgets Flutter sont initialisés
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialise Firebase
-  await Firebase.initializeApp();
+  // Initialise Firebase avec la configuration appropriée
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Configure l'injection de dépendances
   setupDependencies();
@@ -44,8 +47,9 @@ class RucheConnecteeApp extends StatelessWidget {
           create: (context) => getIt<AuthBloc>()..add(CheckAuthStatusEvent()),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Ruche Connectée',
+        routerConfig: router,
         theme: ThemeData(
           primarySwatch: Colors.amber,
           primaryColor: const Color(0xFFFFA000),
@@ -90,7 +94,6 @@ class RucheConnecteeApp extends StatelessWidget {
           fontFamily: 'Poppins',
         ),
         themeMode: ThemeMode.light,
-        home: const SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );

@@ -1,68 +1,103 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'package:ruche_connectee/screens/auth/login_screen.dart';
-import 'package:ruche_connectee/screens/home/home_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ruche_connectee/services/auth_service.dart';
+import 'package:get_it/get_it.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthenticatedState) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        } else if (state is UnauthenticatedState) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _controller.forward();
+
+    // Vérifier l'état de l'authentification après l'animation
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _checkAuthAndRedirect();
+      }
+    });
+  }
+
+  Future<void> _checkAuthAndRedirect() async {
+    try {
+      final authService = GetIt.instance<AuthService>();
+      final user = await authService.getCurrentUser();
+      
+      if (mounted) {
+        if (user != null) {
+          context.go('/home');
+        } else {
+          context.go('/login');
         }
-      },
-      child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo de l'application
-              Image.asset(
-                'assets/images/logo.png',
-                width: 150,
-                height: 150,
+      }
+    } catch (e) {
+      if (mounted) {
+        context.go('/login');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo animé
+            ScaleTransition(
+              scale: _animation,
+              child: const Icon(
+                Icons.hive,
+                size: 120,
+                color: Colors.white,
               ),
-              const SizedBox(height: 24),
-              
-              // Titre de l'application
-              const Text(
+            ),
+            const SizedBox(height: 24),
+            // Titre avec animation de fade
+            FadeTransition(
+              opacity: _animation,
+              child: const Text(
                 'Ruche Connectée',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFFFA000),
+                  color: Colors.white,
                 ),
               ),
-              
-              const SizedBox(height: 8),
-              
-              // Sous-titre
-              const Text(
-                'Surveillance intelligente pour apiculteurs',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF795548),
-                ),
-              ),
-              
-              const SizedBox(height: 48),
-              
-              // Indicateur de chargement
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFA000)),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 48),
+            // Indicateur de chargement
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ],
         ),
       ),
     );

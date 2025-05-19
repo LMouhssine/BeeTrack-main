@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
 import 'package:ruche_connectee/screens/ruches/ruches_list_screen.dart';
-import 'package:ruche_connectee/screens/ruchers/ruchers_list_screen.dart';
+import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
 
@@ -14,15 +14,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-  
-  final List<Widget> _screens = [
-    const RuchesListScreen(),
-    const RuchersListScreen(),
-    const StatsScreen(),
-    const ProfileScreen(),
+  int _selectedIndex = 0;
+
+  static const List<Widget> _screens = [
+    RucherListScreen(),
+    StatsScreen(),
+    ProfileScreen(),
   ];
-  
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,28 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _screens[_currentIndex],
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.hive),
-            label: 'Ruches',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
             label: 'Ruchers',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
+            icon: Icon(Icons.analytics),
             label: 'Statistiques',
           ),
           BottomNavigationBarItem(
@@ -73,14 +65,17 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profil',
           ),
         ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Theme.of(context).primaryColor,
       ),
-      floatingActionButton: _currentIndex < 2
+      floatingActionButton: _selectedIndex < 2
           ? FloatingActionButton(
               onPressed: () {
                 // Ajouter une nouvelle ruche ou un nouveau rucher
-                if (_currentIndex == 0) {
+                if (_selectedIndex == 0) {
                   // Naviguer vers l'écran d'ajout de ruche
-                } else if (_currentIndex == 1) {
+                } else if (_selectedIndex == 1) {
                   // Naviguer vers l'écran d'ajout de rucher
                 }
               },
