@@ -18,7 +18,9 @@ class RucherDetailScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // TODO: Implémenter la modification du rucher
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fonctionnalité de modification en cours de développement')),
+              );
             },
           ),
         ],
@@ -81,7 +83,9 @@ class RucherDetailScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implémenter l'ajout d'une ruche
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Fonctionnalité d\'ajout de ruche en cours de développement')),
+          );
         },
         child: const Icon(Icons.add),
       ),

@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       final authService = GetIt.instance<AuthService>();
       final user = await authService.getCurrentUser();
       
-      if (mounted) {
+      if (context.mounted) {
         if (user != null) {
           context.go('/home');
         } else {
@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         }
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         context.go('/login');
       }
     }

@@ -13,14 +13,16 @@ class RucherListScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // TODO: Implémenter l'ajout de rucher
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fonctionnalité d\'ajout de rucher en cours de développement')),
+              );
             },
           ),
         ],
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: 0, // TODO: Remplacer par la vraie liste des ruchers
+        itemCount: 3, // Exemple avec 3 ruchers statiques
         itemBuilder: (context, index) {
           return Card(
             child: ListTile(

@@ -37,17 +37,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _passwordController.text,
           _nameController.text,
         );
-        if (mounted) {
+        if (context.mounted) {
           context.go('/home');
         }
       } catch (e) {
-        if (mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(e.toString())),
           );
         }
       } finally {
-        if (mounted) {
+        if (context.mounted) {
           setState(() => _isLoading = false);
         }
       }

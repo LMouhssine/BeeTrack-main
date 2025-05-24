@@ -34,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isLoading = true);
       final user = await GetIt.I<AuthService>().getCurrentUser();
       
-      if (!mounted) return;
+      if (!context.mounted) return;
       
       if (user != null) {
         _nameController.text = user.displayName ?? '';
@@ -42,12 +42,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       LoggerService.error('Erreur lors du chargement des données utilisateur', e);
-      if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
     } finally {
-      if (mounted) {
+      if (context.mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -68,19 +68,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      if (!mounted) return;
+      if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profil mis à jour avec succès')),
       );
     } catch (e) {
       LoggerService.error('Erreur lors de la mise à jour du profil', e);
-      if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
     } finally {
-      if (mounted) {
+      if (context.mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -90,12 +90,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await GetIt.I<AuthService>().signOut();
       
-      if (!mounted) return;
+      if (!context.mounted) return;
       
       Navigator.of(context).pushReplacementNamed('/login');
     } catch (e) {
       LoggerService.error('Erreur lors de la déconnexion', e);
-      if (!mounted) return;
+      if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la déconnexion: $e')),

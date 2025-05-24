@@ -17,7 +17,9 @@ class RucheDetailScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // TODO: Implémenter la modification de la ruche
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fonctionnalité de modification en cours de développement')),
+              );
             },
           ),
         ],

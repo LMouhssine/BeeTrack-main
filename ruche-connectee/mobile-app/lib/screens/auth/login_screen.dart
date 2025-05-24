@@ -45,12 +45,12 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
         
-        if (mounted) {
+        if (context.mounted) {
           context.go('/home');
         }
       } catch (e) {
         LoggerService.error('Erreur finale', e);
-        if (mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Erreur: ${e.toString()}'),
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } finally {
-        if (mounted) {
+        if (context.mounted) {
           setState(() => _isLoading = false);
         }
       }
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     try {
                       final authService = GetIt.instance<AuthService>();
                       await authService.resetPassword(_emailController.text);
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Un email de réinitialisation a été envoyé'),
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       }
                     } catch (e) {
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(e.toString()),
@@ -164,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       }
                     } finally {
-                      if (mounted) {
+                      if (context.mounted) {
                         setState(() => _isLoading = false);
                       }
                     }

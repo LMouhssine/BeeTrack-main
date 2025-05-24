@@ -13,8 +13,6 @@ class RucheListScreen extends StatefulWidget {
 }
 
 class _RucheListScreenState extends State<RucheListScreen> {
-  String? _selectedRucherId;
-  final bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -216,14 +214,14 @@ class _RucheListScreenState extends State<RucheListScreen> {
                       'derniere_mise_a_jour': FieldValue.serverTimestamp(),
                     });
 
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Ruche ajoutée avec succès')),
                     );
                   } catch (e) {
                     LoggerService.error('Erreur lors de l\'ajout de la ruche', e);
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Erreur: $e')),
                     );

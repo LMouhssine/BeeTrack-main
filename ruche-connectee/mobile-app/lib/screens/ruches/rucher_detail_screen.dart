@@ -46,9 +46,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> {
           .doc(widget.rucherId)
           .get();
 
-      if (!mounted) return;
-
-      if (docSnapshot.exists) {
+            if (!context.mounted) return;      if (docSnapshot.exists) {
         setState(() {
           _rucherData = docSnapshot.data();
           _nameController.text = _rucherData?['nom'] ?? '';
@@ -61,19 +59,10 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      LoggerService.error('Erreur lors du chargement du rucher', e);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+            LoggerService.error('Erreur lors du chargement du rucher', e);      if (!context.mounted) return;      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _updateRucher() async {
+        } finally {      if (context.mounted) {        setState(() => _isLoading = false);      }    }  }  Future<void> _updateRucher() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
@@ -87,28 +76,15 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> {
         'nom': _nameController.text,
         'localisation': _locationController.text,
         'modifie_le': FieldValue.serverTimestamp(),
-      });
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
+            });      if (!context.mounted) return;      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rucher mis à jour avec succès')),
       );
       Navigator.pop(context);
     } catch (e) {
-      LoggerService.error('Erreur lors de la mise à jour du rucher', e);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+            LoggerService.error('Erreur lors de la mise à jour du rucher', e);      if (!context.mounted) return;      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _deleteRucher() async {
+        } finally {      if (context.mounted) {        setState(() => _isLoading = false);      }    }  }  Future<void> _deleteRucher() async {
     try {
       setState(() => _isLoading = true);
 
@@ -117,11 +93,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> {
           .firestore
           .collection('ruches')
           .where('rucher_id', isEqualTo: widget.rucherId)
-          .get();
-
-      if (!mounted) return;
-
-      if (ruchesSnapshot.docs.isNotEmpty) {
+                    .get();      if (!context.mounted) return;      if (ruchesSnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Impossible de supprimer un rucher contenant des ruches'),
@@ -135,25 +107,15 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> {
           .firestore
           .collection('ruchers')
           .doc(widget.rucherId)
-          .delete();
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
+                    .delete();      if (!context.mounted) return;      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rucher supprimé avec succès')),
       );
       Navigator.pop(context);
     } catch (e) {
-      LoggerService.error('Erreur lors de la suppression du rucher', e);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+            LoggerService.error('Erreur lors de la suppression du rucher', e);      if (!context.mounted) return;      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+        } finally {      if (context.mounted) {        setState(() => _isLoading = false);      }    }
   }
 
   @override
