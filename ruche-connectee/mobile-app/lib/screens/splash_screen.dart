@@ -42,17 +42,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       final authService = GetIt.instance<AuthService>();
       final user = await authService.getCurrentUser();
       
-      if (context.mounted) {
-        if (user != null) {
-          context.go('/home');
-        } else {
-          context.go('/login');
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
+      if (!mounted) return;
+      if (user != null) {
+        context.go('/home');
+      } else {
         context.go('/login');
       }
+    } catch (e) {
+      if (!mounted) return;
+      context.go('/login');
     }
   }
 
