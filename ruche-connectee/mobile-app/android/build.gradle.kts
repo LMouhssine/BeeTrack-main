@@ -5,6 +5,7 @@ buildscript {
     }
     dependencies {
         classpath("com.google.gms:google-services:4.4.1")
+        classpath("dev.flutter.flutter:flutter-gradle-plugin:1.0.0")
     }
 }
 

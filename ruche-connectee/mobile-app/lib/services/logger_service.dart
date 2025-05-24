@@ -9,6 +9,11 @@ class LoggerService {
       colors: true,
       printEmojis: true,
       printTime: true,
+      noBoxingByDefault: true,
+      excludeBox: {
+        Level.trace: true,
+        Level.fatal: true,
+      },
     ),
   );
 
@@ -28,11 +33,11 @@ class LoggerService {
     _logger.e(message, error: error, stackTrace: stackTrace);
   }
 
-  static void verbose(String message) {
-    _logger.v(message);
+  static void trace(String message) {
+    _logger.t(message);
   }
 
-  static void wtf(String message) {
-    _logger.wtf(message);
+  static void fatal(String message) {
+    _logger.f(message);
   }
 } 

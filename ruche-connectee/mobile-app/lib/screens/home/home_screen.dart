@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'package:ruche_connectee/screens/ruches/ruches_list_screen.dart';
 import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:ruche_connectee/services/logger_service.dart';
 
 class FirebaseService {
   // Instances Firebase
@@ -33,31 +34,20 @@ class FirebaseService {
       }
       
       // Configurer les gestionnaires de messages
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        LoggerService.info('Message reçu en premier plan: ${message.notification?.title}');
+        // Ici, vous pouvez afficher une notification locale ou mettre à jour l'UI
+      });
+
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        LoggerService.info('Application ouverte depuis une notification: ${message.notification?.title}');
+        // Ici, vous pouvez naviguer vers un écran spécifique en fonction du message
+      });
+
+      FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
+        LoggerService.info('Message reçu en arrière-plan: ${message.notification?.title}');
+        // Traiter le message reçu en arrière-plan
+      });
     }
   }
-  
-  // Gestionnaire de messages en premier plan
-  void _handleForegroundMessage(RemoteMessage message) {
-    // Traiter le message reçu en premier plan
-    print('Message reçu en premier plan: ${message.notification?.title}');
-    
-    // Ici, vous pouvez afficher une notification locale ou mettre à jour l'UI
-  }
-  
-  // Gestionnaire de messages ouverts
-  void _handleMessageOpenedApp(RemoteMessage message) {
-    // Traiter le message lorsque l'application est ouverte depuis une notification
-    print('Application ouverte depuis une notification: ${message.notification?.title}');
-    
-    // Ici, vous pouvez naviguer vers un écran spécifique en fonction du message
-  }
-}
-
-// Gestionnaire de messages en arrière-plan
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Traiter le message reçu en arrière-plan
-  print('Message reçu en arrière-plan: ${message.notification?.title}');
 }

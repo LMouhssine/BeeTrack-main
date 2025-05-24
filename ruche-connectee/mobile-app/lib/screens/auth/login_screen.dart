@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:get_it/get_it.dart';
+import 'package:ruche_connectee/services/logger_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -36,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordController.text,
           );
         } catch (e) {
-          print('Erreur de connexion initiale: $e');
+          LoggerService.error('Erreur de connexion initiale', e);
           // Si la connexion échoue, essayer de créer l'utilisateur
           await authService.createUserFromFirestore(
             _emailController.text,
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context.go('/home');
         }
       } catch (e) {
-        print('Erreur finale: $e');
+        LoggerService.error('Erreur finale', e);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
