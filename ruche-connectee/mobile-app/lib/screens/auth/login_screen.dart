@@ -45,21 +45,19 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
         
-        if (context.mounted) {
-          context.go('/home');
-        }
+        if (!mounted) return;
+        context.go('/home');
       } catch (e) {
         LoggerService.error('Erreur finale', e);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       } finally {
-        if (context.mounted) {
+        if (mounted) {
           setState(() => _isLoading = false);
         }
       }

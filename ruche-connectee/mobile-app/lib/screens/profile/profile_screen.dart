@@ -86,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _signOut(BuildContext context) async {
+  Future<void> _signOut() async {
     try {
       await GetIt.I<AuthService>().signOut();
       
@@ -111,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _signOut(context),
+            onPressed: _signOut,
           ),
         ],
       ),
