@@ -1,0 +1,140 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ruche-connectee/mobile-app/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ruche-connectee/mobile-app/**'
+
+jobs:
+  test:
+    name: Test Flutter App
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Analyze project source
+      run: flutter analyze
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Run tests
+      run: flutter test
+      working-directory: ruche-connectee/mobile-app
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        cache: true
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Build Android APK
+      run: flutter build apk --release
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: ruche-connectee/mobile-app/build/app/outputs/flutter-apk/app-release.apk
+
+  build-web:
+    name: Build Web App
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Build Web
+      run: flutter build web --release
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Upload Web build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-build
+        path: ruche-connectee/mobile-app/build/web/
+
+  deploy-web:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-web
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Download web build
+      uses: actions/download-artifact@v4
+      with:
+        name: web-build
+        path: ./web-build
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./web-build
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4 

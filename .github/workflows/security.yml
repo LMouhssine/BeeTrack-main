@@ -1,0 +1,84 @@
+name: Security Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+
+  flutter-security:
+    name: Flutter Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Check for vulnerable dependencies
+      run: flutter pub deps --style=compact
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Run security audit
+      run: dart pub audit
+      working-directory: ruche-connectee/mobile-app
+      continue-on-error: true
+
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    strategy:
+      matrix:
+        language: [ 'dart' ]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      working-directory: ruche-connectee/mobile-app
+      
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3 
