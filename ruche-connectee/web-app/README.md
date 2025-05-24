@@ -1,130 +1,204 @@
-# Backend Spring Boot - Ruche Connectée
+# BeeTrack - API Web Backend
 
-## 🖥️ Présentation
+API REST Spring Boot pour le système de ruches connectées BeeTrack. Cette API reproduit et étend les fonctionnalités de l'application mobile Flutter en fournissant un backend web complet.
 
-Le backend de Ruche Connectée est une API REST développée avec Spring Boot qui gère les données des ruches connectées, l'authentification des utilisateurs et le système d'alertes.
+## 🚀 Fonctionnalités
 
-## ✨ Fonctionnalités
+### 🔐 Gestion des Apiculteurs
+- Création et gestion des comptes apiculteurs
+- Authentification avec Firebase Auth
+- Profils utilisateur complets
+- Connexion par email ou identifiant
 
-- 🔐 **Authentification** via Firebase
-- 📊 **API REST complète** pour :
-  - Gestion des apiculteurs
-  - Gestion des ruchers
-  - Gestion des ruches
-  - Accès aux données des capteurs
-- 📈 **Historisation** des données
-- 📧 **Système d'alertes** par email
-- 📝 **Documentation API** avec Swagger
+### 🐝 Gestion des Ruches
+- CRUD complet des ruches
+- Données de capteurs IoT en temps réel
+- Historique des mesures
+- Système d'alertes automatiques
+- Seuils personnalisables
 
-## 🏗️ Architecture
+### 📍 Gestion des Ruchers
+- Organisation des ruches par emplacement
+- Géolocalisation des ruchers
+- Comptage automatique des ruches
 
-Le backend suit une architecture en couches :
+### 📊 Données IoT
+- Réception des données ESP32
+- Température et humidité
+- État d'ouverture du couvercle
+- Niveau de batterie
+- Stockage historique
 
-- **Controller** : Points d'entrée de l'API REST
-- **Service** : Logique métier
-- **Repository** : Accès aux données
-- **Model** : Entités et DTOs
-- **Config** : Configuration de l'application
-- **Security** : Gestion de l'authentification
+## 🛠️ Technologies
 
-## 🚀 Installation
+- **Spring Boot 3.1.3** - Framework principal
+- **Firebase Admin SDK** - Authentification et Firestore
+- **Google Cloud Firestore** - Base de données NoSQL
+- **Lombok** - Réduction du code boilerplate
+- **SpringDoc OpenAPI** - Documentation API automatique
+- **Maven** - Gestion des dépendances
 
-### Prérequis
+## 📋 Prérequis
 
-- Java JDK 17+
-- Maven
-- Compte Firebase
-- Serveur SMTP pour les emails
+- Java 17 ou supérieur
+- Maven 3.6+
+- Compte Firebase avec projet configuré
+- Fichier de credentials Firebase
 
-### Configuration
+## ⚙️ Installation
 
-1. Clonez le dépôt et accédez au dossier du backend :
+### 1. Cloner le projet
 ```bash
-git clone https://github.com/votre-utilisateur/ruche-connectee.git
-cd ruche-connectee/web-app
+git clone https://github.com/LMouhssine/BeeTrack-main.git
+cd BeeTrack-main/ruche-connectee/web-app
 ```
 
-2. Configurez les propriétés de l'application dans `src/main/resources/application.properties` :
+### 2. Configuration Firebase
+
+1. Créer un projet Firebase sur [Firebase Console](https://console.firebase.google.com)
+2. Activer Firestore Database
+3. Activer Firebase Authentication (Email/Password)
+4. Générer une clé privée de compte de service :
+   - Aller dans Paramètres du projet > Comptes de service
+   - Cliquer sur "Générer une nouvelle clé privée"
+   - Télécharger le fichier JSON
+
+5. Placer le fichier JSON dans `src/main/resources/` et le renommer `firebase-service-account.json`
+
+### 3. Configuration de l'application
+
+Modifier `src/main/resources/application.properties` :
 ```properties
-# Configuration du serveur
-server.port=8080
-
-# Configuration Firebase
-firebase.database-url=https://votre-projet.firebaseio.com
-firebase.storage-bucket=votre-projet.appspot.com
-firebase.credentials-file-path=classpath:firebase-service-account.json
-
-# Configuration email
-spring.mail.host=smtp.example.com
-spring.mail.port=587
-spring.mail.username=your-email@example.com
-spring.mail.password=your-password
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
+firebase.project-id=VOTRE_PROJECT_ID
+firebase.credentials-path=firebase-service-account.json
 ```
 
-3. Placez votre fichier de configuration Firebase (`firebase-service-account.json`) dans `src/main/resources/`
-
-4. Lancez l'application :
+### 4. Compilation et lancement
 ```bash
-./mvnw spring-boot:run
+mvn clean install
+mvn spring-boot:run
 ```
 
-## 📁 Structure du projet
-
-```
-src/
-├── main/
-│   ├── java/com/rucheconnectee/
-│   │   ├── config/           # Configuration
-│   │   ├── controller/       # Contrôleurs REST
-│   │   ├── dto/              # Objets de transfert de données
-│   │   ├── exception/        # Gestion des exceptions
-│   │   ├── model/            # Entités
-│   │   ├── repository/       # Accès aux données
-│   │   ├── security/         # Configuration de sécurité
-│   │   ├── service/          # Services métier
-│   │   └── RucheConnecteeApplication.java
-│   └── resources/
-│       ├── application.properties
-│       └── firebase-service-account.json
-└── test/                     # Tests unitaires et d'intégration
-```
+L'API sera accessible sur `http://localhost:8080`
 
 ## 📚 Documentation API
 
-La documentation de l'API est disponible via Swagger UI à l'adresse :
+Une fois l'application lancée, la documentation Swagger est disponible sur :
+- **Swagger UI** : http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON** : http://localhost:8080/api-docs
+
+## 🔗 Endpoints Principaux
+
+### Apiculteurs
 ```
-http://localhost:8080/swagger-ui.html
+GET    /api/apiculteurs              - Liste tous les apiculteurs
+GET    /api/apiculteurs/{id}         - Récupère un apiculteur
+POST   /api/apiculteurs              - Crée un apiculteur
+PUT    /api/apiculteurs/{id}         - Met à jour un apiculteur
+DELETE /api/apiculteurs/{id}         - Désactive un apiculteur
+
+POST   /api/apiculteurs/auth/email   - Authentification par email
+POST   /api/apiculteurs/auth/identifiant - Récupère email par identifiant
 ```
+
+### Ruchers
+```
+GET    /api/ruchers/apiculteur/{id}  - Ruchers d'un apiculteur
+GET    /api/ruchers/{id}             - Récupère un rucher
+POST   /api/ruchers                  - Crée un rucher
+PUT    /api/ruchers/{id}             - Met à jour un rucher
+DELETE /api/ruchers/{id}             - Désactive un rucher
+```
+
+### Ruches
+```
+GET    /api/ruches/apiculteur/{id}   - Ruches d'un apiculteur
+GET    /api/ruches/rucher/{id}       - Ruches d'un rucher
+GET    /api/ruches/{id}              - Récupère une ruche
+POST   /api/ruches                   - Crée une ruche
+PUT    /api/ruches/{id}              - Met à jour une ruche
+DELETE /api/ruches/{id}              - Désactive une ruche
+
+POST   /api/ruches/{id}/donnees      - Données capteurs (ESP32)
+GET    /api/ruches/{id}/historique   - Historique des données
+GET    /api/ruches/{id}/alertes      - Vérification des alertes
+```
+
+## 📱 Intégration ESP32
+
+L'ESP32 peut envoyer les données directement à l'API :
+
+```cpp
+// Exemple de payload JSON pour ESP32
+{
+  "temperature": 25.5,
+  "humidity": 65.0,
+  "couvercle_ouvert": false,
+  "batterie": 85,
+  "signal_qualite": 90
+}
+```
+
+Endpoint : `POST /api/ruches/{rucheId}/donnees`
+
+## 🔄 Synchronisation avec l'App Mobile
+
+L'API partage la même base de données Firestore que l'application mobile Flutter, garantissant une synchronisation en temps réel des données.
+
+## 🚨 Système d'Alertes
+
+Le système vérifie automatiquement :
+- Température hors seuils (défaut : 15-35°C)
+- Humidité hors seuils (défaut : 40-70%)
+- Batterie faible (< 20%)
+- Ouverture prolongée du couvercle
 
 ## 🧪 Tests
 
-Pour exécuter les tests :
 ```bash
-./mvnw test
+# Tests unitaires
+mvn test
+
+# Tests d'intégration
+mvn verify
 ```
 
-## 🚢 Déploiement
+## 📦 Déploiement
 
-Pour créer un package déployable :
+### Docker
 ```bash
-./mvnw clean package
+# Construction de l'image
+docker build -t ruche-connectee-api .
+
+# Lancement du conteneur
+docker run -p 8080:8080 ruche-connectee-api
 ```
 
-Le fichier JAR sera généré dans le dossier `target/`.
+### Production
+1. Configurer les variables d'environnement
+2. Utiliser un profil de production
+3. Configurer HTTPS
+4. Mettre en place la surveillance
 
-## 🔄 Intégration continue
+## 🤝 Contribution
 
-Le projet utilise GitHub Actions pour l'intégration continue. Voir le fichier `.github/workflows/maven.yml` pour plus de détails.
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Créer une Pull Request
 
-## 🛠️ Technologies utilisées
+## 📄 Licence
 
-- **Spring Boot** : Framework Java
-- **Spring Security** : Sécurité et authentification
-- **Firebase Admin SDK** : Intégration avec Firebase
-- **Firestore** : Base de données
-- **JavaMail** : Envoi d'emails
-- **Swagger** : Documentation API
-- **JUnit & Mockito** : Tests
-- **Maven** : Gestion des dépendances
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 📞 Support
+
+Pour toute question ou problème :
+- Ouvrir une issue sur GitHub
+- Consulter la documentation Swagger
+- Vérifier les logs de l'application
+
+---
+
+**Note** : Cette API est conçue pour fonctionner en parfaite harmonie avec l'application mobile Flutter existante, partageant la même base de données et la même logique métier.
