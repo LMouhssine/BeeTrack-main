@@ -47,38 +47,12 @@ jobs:
       run: dart pub audit
       working-directory: ruche-connectee/mobile-app
       continue-on-error: true
-
-  codeql-analysis:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    
-    strategy:
-      matrix:
-        language: [ 'dart' ]
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
       
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.24.x'
-        cache: true
-        
-    - name: Get dependencies
-      run: flutter pub get
+    - name: Check for outdated dependencies
+      run: flutter pub outdated
       working-directory: ruche-connectee/mobile-app
+      continue-on-error: true
       
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3 
+    - name: Static analysis for security issues
+      run: flutter analyze --fatal-infos
+      working-directory: ruche-connectee/mobile-app 

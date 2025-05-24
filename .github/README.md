@@ -25,9 +25,12 @@ Cette configuration GitHub Actions fournit une pipeline complète CI/CD pour l'a
 **Déclencheurs :** Push/PR sur `main` + hebdomadaire
 
 **Contrôles :**
-- 🔍 Audit des dépendances Flutter
-- 🛡️ Analyse CodeQL pour la sécurité du code
+- 🔍 Audit des dépendances Flutter (`dart pub audit`)
 - 📊 Review des dépendances dans les PR
+- 📋 Vérification des dépendances obsolètes
+- 🛡️ Analyse statique de sécurité (`flutter analyze --fatal-infos`)
+
+> **Note :** CodeQL n'est pas encore compatible avec Dart/Flutter. Nous utilisons les outils natifs Flutter pour l'analyse de sécurité.
 
 ## 🔧 Configuration Requise
 
@@ -56,9 +59,10 @@ Aucun secret requis pour le fonctionnement de base.
 - **Releases** : Assets automatiquement attachés
 
 ### 🛡️ Sécurité
-- Audit des dépendances hebdomadaire
-- Analyse CodeQL du code source
-- Review des changements de dépendances
+- Audit des dépendances hebdomadaire avec `dart pub audit`
+- Analyse statique stricte du code Dart/Flutter
+- Review des changements de dépendances dans les PR
+- Vérification des dépendances obsolètes
 
 ## 📈 Monitoring
 
@@ -85,4 +89,11 @@ Les workflows génèrent des artifacts téléchargeables :
 En cas de problème :
 - Vérifier les logs dans l'onglet "Actions"
 - S'assurer que Flutter 3.24.x est compatible
-- Vérifier les permissions GitHub Pages 
+- Vérifier les permissions GitHub Pages
+
+## 🛡️ Sécurité Flutter
+
+Notre pipeline utilise les outils de sécurité spécifiques à Flutter :
+- **`dart pub audit`** : Détection des vulnérabilités dans les dépendances
+- **`flutter analyze --fatal-infos`** : Analyse statique stricte
+- **`flutter pub outdated`** : Suivi des mises à jour de sécurité 
