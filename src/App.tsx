@@ -3,6 +3,10 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'f
 import { auth, db } from './firebase-config';
 import { doc, getDoc } from 'firebase/firestore';
 import { LogIn, LogOut, User as UserIcon, AlertTriangle } from 'lucide-react';
+import Navigation from './components/Navigation';
+import RuchersList from './components/RuchersList';
+import RuchesList from './components/RuchesList';
+import Statistiques from './components/Statistiques';
 
 interface Apiculteur {
   id: string;
@@ -14,6 +18,8 @@ interface Apiculteur {
 }
 
 function App() {
+  console.log('🐝 App component initializing...');
+  
   const [user, setUser] = useState<User | null>(null);
   const [apiculteur, setApiculteur] = useState<Apiculteur | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,8 +27,12 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('ruchers');
+  
+  console.log('🐝 App state initialized');
 
   useEffect(() => {
+    console.log('🐝 Setting up auth listener...');
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
@@ -182,7 +192,7 @@ function App() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <span className="text-2xl">🐝</span>
-              <h1 className="text-xl font-bold text-amber-800">Ruche Connectée</h1>
+              <h1 className="text-xl font-bold text-amber-800">BeeTrack</h1>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -205,70 +215,14 @@ function App() {
         </div>
       </header>
 
+      {/* Navigation */}
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              🎉 Connexion réussie !
-            </h2>
-            
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
-                Authentification fonctionnelle
-              </h3>
-              <p className="text-green-700">
-                L'authentification Firebase fonctionne parfaitement entre l'application mobile et web !
-              </p>
-            </div>
-
-            {apiculteur && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
-                <h4 className="text-lg font-semibold text-amber-800 mb-3">
-                  Informations du compte
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                  <div>
-                    <span className="font-medium text-gray-600">Email :</span>
-                    <p className="text-gray-800">{apiculteur.email}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Nom :</span>
-                    <p className="text-gray-800">{apiculteur.nom}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Prénom :</span>
-                    <p className="text-gray-800">{apiculteur.prenom}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-600">Rôle :</span>
-                    <p className="text-gray-800">{apiculteur.role}</p>
-                  </div>
-                  {apiculteur.identifiant && (
-                    <div>
-                      <span className="font-medium text-gray-600">Identifiant :</span>
-                      <p className="text-gray-800">{apiculteur.identifiant}</p>
-                    </div>
-                  )}
-                  <div>
-                    <span className="font-medium text-gray-600">ID Firebase :</span>
-                    <p className="text-gray-800 font-mono text-sm">{apiculteur.id}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-blue-800 mb-2">
-                Prochaines étapes
-              </h4>
-              <p className="text-blue-700">
-                L'interface d'authentification est maintenant fonctionnelle. 
-                Vous pouvez développer les fonctionnalités de gestion des ruches et ruchers.
-              </p>
-            </div>
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        {activeTab === 'ruchers' && <RuchersList user={user} />}
+        {activeTab === 'ruches' && <RuchesList />}
+        {activeTab === 'statistiques' && <Statistiques />}
       </main>
     </div>
   );
