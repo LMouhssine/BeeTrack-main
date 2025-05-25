@@ -165,7 +165,7 @@ public class ApiculteurService {
             try {
                 existingUser = firebaseService.getUserByEmail(email);
             } catch (FirebaseAuthException e) {
-                if (!e.getErrorCode().equals("user-not-found")) {
+                if (!"user-not-found".equals(e.getErrorCode().toString())) {
                     // Si ce n'est pas une erreur "utilisateur non trouvé", c'est une vraie erreur
                     result.put("error", "Erreur Firebase Auth: " + e.getMessage());
                     return result;
