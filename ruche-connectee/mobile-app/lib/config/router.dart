@@ -5,10 +5,12 @@ import 'package:ruche_connectee/screens/home/home_screen.dart';
 import 'package:ruche_connectee/screens/splash_screen.dart';
 import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
 import 'package:ruche_connectee/screens/ruchers/rucher_detail_screen.dart';
+import 'package:ruche_connectee/screens/ruchers/ajouter_rucher_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_list_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
+import 'package:ruche_connectee/screens/test_rucher_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -34,6 +36,10 @@ final router = GoRouter(
       builder: (context, state) => const RucherListScreen(),
     ),
     GoRoute(
+      path: '/ruchers/ajouter',
+      builder: (context, state) => const AjouterRucherScreen(),
+    ),
+    GoRoute(
       path: '/ruchers/:id',
       builder: (context, state) => RucherDetailScreen(
         rucherId: state.pathParameters['id']!,
@@ -56,6 +62,10 @@ final router = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/test',
+      builder: (context, state) => const TestRucherScreen(),
     ),
   ],
 ); 

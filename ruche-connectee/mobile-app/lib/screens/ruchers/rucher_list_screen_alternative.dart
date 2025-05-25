@@ -5,39 +5,28 @@ import 'package:ruche_connectee/services/rucher_service.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
-class RucherListScreen extends StatefulWidget {
-  const RucherListScreen({Key? key}) : super(key: key);
+class RucherListScreenAlternative extends StatefulWidget {
+  const RucherListScreenAlternative({Key? key}) : super(key: key);
 
   @override
-  State<RucherListScreen> createState() => _RucherListScreenState();
+  State<RucherListScreenAlternative> createState() => _RucherListScreenAlternativeState();
 }
 
-class _RucherListScreenState extends State<RucherListScreen> {
+class _RucherListScreenAlternativeState extends State<RucherListScreenAlternative> {
   late final RucherService _rucherService;
-  late Stream<List<Map<String, dynamic>>> _ruchersStream;
+  late Future<List<Map<String, dynamic>>> _ruchersFuture;
 
   @override
   void initState() {
     super.initState();
     _rucherService = RucherService(GetIt.I<FirebaseService>());
-    _initializeStream();
+    _loadRuchers();
   }
 
-  void _initializeStream() {
-    _ruchersStream = _rucherService.ecouterRuchersUtilisateur();
-  }
-
-  void _refreshStream() {
+  void _loadRuchers() {
     setState(() {
-      _initializeStream();
+      _ruchersFuture = _rucherService.obtenirRuchersUtilisateur();
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Rafraîchir le stream quand on revient sur cet écran
-    _refreshStream();
   }
 
   @override
@@ -52,15 +41,21 @@ class _RucherListScreenState extends State<RucherListScreen> {
             icon: const Icon(Icons.add),
             onPressed: () async {
               await context.push('/ruchers/ajouter');
-              // Rafraîchir la liste quand on revient
-              _refreshStream();
+              // Recharger la liste quand on revient
+              _loadRuchers();
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _ruchersStream,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _ruchersFuture,
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
           if (snapshot.hasError) {
             LoggerService.error('Erreur lors du chargement des ruchers', snapshot.error);
             return Center(
@@ -80,7 +75,7 @@ class _RucherListScreenState extends State<RucherListScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _refreshStream,
+                    onPressed: _loadRuchers,
                     child: const Text('Réessayer'),
                   ),
                 ],
@@ -88,13 +83,7 @@ class _RucherListScreenState extends State<RucherListScreen> {
             );
           }
 
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final ruchers = snapshot.data!;
+          final ruchers = snapshot.data ?? [];
 
           if (ruchers.isEmpty) {
             return Center(
@@ -125,7 +114,7 @@ class _RucherListScreenState extends State<RucherListScreen> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       await context.push('/ruchers/ajouter');
-                      _refreshStream();
+                      _loadRuchers();
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Créer un rucher'),
@@ -145,7 +134,7 @@ class _RucherListScreenState extends State<RucherListScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              _refreshStream();
+              _loadRuchers();
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16.0),
@@ -236,7 +225,7 @@ class _RucherListScreenState extends State<RucherListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await context.push('/ruchers/ajouter');
-          _refreshStream();
+          _loadRuchers();
         },
         backgroundColor: Colors.amber,
         foregroundColor: Colors.black,

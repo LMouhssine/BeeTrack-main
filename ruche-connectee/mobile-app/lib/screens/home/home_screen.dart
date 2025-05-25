@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
+import 'package:ruche_connectee/screens/ruchers/rucher_list_screen_alternative.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
 
@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _screens = [
-    RucherListScreen(),
+    RucherListScreenAlternative(),
     StatsScreen(),
     ProfileScreen(),
   ];
@@ -68,20 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).primaryColor,
       ),
-      floatingActionButton: _selectedIndex < 2
-          ? FloatingActionButton(
-              onPressed: () {
-                // Ajouter une nouvelle ruche ou un nouveau rucher
-                if (_selectedIndex == 0) {
-                  // Naviguer vers l'écran d'ajout de ruche
-                } else if (_selectedIndex == 1) {
-                  // Naviguer vers l'écran d'ajout de rucher
-                }
-              },
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(Icons.add),
-            )
-          : null,
+
     );
   }
   
