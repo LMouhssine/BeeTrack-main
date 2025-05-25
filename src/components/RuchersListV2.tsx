@@ -1,48 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
-import { RucherService, Rucher } from '../services/rucherService';
-import { Plus, Home, MapPin, FileText, Calendar, Trash2, Edit } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRuchers } from '../hooks/useRuchers';
+import { Plus, Home, MapPin, FileText, Calendar, Trash2, Edit, RefreshCw } from 'lucide-react';
 
-interface RuchersListProps {
-  user: User;
-}
-
-const RuchersList: React.FC<RuchersListProps> = ({ user }) => {
-  const [ruchers, setRuchers] = useState<Rucher[]>([]);
-  const [loading, setLoading] = useState(true);
+const RuchersListV2: React.FC = () => {
+  const { 
+    ruchers, 
+    loading, 
+    error, 
+    rechargerRuchers, 
+    ajouterRucher, 
+    supprimerRucher,
+    clearError 
+  } = useRuchers();
+  
   const [showAddForm, setShowAddForm] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (user) {
-      loadRuchers();
-    }
-  }, [user]);
-
-  const loadRuchers = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      // Utilisation de la nouvelle fonction qui récupère automatiquement l'utilisateur connecté
-      const ruchersData = await RucherService.obtenirRuchersUtilisateurConnecte();
-      setRuchers(ruchersData);
-      console.log(`🐝 ${ruchersData.length} rucher(s) chargé(s) avec succès`);
-    } catch (error: any) {
-      console.error('Erreur lors du chargement des ruchers:', error);
-      setError(error.message || 'Impossible de charger les ruchers');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteRucher = async (id: string, nom: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le rucher "${nom}" ?`)) {
       try {
-        await RucherService.supprimerRucher(id);
-        await loadRuchers(); // Recharger la liste
+        await supprimerRucher(id);
+        console.log('🐝 Rucher supprimé avec succès');
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
-        setError('Impossible de supprimer le rucher');
+        // L'erreur est déjà gérée par le hook
       }
     }
   };
@@ -72,20 +52,38 @@ const RuchersList: React.FC<RuchersListProps> = ({ user }) => {
         <div className="flex items-center space-x-2">
           <Home className="text-amber-600" size={24} />
           <h2 className="text-2xl font-bold text-gray-800">Mes Ruchers</h2>
+          <span className="bg-amber-100 text-amber-800 text-sm px-2 py-1 rounded-full">
+            Temps réel
+          </span>
         </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition duration-200"
-        >
-          <Plus size={20} />
-          <span>Ajouter un Rucher</span>
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={rechargerRuchers}
+            className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition duration-200"
+            title="Actualiser"
+          >
+            <RefreshCw size={16} />
+          </button>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition duration-200"
+          >
+            <Plus size={20} />
+            <span>Ajouter un Rucher</span>
+          </button>
+        </div>
       </div>
 
       {/* Messages d'erreur */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center">
+          <span>{error}</span>
+          <button
+            onClick={clearError}
+            className="text-red-500 hover:text-red-700 ml-2"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -161,27 +159,27 @@ const RuchersList: React.FC<RuchersListProps> = ({ user }) => {
 
       {/* Formulaire d'ajout */}
       {showAddForm && (
-        <AddRucherForm
-          user={user}
+        <AddRucherFormV2
           onClose={() => setShowAddForm(false)}
           onSuccess={() => {
             setShowAddForm(false);
-            loadRuchers();
+            // Pas besoin de recharger, l'écoute temps réel se charge de la mise à jour
           }}
+          ajouterRucher={ajouterRucher}
         />
       )}
     </div>
   );
 };
 
-// Composant pour le formulaire d'ajout
-interface AddRucherFormProps {
-  user: User;
+// Composant pour le formulaire d'ajout amélioré
+interface AddRucherFormV2Props {
   onClose: () => void;
   onSuccess: () => void;
+  ajouterRucher: (rucher: { nom: string; adresse: string; description: string }) => Promise<string>;
 }
 
-const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess }) => {
+const AddRucherFormV2: React.FC<AddRucherFormV2Props> = ({ onClose, onSuccess, ajouterRucher }) => {
   const [formData, setFormData] = useState({
     nom: '',
     adresse: '',
@@ -202,35 +200,36 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
       setLoading(true);
       setError('');
       
-      await RucherService.ajouterRucher({
+      await ajouterRucher({
         nom: formData.nom.trim(),
         adresse: formData.adresse.trim(),
-        description: formData.description.trim(),
-        idApiculteur: user.uid
+        description: formData.description.trim()
       });
 
+      console.log('🐝 Rucher créé avec succès');
       onSuccess();
-    } catch (error) {
-      console.error('Erreur lors de la création:', error);
-      setError('Impossible de créer le rucher. Veuillez réessayer.');
+    } catch (error: any) {
+      console.error('Erreur lors de la création du rucher:', error);
+      setError(error.message || 'Erreur lors de la création du rucher');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Nouveau Rucher</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Ajouter un Rucher</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition duration-200"
@@ -238,6 +237,12 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
               ✕
             </button>
           </div>
+
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -250,7 +255,7 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
                 name="nom"
                 value={formData.nom}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 placeholder="Ex: Rucher des Tilleuls"
                 required
               />
@@ -266,7 +271,7 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
                 name="adresse"
                 value={formData.adresse}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 placeholder="Ex: 123 Rue des Abeilles, 75001 Paris"
                 required
               />
@@ -282,36 +287,26 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-vertical"
-                placeholder="Décrivez votre rucher (emplacement, caractéristiques, etc.)"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                placeholder="Décrivez votre rucher..."
                 required
               />
             </div>
-
-            {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-                {error}
-              </div>
-            )}
 
             <div className="flex space-x-3 pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition duration-200"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white rounded-md transition duration-200 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
               >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  'Créer'
-                )}
+                {loading ? 'Création...' : 'Créer'}
               </button>
             </div>
           </form>
@@ -321,4 +316,4 @@ const AddRucherForm: React.FC<AddRucherFormProps> = ({ user, onClose, onSuccess 
   );
 };
 
-export default RuchersList; 
+export default RuchersListV2; 
