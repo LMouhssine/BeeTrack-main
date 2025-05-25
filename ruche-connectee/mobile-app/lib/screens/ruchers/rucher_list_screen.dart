@@ -24,7 +24,8 @@ class _RucherListScreenState extends State<RucherListScreen> {
   }
 
   void _initializeStream() {
-    _ruchersStream = _rucherService.ecouterRuchersUtilisateur();
+    // Utiliser la version optimisée avec fallback automatique
+    _ruchersStream = _rucherService.ecouterRuchersUtilisateurOptimise();
   }
 
   void _refreshStream() {
