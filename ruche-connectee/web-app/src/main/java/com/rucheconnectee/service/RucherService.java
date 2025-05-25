@@ -37,9 +37,17 @@ public class RucherService {
 
     /**
      * Récupère tous les ruchers d'un apiculteur
+     * Compatible avec les formats mobile (idApiculteur) et web (apiculteur_id)
      */
     public List<Rucher> getRuchersByApiculteur(String apiculteurId) throws ExecutionException, InterruptedException {
+        // Essayer d'abord avec le format web (apiculteur_id)
         List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_RUCHERS, "apiculteur_id", apiculteurId);
+        
+        // Si aucun résultat, essayer avec le format mobile (idApiculteur)
+        if (documents.isEmpty()) {
+            documents = firebaseService.getDocuments(COLLECTION_RUCHERS, "idApiculteur", apiculteurId);
+        }
+        
         return documents.stream()
                 .filter(doc -> (Boolean) doc.getData().getOrDefault("actif", true))
                 .map(doc -> documentToRucher(doc.getId(), doc.getData()))
@@ -114,6 +122,7 @@ public class RucherService {
 
     /**
      * Convertit un document Firestore en objet Rucher
+     * Compatible avec les formats mobile et web
      */
     private Rucher documentToRucher(String id, Map<String, Object> data) {
         if (data == null) return null;
@@ -121,7 +130,14 @@ public class RucherService {
         Rucher rucher = new Rucher();
         rucher.setId(id);
         rucher.setNom((String) data.get("nom"));
-        rucher.setApiculteurId((String) data.get("apiculteur_id"));
+        
+        // Support des deux formats d'ID apiculteur
+        String apiculteurId = (String) data.get("apiculteur_id");
+        if (apiculteurId == null) {
+            apiculteurId = (String) data.get("idApiculteur");
+        }
+        rucher.setApiculteurId(apiculteurId);
+        
         rucher.setDescription((String) data.get("description"));
         rucher.setAdresse((String) data.get("adresse"));
         rucher.setVille((String) data.get("ville"));
@@ -142,8 +158,11 @@ public class RucherService {
             rucher.setNombreRuches(((Number) data.get("nombre_ruches")).intValue());
         }
 
-        // Gestion de la date de création
+        // Gestion de la date de création (support des deux formats)
         Object dateCreation = data.get("date_creation");
+        if (dateCreation == null) {
+            dateCreation = data.get("dateCreation");
+        }
         if (dateCreation instanceof com.google.cloud.Timestamp) {
             rucher.setDateCreation(((com.google.cloud.Timestamp) dateCreation).toDate().toInstant()
                     .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
@@ -154,11 +173,16 @@ public class RucherService {
 
     /**
      * Convertit un objet Rucher en Map pour Firestore
+     * Sauvegarde dans les deux formats pour compatibilité mobile/web
      */
     private Map<String, Object> rucherToMap(Rucher rucher) {
         Map<String, Object> data = new HashMap<>();
         data.put("nom", rucher.getNom());
-        data.put("apiculteur_id", rucher.getApiculteurId());
+        
+        // Sauvegarder dans les deux formats pour compatibilité
+        data.put("apiculteur_id", rucher.getApiculteurId());  // Format web
+        data.put("idApiculteur", rucher.getApiculteurId());   // Format mobile
+        
         data.put("description", rucher.getDescription());
         data.put("adresse", rucher.getAdresse());
         data.put("ville", rucher.getVille());
@@ -167,12 +191,17 @@ public class RucherService {
         data.put("actif", rucher.isActif());
         data.put("position_lat", rucher.getPositionLat());
         data.put("position_lng", rucher.getPositionLng());
-        data.put("nombre_ruches", rucher.getNombreRuches());
+        
+        // Sauvegarder dans les deux formats
+        data.put("nombre_ruches", rucher.getNombreRuches());  // Format web
+        data.put("nombreRuches", rucher.getNombreRuches());   // Format mobile
 
         if (rucher.getDateCreation() != null) {
-            data.put("date_creation", com.google.cloud.Timestamp.of(
+            com.google.cloud.Timestamp timestamp = com.google.cloud.Timestamp.of(
                     java.util.Date.from(rucher.getDateCreation().atZone(java.time.ZoneId.systemDefault()).toInstant())
-            ));
+            );
+            data.put("date_creation", timestamp);  // Format web
+            data.put("dateCreation", timestamp);   // Format mobile
         }
 
         return data;
