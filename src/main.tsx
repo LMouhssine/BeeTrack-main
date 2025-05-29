@@ -1,17 +1,22 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
-import Debug from './debug.tsx';
 import './index.css';
 
-console.log('🐝 Main.tsx loaded!');
+// Test d'import Firebase
+console.log('🐝 Testing Firebase imports...');
+try {
+  import('./firebase-config').then(({ auth, db }) => {
+    console.log('🐝 Firebase imports successful:', { auth: !!auth, db: !!db });
+  });
+} catch (error) {
+  console.error('🐝 Firebase import error:', error);
+}
 
-// Utiliser Debug temporairement pour tester
-const isDevelopment = import.meta.env.DEV;
-const useDebug = false; // Changez à true pour activer le debug
+console.log('🐝 Main.tsx loaded - BeeTrack Application Starting!');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {useDebug ? <Debug /> : <App />}
+    <App />
   </StrictMode>
 );

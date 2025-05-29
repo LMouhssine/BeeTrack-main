@@ -97,6 +97,7 @@ function App() {
   };
 
   if (loading) {
+    console.log('🐝 Rendering loading state...');
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100 flex items-center justify-center">
         <div className="text-center">
@@ -184,6 +185,7 @@ function App() {
     );
   }
 
+  console.log('🐝 Rendering main app...');
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100">
       {/* Header */}

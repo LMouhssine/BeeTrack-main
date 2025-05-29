@@ -96,6 +96,7 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
     if (confirmed == true) {
       try {
         await _rucherService.supprimerRucher(rucherId);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Rucher "$nom" supprimé avec succès'),
@@ -104,6 +105,7 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
         );
         await _refreshRuchers();
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la suppression: $e'),
@@ -342,7 +344,7 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${dateCreation.day}/${dateCreation.month}/${dateCreation.year}',
+                  '$dateCreation.day/$dateCreation.month/$dateCreation.year',
                   style: TextStyle(
                     color: Colors.grey.shade500,
                     fontSize: 12,

@@ -20,6 +20,10 @@ dependencies:
   firebase_storage: ^11.6.10
   firebase_messaging: ^14.7.20
   
+  # HTTP Client pour API REST
+  http: ^1.1.0
+  dio: ^5.3.2
+  
   # UI
   cupertino_icons: ^1.0.5
   flutter_svg: ^2.0.7

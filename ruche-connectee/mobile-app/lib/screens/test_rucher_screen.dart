@@ -64,11 +64,10 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
       final ruchers = await _rucherService.obtenirRuchersUtilisateur();
 
       setState(() {
-        _result = 'Trouvé ${ruchers.length} rucher(s):\n' +
-            ruchers.map((r) => '- ${r['nom']} (${r['adresse']})').join('\n');
+        _result = 'Trouvé $ruchers.length rucher(s):\n${ruchers.map((r) => '- ${r['nom']} (${r['adresse']})').join('\n')}';
       });
 
-      LoggerService.info('Test réussi - ${ruchers.length} ruchers trouvés');
+      LoggerService.info('Test réussi - $ruchers.length ruchers trouvés');
 
     } catch (e) {
       setState(() {

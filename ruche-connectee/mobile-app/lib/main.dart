@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/config/router.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
 import 'package:ruche_connectee/firebase_options.dart';
-
-// Instance singleton pour l'injection de dépendances
-final GetIt getIt = GetIt.instance;
 
 void main() async {
   // Assure que les widgets Flutter sont initialisés
@@ -20,20 +16,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // Configure l'injection de dépendances
-  setupDependencies();
+  // Configure l'injection de dépendances avec les nouveaux services API
+  await setupServiceLocator();
   
   // Lance l'application
   runApp(const RucheConnecteeApp());
-}
-
-void setupDependencies() {
-  // Services
-  getIt.registerSingleton<FirebaseService>(FirebaseService());
-  getIt.registerSingleton<AuthService>(AuthService(getIt<FirebaseService>()));
-  
-  // BLoCs
-  getIt.registerFactory<AuthBloc>(() => AuthBloc(getIt<AuthService>()));
 }
 
 class RucheConnecteeApp extends StatelessWidget {
@@ -44,7 +31,7 @@ class RucheConnecteeApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (context) => getIt<AuthBloc>()..add(CheckAuthStatusEvent()),
+          create: (context) => AuthBloc(getIt<AuthService>())..add(CheckAuthStatusEvent()),
         ),
       ],
       child: MaterialApp.router(
