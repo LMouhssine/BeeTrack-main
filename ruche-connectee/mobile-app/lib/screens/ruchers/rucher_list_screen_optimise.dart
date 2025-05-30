@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/rucher_service.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
+import 'package:ruche_connectee/screens/ruches/rucher_detail_screen.dart';
 
 /// Écran de liste des ruchers optimisé utilisant l'index Firestore composite
 /// 
@@ -388,10 +389,11 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
           ],
         ),
         onTap: () {
-          // TODO: Naviguer vers les détails du rucher
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Détails du rucher "${rucher['nom']}" (à implémenter)'),
+          // Naviguer vers les détails du rucher
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RucherDetailScreen(rucherId: rucher['id']),
             ),
           );
         },

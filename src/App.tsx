@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db } from './firebase-config';
 import { doc, getDoc } from 'firebase/firestore';
-import { LogIn, LogOut, User as UserIcon, AlertTriangle } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, AlertTriangle, ChevronDown, Settings } from 'lucide-react';
 import Navigation from './components/Navigation';
 import RuchersList from './components/RuchersList';
 import RuchesList from './components/RuchesList';
@@ -28,6 +28,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('ruchers');
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   
   console.log('🐝 App state initialized');
 
@@ -197,21 +198,75 @@ function App() {
               <h1 className="text-xl font-bold text-amber-800">BeeTrack</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-gray-700">
-                <UserIcon size={20} />
-                <span className="font-medium">
-                  {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : user.email}
-                </span>
-              </div>
-              
+            {/* Menu utilisateur avec dropdown */}
+            <div className="relative">
               <button
-                onClick={handleLogout}
-                className="flex items-center space-x-1 text-red-600 hover:text-red-700 transition duration-200"
+                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors duration-200"
               >
-                <LogOut size={20} />
-                <span>Déconnexion</span>
+                <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
+                  <UserIcon size={16} className="text-amber-600" />
+                </div>
+                <div className="text-left hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900">
+                    {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate max-w-32">
+                    {user?.email}
+                  </p>
+                </div>
+                <ChevronDown 
+                  size={16} 
+                  className={`text-gray-500 transition-transform duration-200 ${
+                    isUserDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
+
+              {/* Dropdown Menu */}
+              {isUserDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {/* Info utilisateur */}
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-full">
+                        <UserIcon size={20} className="text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                        {apiculteur?.role && (
+                          <span className="inline-block mt-1 px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                            {apiculteur.role}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu Items */}
+                  <div className="py-1">
+                    <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                      <UserIcon size={16} />
+                      <span>Mon Profil</span>
+                    </button>
+                    <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                      <Settings size={16} />
+                      <span>Paramètres</span>
+                    </button>
+                    <hr className="my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      <LogOut size={16} />
+                      <span>Se déconnecter</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -226,6 +281,14 @@ function App() {
         {activeTab === 'ruches' && <RuchesList />}
         {activeTab === 'statistiques' && <Statistiques />}
       </main>
+
+      {/* Overlay pour fermer le dropdown */}
+      {isUserDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-40"
+          onClick={() => setIsUserDropdownOpen(false)}
+        />
+      )}
     </div>
   );
 }

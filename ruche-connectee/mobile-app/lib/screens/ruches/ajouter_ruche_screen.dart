@@ -4,6 +4,7 @@ import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
+import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 
 class AjouterRucheScreen extends StatefulWidget {
   final String? rucherId; // Si fourni, pré-sélectionne ce rucher
@@ -133,7 +134,12 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
             label: 'Voir',
             textColor: Colors.white,
             onPressed: () {
-              // TODO: Naviguer vers les détails de la ruche
+              // Naviguer vers les détails de la ruche
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => RucheDetailScreen(rucheId: rucheResponse.id),
+                ),
+              );
             },
           ),
         ),

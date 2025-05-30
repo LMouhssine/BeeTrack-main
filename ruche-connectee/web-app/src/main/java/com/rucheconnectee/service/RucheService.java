@@ -3,6 +3,8 @@ package com.rucheconnectee.service;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.model.DonneesCapteur;
+import com.rucheconnectee.model.CreateRucheRequest;
+import com.rucheconnectee.model.RucheResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -357,5 +359,69 @@ public class RucheService {
         }
 
         return data;
+    }
+
+    /**
+     * Ajouter une nouvelle ruche avec validation de l'apiculteur
+     * @param request Données de création de la ruche
+     * @param apiculteurId ID de l'apiculteur
+     * @return RucheResponse
+     */
+    public RucheResponse ajouterRuche(CreateRucheRequest request, String apiculteurId) 
+            throws ExecutionException, InterruptedException {
+        // Convertir la requête en objet Ruche
+        Ruche ruche = request.toRuche(apiculteurId);
+        
+        // Créer la ruche
+        Ruche rucheCreee = createRuche(ruche);
+        
+        // Retourner la réponse
+        return RucheResponse.fromRuche(rucheCreee);
+    }
+
+    /**
+     * Obtenir toutes les ruches d'un utilisateur
+     * @param apiculteurId ID de l'apiculteur
+     * @return Liste des ruches
+     */
+    public List<RucheResponse> obtenirRuchesUtilisateur(String apiculteurId) 
+            throws ExecutionException, InterruptedException {
+        List<Ruche> ruches = getRuchesByApiculteur(apiculteurId);
+        return ruches.stream()
+                .map(RucheResponse::fromRuche)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Obtenir les ruches d'un rucher spécifique
+     * @param rucherId ID du rucher
+     * @param apiculteurId ID de l'apiculteur (pour validation)
+     * @return Liste des ruches du rucher
+     */
+    public List<RucheResponse> obtenirRuchesParRucher(String rucherId, String apiculteurId) 
+            throws ExecutionException, InterruptedException {
+        List<Ruche> ruches = getRuchesByRucher(rucherId);
+        
+        // Filtrer par apiculteur pour sécurité
+        return ruches.stream()
+                .filter(ruche -> ruche.getApiculteurId().equals(apiculteurId))
+                .map(RucheResponse::fromRuche)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Supprimer une ruche avec validation de l'apiculteur
+     * @param rucheId ID de la ruche à supprimer
+     * @param apiculteurId ID de l'apiculteur (pour validation)
+     */
+    public void supprimerRuche(String rucheId, String apiculteurId) 
+            throws ExecutionException, InterruptedException {
+        // Vérifier que la ruche appartient à l'apiculteur
+        Ruche ruche = getRucheById(rucheId);
+        if (ruche != null && ruche.getApiculteurId().equals(apiculteurId)) {
+            deleteRuche(rucheId);
+        } else {
+            throw new IllegalArgumentException("Ruche non trouvée ou accès non autorisé");
+        }
     }
 } 

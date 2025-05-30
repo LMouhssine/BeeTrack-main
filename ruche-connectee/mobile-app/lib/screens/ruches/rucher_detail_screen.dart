@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/services/ruche_service.dart';
+import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'dart:async';
 
 class RucherDetailScreen extends StatefulWidget {
@@ -692,8 +693,13 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                           onSelected: (value) {
                             switch (value) {
                               case 'details':
-                                // TODO: Naviguer vers les détails de la ruche
-                                _showErrorSnackBar('Détails de ruche à implémenter');
+                                // Naviguer vers les détails de la ruche
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RucheDetailScreen(rucheId: ruche['id']),
+                                  ),
+                                );
                                 break;
                               case 'edit':
                                 // TODO: Modifier la ruche

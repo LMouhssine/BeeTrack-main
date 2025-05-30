@@ -4,6 +4,7 @@ import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/ruche_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ajouter_ruche_screen.dart';
+import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'dart:async';
 
 class RuchesListScreen extends StatefulWidget {
@@ -427,8 +428,11 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                     onSelected: (value) {
                                       switch (value) {
                                         case 'details':
-                                          // TODO: Naviguer vers les détails de la ruche
-                                          _showErrorSnackBar('Détails de ruche à implémenter');
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => RucheDetailScreen(rucheId: ruche['id']),
+                                            ),
+                                          );
                                           break;
                                         case 'edit':
                                           // TODO: Modifier la ruche
@@ -441,8 +445,11 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                     },
                                   ),
                                   onTap: () {
-                                    // TODO: Naviguer vers les détails de la ruche
-                                    _showErrorSnackBar('Navigation vers détails à implémenter');
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => RucheDetailScreen(rucheId: ruche['id']),
+                                      ),
+                                    );
                                   },
                                 ),
                               );
