@@ -101,10 +101,10 @@ class ApiRucheService {
   /// Paramètres :
   /// - [idRucher] : ID du rucher
   /// 
-  /// Retourne une liste des ruches triées par position
+  /// Retourne une liste des ruches triées par nom croissant
   Future<List<RucheResponse>> obtenirRuchesParRucher(String idRucher) async {
     try {
-      LoggerService.info('🐝 Récupération des ruches pour le rucher: $idRucher');
+      LoggerService.info('🐝 Récupération des ruches pour le rucher: $idRucher (API - triées par nom)');
       
       final response = await _apiClient.get(
         '${ApiConfig.ruchesEndpoint}/rucher/$idRucher',
@@ -115,7 +115,11 @@ class ApiRucheService {
           .map((json) => RucheResponse.fromJson(json as Map<String, dynamic>))
           .toList();
       
-      LoggerService.info('🐝 ${ruches.length} ruche(s) récupérée(s) avec succès pour le rucher: $idRucher');
+      // Tri supplémentaire côté client pour garantir l'ordre par nom
+      // (le backend Spring Boot fait déjà le tri, mais on s'assure)
+      _trierRuchesParNom(ruches);
+      
+      LoggerService.info('🐝 ${ruches.length} ruche(s) récupérée(s) avec succès pour le rucher: $idRucher (API - triées par nom)');
       
       return ruches;
       
@@ -128,6 +132,18 @@ class ApiRucheService {
       
       throw ApiException('Une erreur inattendue s\'est produite lors de la récupération des ruches', 500);
     }
+  }
+
+  /// Trie une liste de ruches par nom croissant (insensible à la casse)
+  /// 
+  /// Paramètres :
+  /// - [ruches] : liste des ruches à trier (modifiée en place)
+  void _trierRuchesParNom(List<RucheResponse> ruches) {
+    ruches.sort((a, b) {
+      final nomA = a.nom.toLowerCase();
+      final nomB = b.nom.toLowerCase();
+      return nomA.compareTo(nomB);
+    });
   }
 
   /// Récupère une ruche par son ID

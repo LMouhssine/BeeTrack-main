@@ -6,7 +6,9 @@ import { LogIn, LogOut, User as UserIcon, AlertTriangle, ChevronDown, Settings }
 import Navigation from './components/Navigation';
 import RuchersList from './components/RuchersList';
 import RuchesList from './components/RuchesList';
+import RucheDetails from './components/RucheDetails';
 import Statistiques from './components/Statistiques';
+import { RucheService } from './services/rucheService';
 
 interface Apiculteur {
   id: string;
@@ -29,6 +31,9 @@ function App() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('ruchers');
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  
+  // État pour la navigation vers les détails des ruches
+  const [selectedRucheId, setSelectedRucheId] = useState<string | null>(null);
   
   console.log('🐝 App state initialized');
 
@@ -94,6 +99,36 @@ function App() {
       await signOut(auth);
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  // Fonctions de navigation pour les ruches
+  const handleViewRucheDetails = (rucheId: string) => {
+    setSelectedRucheId(rucheId);
+    setActiveTab('ruches'); // S'assurer qu'on est sur l'onglet ruches
+  };
+
+  const handleBackToRuchesList = () => {
+    setSelectedRucheId(null);
+  };
+
+  const handleDeleteRuche = async (rucheId: string) => {
+    try {
+      await RucheService.supprimerRuche(rucheId);
+      console.log('🐝 Ruche supprimée:', rucheId);
+      // Retourner à la liste après suppression
+      setSelectedRucheId(null);
+    } catch (error: any) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression: ' + error.message);
+    }
+  };
+
+  // Fonction pour changer d'onglet et réinitialiser la navigation
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab !== 'ruches') {
+      setSelectedRucheId(null); // Réinitialiser la sélection de ruche si on change d'onglet
     }
   };
 
@@ -273,12 +308,21 @@ function App() {
       </header>
 
       {/* Navigation */}
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {activeTab === 'ruchers' && <RuchersList user={user} />}
-        {activeTab === 'ruches' && <RuchesList />}
+        {activeTab === 'ruches' && !selectedRucheId && (
+          <RuchesList onViewDetails={handleViewRucheDetails} />
+        )}
+        {activeTab === 'ruches' && selectedRucheId && (
+          <RucheDetails 
+            rucheId={selectedRucheId} 
+            onBack={handleBackToRuchesList}
+            onDelete={handleDeleteRuche}
+          />
+        )}
         {activeTab === 'statistiques' && <Statistiques />}
       </main>
 

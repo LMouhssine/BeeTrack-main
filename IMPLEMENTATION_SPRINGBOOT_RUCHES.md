@@ -239,7 +239,7 @@ boolean nomExiste = ruchesExistantes.stream()
 |---------|----------|-------------|
 | `POST` | `/api/mobile/ruches` | Créer une ruche |
 | `GET` | `/api/mobile/ruches` | Lister toutes les ruches |
-| `GET` | `/api/mobile/ruches/rucher/{id}` | Ruches d'un rucher |
+| `GET` | `/api/mobile/ruches/rucher/{id}` | Ruches d'un rucher (triées par nom croissant) |
 | `GET` | `/api/mobile/ruches/{id}` | Détails d'une ruche |
 | `PUT` | `/api/mobile/ruches/{id}` | Modifier une ruche |
 | `DELETE` | `/api/mobile/ruches/{id}` | Supprimer une ruche |

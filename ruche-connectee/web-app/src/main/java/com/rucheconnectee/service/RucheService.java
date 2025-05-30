@@ -396,15 +396,21 @@ public class RucheService {
      * Obtenir les ruches d'un rucher spécifique
      * @param rucherId ID du rucher
      * @param apiculteurId ID de l'apiculteur (pour validation)
-     * @return Liste des ruches du rucher
+     * @return Liste des ruches du rucher triées par nom croissant
      */
     public List<RucheResponse> obtenirRuchesParRucher(String rucherId, String apiculteurId) 
             throws ExecutionException, InterruptedException {
         List<Ruche> ruches = getRuchesByRucher(rucherId);
         
-        // Filtrer par apiculteur pour sécurité
+        // Filtrer par apiculteur pour sécurité et trier par nom croissant
         return ruches.stream()
                 .filter(ruche -> ruche.getApiculteurId().equals(apiculteurId))
+                .sorted((r1, r2) -> {
+                    // Tri par nom croissant, gérer les cas null
+                    String nom1 = r1.getNom() != null ? r1.getNom() : "";
+                    String nom2 = r2.getNom() != null ? r2.getNom() : "";
+                    return nom1.compareToIgnoreCase(nom2);
+                })
                 .map(RucheResponse::fromRuche)
                 .collect(java.util.stream.Collectors.toList());
     }

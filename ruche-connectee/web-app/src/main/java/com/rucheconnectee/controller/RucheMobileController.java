@@ -61,7 +61,7 @@ public class RucheMobileController {
     }
 
     /**
-     * Récupère les ruches d'un rucher spécifique
+     * Récupère les ruches d'un rucher spécifique, triées par nom croissant
      * GET /api/mobile/ruches/rucher/{rucherId}
      */
     @GetMapping("/rucher/{rucherId}")

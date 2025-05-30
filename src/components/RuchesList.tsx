@@ -18,7 +18,11 @@ import {
 import { RucheService, RucheAvecRucher } from '../services/rucheService';
 import AjouterRucheModal from './AjouterRucheModal';
 
-const RuchesList: React.FC = () => {
+interface RuchesListProps {
+  onViewDetails?: (rucheId: string) => void;
+}
+
+const RuchesList: React.FC<RuchesListProps> = ({ onViewDetails }) => {
   const [ruches, setRuches] = useState<RucheAvecRucher[]>([]);
   const [filteredRuches, setFilteredRuches] = useState<RucheAvecRucher[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +95,14 @@ const RuchesList: React.FC = () => {
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);
       alert('Erreur lors de la suppression: ' + error.message);
+    }
+  };
+
+  const handleViewDetails = (rucheId: string) => {
+    if (onViewDetails) {
+      onViewDetails(rucheId);
+    } else {
+      console.log('Voir détails de la ruche:', rucheId);
     }
   };
 
@@ -347,25 +359,25 @@ const RuchesList: React.FC = () => {
                 )}
 
                 {/* Données capteurs si disponibles */}
-                {(ruche.temperature || ruche.humidite || ruche.niveauBatterie) && (
+                {((ruche as any).temperature || (ruche as any).humidite || (ruche as any).niveauBatterie) && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className="grid grid-cols-3 gap-2 text-xs">
-                      {ruche.temperature && (
+                      {(ruche as any).temperature && (
                         <div className="text-center">
                           <p className="text-gray-500">Temp.</p>
-                          <p className="font-medium">{ruche.temperature.toFixed(1)}°C</p>
+                          <p className="font-medium">{(ruche as any).temperature.toFixed(1)}°C</p>
                         </div>
                       )}
-                      {ruche.humidite && (
+                      {(ruche as any).humidite && (
                         <div className="text-center">
                           <p className="text-gray-500">Hum.</p>
-                          <p className="font-medium">{ruche.humidite.toFixed(0)}%</p>
+                          <p className="font-medium">{(ruche as any).humidite.toFixed(0)}%</p>
                         </div>
                       )}
-                      {ruche.niveauBatterie && (
+                      {(ruche as any).niveauBatterie && (
                         <div className="text-center">
                           <p className="text-gray-500">Batt.</p>
-                          <p className="font-medium">{ruche.niveauBatterie}%</p>
+                          <p className="font-medium">{(ruche as any).niveauBatterie}%</p>
                         </div>
                       )}
                     </div>
@@ -375,7 +387,10 @@ const RuchesList: React.FC = () => {
 
               {/* Actions */}
               <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                <button className="w-full text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center space-x-1">
+                <button 
+                  onClick={() => handleViewDetails(ruche.id)}
+                  className="w-full text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center space-x-1 hover:bg-amber-50 py-1 rounded transition-colors"
+                >
                   <Activity size={16} />
                   <span>Voir les détails</span>
                 </button>

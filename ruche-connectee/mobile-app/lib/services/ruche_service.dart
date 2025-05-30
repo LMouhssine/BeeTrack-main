@@ -138,13 +138,13 @@ class RucheService {
     }
   }
   
-  /// Récupère toutes les ruches d'un rucher spécifique
+  /// Récupère toutes les ruches d'un rucher spécifique, triées par nom croissant
   /// 
   /// Paramètres :
   /// - [idRucher] : ID du rucher
   /// 
-  /// Retourne une liste des ruches triées par position
-  Future<List<Map<String, dynamic>>> obtenirRuchesParRucher(String idRucher) async {
+  /// Retourne une liste des ruches triées par nom croissant
+  Future<List<Map<String, dynamic>>> obtenirRuchesParRucherTrieesParNom(String idRucher) async {
     try {
       // Vérifier que l'utilisateur est connecté
       final User? currentUser = _firebaseService.auth.currentUser;
@@ -153,7 +153,7 @@ class RucheService {
         throw Exception('Utilisateur non connecté. Veuillez vous connecter pour accéder aux ruches.');
       }
       
-      LoggerService.info('🐝 Récupération des ruches pour le rucher: $idRucher');
+      LoggerService.info('🐝 Récupération des ruches pour le rucher: $idRucher (triées par nom)');
       
       // Vérifier que le rucher existe et appartient à l'utilisateur
       final DocumentSnapshot rucherDoc = await _firebaseService.firestore
@@ -175,7 +175,6 @@ class RucheService {
           .collection(_collectionRuches)
           .where('idRucher', isEqualTo: idRucher)
           .where('actif', isEqualTo: true)
-          .orderBy('position')
           .get();
       
       final List<Map<String, dynamic>> ruches = querySnapshot.docs
@@ -186,12 +185,19 @@ class RucheService {
           })
           .toList();
       
-      LoggerService.info('🐝 ${ruches.length} ruche(s) récupérée(s) avec succès pour le rucher: $idRucher');
+      // Trier par nom croissant (insensible à la casse)
+      ruches.sort((a, b) {
+        final nomA = (a['nom'] as String?)?.toLowerCase() ?? '';
+        final nomB = (b['nom'] as String?)?.toLowerCase() ?? '';
+        return nomA.compareTo(nomB);
+      });
+      
+      LoggerService.info('🐝 ${ruches.length} ruche(s) récupérée(s) avec succès pour le rucher: $idRucher (triées par nom)');
       
       return ruches;
       
     } catch (e) {
-      LoggerService.error('Erreur lors de la récupération des ruches', e);
+      LoggerService.error('Erreur lors de la récupération des ruches triées par nom', e);
       
       if (e is FirebaseException) {
         switch (e.code) {
@@ -206,6 +212,17 @@ class RucheService {
       
       rethrow;
     }
+  }
+  
+  /// Récupère toutes les ruches d'un rucher spécifique
+  /// 
+  /// Paramètres :
+  /// - [idRucher] : ID du rucher
+  /// 
+  /// Retourne une liste des ruches triées par nom croissant (nouvelle version)
+  Future<List<Map<String, dynamic>>> obtenirRuchesParRucher(String idRucher) async {
+    // Utiliser la nouvelle méthode avec tri par nom
+    return obtenirRuchesParRucherTrieesParNom(idRucher);
   }
   
   /// Récupère toutes les ruches de l'utilisateur connecté
@@ -406,7 +423,7 @@ class RucheService {
   /// Paramètres :
   /// - [idRucher] : ID du rucher
   /// 
-  /// Retourne un stream de la liste des ruches
+  /// Retourne un stream de la liste des ruches triées par nom croissant
   Stream<List<Map<String, dynamic>>> ecouterRuchesParRucher(String idRucher) {
     final User? currentUser = _firebaseService.auth.currentUser;
     if (currentUser == null) {
@@ -414,13 +431,12 @@ class RucheService {
       return Stream.error(Exception('Utilisateur non connecté. Veuillez vous connecter pour écouter les ruches.'));
     }
     
-    LoggerService.info('🐝 Démarrage de l\'écoute temps réel des ruches pour le rucher: $idRucher');
+    LoggerService.info('🐝 Démarrage de l\'écoute temps réel des ruches pour le rucher: $idRucher (triées par nom)');
     
     return _firebaseService.firestore
         .collection(_collectionRuches)
         .where('idRucher', isEqualTo: idRucher)
         .where('actif', isEqualTo: true)
-        .orderBy('position')
         .snapshots()
         .map((querySnapshot) {
       final ruches = querySnapshot.docs
@@ -431,7 +447,14 @@ class RucheService {
           })
           .toList();
       
-      LoggerService.debug('🐝 Mise à jour temps réel: ${ruches.length} ruche(s) pour le rucher: $idRucher');
+      // Trier par nom croissant (insensible à la casse)
+      ruches.sort((a, b) {
+        final nomA = (a['nom'] as String?)?.toLowerCase() ?? '';
+        final nomB = (b['nom'] as String?)?.toLowerCase() ?? '';
+        return nomA.compareTo(nomB);
+      });
+      
+      LoggerService.debug('🐝 Mise à jour temps réel: ${ruches.length} ruche(s) pour le rucher: $idRucher (triées par nom)');
       
       return ruches;
     }).handleError((error) {
