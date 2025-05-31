@@ -2,6 +2,7 @@ package com.rucheconnectee.controller;
 
 import com.rucheconnectee.model.CreateRucheRequest;
 import com.rucheconnectee.model.RucheResponse;
+import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.RucheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -185,6 +186,34 @@ public class RucheMobileController {
     public ResponseEntity<?> healthCheckWithAuth(
             @RequestHeader("X-Apiculteur-ID") String apiculteurId) {
         return ResponseEntity.ok(new HealthResponse("OK", "API Ruches fonctionnelle - Utilisateur: " + apiculteurId));
+    }
+
+    /**
+     * Récupère les mesures des 7 derniers jours d'une ruche
+     * GET /api/mobile/ruches/{rucheId}/mesures-7-jours
+     */
+    @GetMapping("/{rucheId}/mesures-7-jours")
+    public ResponseEntity<?> getMesures7DerniersJours(
+            @PathVariable String rucheId,
+            @RequestHeader("X-Apiculteur-ID") String apiculteurId) {
+        try {
+            // Vérifier que la ruche existe et appartient à l'utilisateur
+            var ruche = rucheService.getRucheById(rucheId);
+            if (ruche == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!ruche.getApiculteurId().equals(apiculteurId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ErrorResponse("ACCESS_DENIED", "Accès non autorisé à cette ruche"));
+            }
+
+            // Récupérer les mesures
+            var mesures = rucheService.getMesures7DerniersJours(rucheId);
+            return ResponseEntity.ok(mesures);
+        } catch (ExecutionException | InterruptedException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération des mesures"));
+        }
     }
 
     // ==================== CLASSES INTERNES POUR LES RÉPONSES ====================

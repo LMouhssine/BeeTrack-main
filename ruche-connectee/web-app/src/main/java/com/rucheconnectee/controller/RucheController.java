@@ -135,6 +135,19 @@ public class RucheController {
     }
 
     /**
+     * Récupère les mesures des 7 derniers jours d'une ruche
+     */
+    @GetMapping("/{rucheId}/mesures-7-jours")
+    public ResponseEntity<List<DonneesCapteur>> getMesures7DerniersJours(@PathVariable String rucheId) {
+        try {
+            List<DonneesCapteur> mesures = rucheService.getMesures7DerniersJours(rucheId);
+            return ResponseEntity.ok(mesures);
+        } catch (ExecutionException | InterruptedException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
      * Vérifie les alertes d'une ruche
      */
     @GetMapping("/{id}/alertes")

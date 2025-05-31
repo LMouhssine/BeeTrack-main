@@ -309,10 +309,10 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
             size: 24,
           ),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Text(
               'Statut',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,

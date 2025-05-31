@@ -56,6 +56,37 @@ public class FirebaseService {
     }
 
     /**
+     * Exécute une requête complexe avec filtres de date et tri
+     * @param collection Nom de la collection
+     * @param filterField Champ pour le filtre d'égalité
+     * @param filterValue Valeur pour le filtre d'égalité
+     * @param dateField Champ de date pour le filtre temporel
+     * @param dateLimit Date limite (les documents doivent avoir une date supérieure)
+     * @param orderByField Champ pour le tri
+     * @param ascending True pour tri croissant, false pour décroissant
+     * @return Liste des documents correspondant aux critères
+     */
+    public List<QueryDocumentSnapshot> getDocumentsWithDateFilter(
+            String collection, 
+            String filterField, 
+            Object filterValue,
+            String dateField,
+            com.google.cloud.Timestamp dateLimit,
+            String orderByField,
+            boolean ascending) throws ExecutionException, InterruptedException {
+        
+        CollectionReference colRef = firestore.collection(collection);
+        Query query = colRef
+            .whereEqualTo(filterField, filterValue)
+            .whereGreaterThan(dateField, dateLimit)
+            .orderBy(dateField, ascending ? Query.Direction.ASCENDING : Query.Direction.DESCENDING);
+        
+        ApiFuture<QuerySnapshot> future = query.get();
+        QuerySnapshot querySnapshot = future.get();
+        return querySnapshot.getDocuments();
+    }
+
+    /**
      * Crée ou met à jour un document
      */
     public void setDocument(String collection, String documentId, Map<String, Object> data) throws ExecutionException, InterruptedException {

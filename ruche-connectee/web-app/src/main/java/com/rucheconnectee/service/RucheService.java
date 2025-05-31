@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.Query;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.api.core.ApiFuture;
 
 /**
  * Service pour la gestion des ruches et de leurs données de capteurs.
@@ -170,6 +174,37 @@ public class RucheService {
         List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_DONNEES, "ruche_id", rucheId);
         return documents.stream()
                 .limit(limite)
+                .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère les mesures des 7 derniers jours d'une ruche
+     * @param rucheId ID de la ruche
+     * @return Liste des mesures triées par date croissante
+     */
+    public List<DonneesCapteur> getMesures7DerniersJours(String rucheId) throws ExecutionException, InterruptedException {
+        // Calculer la date limite (maintenant - 7 jours)
+        LocalDateTime dateLimite = LocalDateTime.now().minusDays(7);
+        
+        // Convertir en Timestamp Firebase pour la comparaison
+        com.google.cloud.Timestamp timestampLimite = com.google.cloud.Timestamp.of(
+            java.util.Date.from(dateLimite.atZone(java.time.ZoneId.systemDefault()).toInstant())
+        );
+        
+        // Utiliser le FirebaseService pour exécuter la requête complexe
+        List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithDateFilter(
+            COLLECTION_DONNEES,   // collection
+            "ruche_id",           // filterField
+            rucheId,              // filterValue
+            "timestamp",          // dateField
+            timestampLimite,      // dateLimit
+            "timestamp",          // orderByField
+            true                  // ascending = true pour tri croissant
+        );
+        
+        // Convertir les résultats en objets DonneesCapteur
+        return documents.stream()
                 .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
                 .collect(Collectors.toList());
     }
@@ -422,12 +457,66 @@ public class RucheService {
      */
     public void supprimerRuche(String rucheId, String apiculteurId) 
             throws ExecutionException, InterruptedException {
-        // Vérifier que la ruche appartient à l'apiculteur
+        // Récupérer la ruche pour validation
         Ruche ruche = getRucheById(rucheId);
-        if (ruche != null && ruche.getApiculteurId().equals(apiculteurId)) {
-            deleteRuche(rucheId);
-        } else {
-            throw new IllegalArgumentException("Ruche non trouvée ou accès non autorisé");
+        if (ruche == null) {
+            throw new IllegalArgumentException("Ruche introuvable");
         }
+        
+        // Vérifier les permissions
+        if (!ruche.getApiculteurId().equals(apiculteurId)) {
+            throw new IllegalArgumentException("Accès non autorisé à cette ruche");
+        }
+        
+        // Effectuer une suppression logique (désactivation)
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("actif", false);
+        updates.put("derniere_mise_a_jour", com.google.cloud.Timestamp.now());
+        
+        firebaseService.updateDocument(COLLECTION_RUCHES, rucheId, updates);
+        
+        // Optionnel : décrémenter le nombre de ruches dans le rucher
+        if (ruche.getRucherId() != null) {
+            rucherService.decrementerNombreRuches(ruche.getRucherId());
+        }
+    }
+
+    /**
+     * Méthode utilitaire pour créer des données de test pour les capteurs
+     * @param rucheId ID de la ruche
+     * @param nombreJours Nombre de jours de données à créer (rétroactivement)
+     * @param mesuresParJour Nombre de mesures par jour
+     * @return Nombre de mesures créées
+     */
+    public int creerDonneesTest(String rucheId, int nombreJours, int mesuresParJour) 
+            throws ExecutionException, InterruptedException {
+        int totalMesures = 0;
+        LocalDateTime maintenant = LocalDateTime.now();
+        
+        for (int jour = 0; jour < nombreJours; jour++) {
+            for (int mesure = 0; mesure < mesuresParJour; mesure++) {
+                // Calculer le timestamp pour cette mesure
+                LocalDateTime timestampMesure = maintenant
+                    .minusDays(jour)
+                    .minusHours(mesure * (24 / mesuresParJour));
+                
+                // Créer des données simulées
+                DonneesCapteur donnees = new DonneesCapteur();
+                donnees.setRucheId(rucheId);
+                donnees.setTimestamp(timestampMesure);
+                donnees.setTemperature(15.0 + Math.random() * 20.0); // 15-35°C
+                donnees.setHumidity(40.0 + Math.random() * 30.0);   // 40-70%
+                donnees.setCouvercleOuvert(Math.random() < 0.1);    // 10% de chance d'être ouvert
+                donnees.setBatterie(80 + (int)(Math.random() * 20)); // 80-100%
+                donnees.setSignalQualite(70 + (int)(Math.random() * 30)); // 70-100%
+                
+                // Sauvegarder la mesure
+                Map<String, Object> donneesData = donneesToMap(donnees);
+                firebaseService.addDocument(COLLECTION_DONNEES, donneesData);
+                totalMesures++;
+            }
+        }
+        
+        return totalMesures;
     }
 } 

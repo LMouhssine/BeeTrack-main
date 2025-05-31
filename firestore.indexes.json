@@ -71,6 +71,60 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "ruches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "idApiculteur",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "idRucher",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "actif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "position",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ruches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "idApiculteur",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "actif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dateCreation",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "donneesCapteurs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "rucheId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
