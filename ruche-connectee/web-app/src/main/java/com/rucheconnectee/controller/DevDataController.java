@@ -1,15 +1,12 @@
 package com.rucheconnectee.controller;
 
-import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.FirebaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Contrôleur pour créer des données de test en développement.

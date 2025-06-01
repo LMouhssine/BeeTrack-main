@@ -4,7 +4,6 @@ import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
-import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class AjouterRucheScreen extends StatefulWidget {
@@ -164,6 +163,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
   }
 
   void _showErrorSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

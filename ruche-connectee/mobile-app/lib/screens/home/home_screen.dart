@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.add_business),
               tooltip: 'Ajouter un rucher',
               onPressed: () {
-                // TODO: Naviguer vers l'ajout de rucher
+                // Navigation vers l'ajout de rucher à implémenter
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Navigation vers ajout rucher à implémenter')),
                 );

@@ -30,7 +30,6 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   bool _isLoadingRuche = true;
   bool _isLoadingMesures = true;
   String? _errorMessage;
-  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -98,7 +97,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           return;
         } catch (firestoreError) {
           LoggerService.error('❌ Échec du fallback Firestore pour les détails de ruche', firestoreError);
-          throw firestoreError;
+          rethrow;
         }
       }
       
@@ -218,7 +217,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           return;
         } catch (firestoreError) {
           LoggerService.error('❌ Échec du fallback Firestore', firestoreError);
-          throw firestoreError;
+          rethrow;
         }
       }
       
@@ -288,6 +287,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   }
 
   void _showErrorSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -295,13 +295,6 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
         duration: const Duration(seconds: 5),
       ),
     );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Non définie';
-    return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')}/'
-           '${date.year}';
   }
 
   String _formatDateTime(DateTime date) {
@@ -394,7 +387,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _ruche!.enService ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+              color: _ruche!.enService ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -599,13 +592,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                       verticalInterval: 86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withValues(alpha: 0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withValues(alpha: 0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -658,7 +651,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -669,7 +662,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.orange.withOpacity(0.1),
+                          color: Colors.orange.withValues(alpha: 0.1),
                         ),
                       ),
                     ],
@@ -724,13 +717,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                       verticalInterval: 86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withValues(alpha: 0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withValues(alpha: 0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -783,7 +776,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -794,7 +787,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.blue.withOpacity(0.1),
+                          color: Colors.blue.withValues(alpha: 0.1),
                         ),
                       ),
                     ],
@@ -842,7 +835,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -870,7 +863,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -896,7 +889,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -922,7 +915,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -978,6 +971,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       if (confirmed != true) return;
 
       // Afficher le loading
+      if (!mounted) return;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -1005,11 +999,11 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
         final timestamp = now.subtract(Duration(hours: hoursAgo));
         
         // Générer des valeurs réalistes avec variation
-        final baseTemp = 25.0;
+        const baseTemp = 25.0;
         final tempVariation = (i % 20 - 10) * 0.5; // Variation de -5 à +5°C
         final temperature = baseTemp + tempVariation + (DateTime.now().millisecond % 100) / 100;
         
-        final baseHumidity = 60.0;
+        const baseHumidity = 60.0;
         final humidityVariation = (i % 30 - 15) * 0.8; // Variation de -12 à +12%
         final humidity = baseHumidity + humidityVariation + (DateTime.now().microsecond % 100) / 100;
         

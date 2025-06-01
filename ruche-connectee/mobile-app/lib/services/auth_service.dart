@@ -24,8 +24,6 @@ class AuthService {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        final userData = querySnapshot.docs.first.data();
-
         final userCredential = await _firebaseService.auth.signInWithEmailAndPassword(
           email: email,
           password: password,

@@ -5,7 +5,7 @@ class ApiConfig {
   static const String _baseUrlDev = 'http://localhost:8080';
   
   // Utiliser l'URL de développement par défaut
-  // TODO: Adapter selon l'environnement (dev/prod)
+  // Configuration à adapter selon l'environnement (dev/prod)
   static const String baseUrl = _baseUrlDev;
   
   // Endpoints de l'API

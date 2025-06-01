@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.Query;
-import com.google.cloud.firestore.QuerySnapshot;
-import com.google.api.core.ApiFuture;
 
 /**
  * Service pour la gestion des ruches et de leurs données de capteurs.

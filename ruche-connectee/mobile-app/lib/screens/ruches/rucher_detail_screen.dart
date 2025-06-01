@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/services/ruche_service.dart';
-import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 
@@ -698,7 +697,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                                 context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                 break;
                               case 'edit':
-                                // TODO: Modifier la ruche
+                                // Fonctionnalité de modification à implémenter
                                 _showErrorSnackBar('Modification à implémenter');
                                 break;
                               case 'delete':

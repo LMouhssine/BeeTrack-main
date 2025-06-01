@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ruche_connectee/models/api_models.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
@@ -84,26 +83,6 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
       }
     }
     return 'Erreur de connexion. Vérifiez votre connexion internet.';
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-      ),
-    );
-  }
-
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
   }
 
   List<RucheResponse> get _filteredRuches {
@@ -392,7 +371,7 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: enService ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+        color: enService ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
