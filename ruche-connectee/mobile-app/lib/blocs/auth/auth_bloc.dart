@@ -105,7 +105,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.email,
         event.password,
       );
-      emit(AuthenticatedState(userId: user.uid));
+      if (user != null) {
+        emit(AuthenticatedState(userId: user.uid));
+      } else {
+        emit(AuthErrorState(message: 'Échec de la connexion'));
+      }
     } catch (e) {
       emit(AuthErrorState(message: e.toString()));
     }
@@ -122,7 +126,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.password,
         event.name,
       );
-      emit(AuthenticatedState(userId: user.uid));
+      if (user != null) {
+        emit(AuthenticatedState(userId: user.uid));
+      } else {
+        emit(AuthErrorState(message: 'Échec de la création du compte'));
+      }
     } catch (e) {
       emit(AuthErrorState(message: e.toString()));
     }

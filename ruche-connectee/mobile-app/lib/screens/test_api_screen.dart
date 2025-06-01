@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:ruche_connectee/services/api_ruche_service.dart';
+import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/widgets/api_health_widget.dart';
 import 'package:ruche_connectee/widgets/auth_debug_widget.dart';
 import 'package:ruche_connectee/models/api_models.dart';
@@ -39,7 +40,13 @@ class _TestApiScreenState extends State<TestApiScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = _apiRucheService.getErrorMessage(e);
+        String errorMessage = 'Erreur de connexion à l\'API';
+        if (e is RucheApiException) {
+          errorMessage = e.message;
+        } else if (e is ApiException) {
+          errorMessage = e.message;
+        }
+        _errorMessage = errorMessage;
         _isLoading = false;
       });
     }

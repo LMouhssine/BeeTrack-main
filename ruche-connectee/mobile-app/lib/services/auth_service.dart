@@ -14,50 +14,40 @@ class AuthService {
   }
   
   // Connexion avec email et mot de passe
-  Future<User> signInWithEmailAndPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(String email, String password) async {
     try {
-      LoggerService.info('Tentative de connexion avec email: $email');
-      
-      // Vérifier d'abord les données dans Firestore
+      LoggerService.info('Connexion: $email');
+
       final querySnapshot = await _firebaseService.firestore
           .collection('apiculteurs')
           .where('email', isEqualTo: email)
           .get();
-      
-      LoggerService.debug('Données Firestore trouvées: ${querySnapshot.docs.length} document(s)');
+
       if (querySnapshot.docs.isNotEmpty) {
         final userData = querySnapshot.docs.first.data();
-        LoggerService.debug('Données utilisateur trouvées: $userData');
+
+        final userCredential = await _firebaseService.auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+
+        if (userCredential.user != null) {
+          LoggerService.info('Connexion réussie pour: ${userCredential.user!.email}');
+          return userCredential.user;
+        } else {
+          LoggerService.error('Connexion échouée: user est null');
+          return null;
+        }
       }
-      
-      final userCredential = await _firebaseService.auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
-      if (userCredential.user == null) {
-        LoggerService.error('Échec de connexion: userCredential.user est null');
-        throw Exception('Échec de connexion');
-      }
-      
-      LoggerService.info('Connexion réussie pour l\'utilisateur: ${userCredential.user!.uid}');
-      return userCredential.user!;
     } catch (e) {
       LoggerService.error('Erreur lors de la connexion', e);
-      
-      // Si l'utilisateur n'existe pas, essayer de le créer
-      if (e is FirebaseAuthException && 
-          (e.code == 'invalid-credential' || e.code == 'user-not-found')) {
-        LoggerService.info('Tentative de création de l\'utilisateur...');
-        return await createUserFromFirestore(email, password);
-      }
-      
-      throw _handleAuthException(e);
+      rethrow;
     }
+    return null;
   }
   
   // Inscription avec email et mot de passe
-  Future<User> registerWithEmailAndPassword(
+  Future<User?> registerWithEmailAndPassword(
     String email,
     String password,
     String name,
@@ -69,7 +59,8 @@ class AuthService {
       );
       
       if (userCredential.user == null) {
-        throw Exception('Échec de création du compte');
+        LoggerService.error('Échec de création du compte');
+        return null;
       }
       
       // Mettre à jour le profil utilisateur
@@ -88,7 +79,8 @@ class AuthService {
       
       return userCredential.user!;
     } catch (e) {
-      throw _handleAuthException(e);
+      LoggerService.error('Erreur lors de l\'inscription', e);
+      rethrow;
     }
   }
   
@@ -111,31 +103,34 @@ class AuthService {
   }
   
   // Connexion avec identifiant et mot de passe
-  Future<User> signInWithUsername(String username, String password) async {
+  Future<User?> signInWithUsername(String username, String password) async {
     try {
-      // Rechercher l'utilisateur dans Firestore par identifiant
+      // Rechercher l'email correspondant au nom d'utilisateur
       final querySnapshot = await _firebaseService.firestore
           .collection('apiculteurs')
           .where('identifiant', isEqualTo: username)
-          .limit(1)
           .get();
 
-      if (querySnapshot.docs.isEmpty) {
-        throw Exception('Aucun utilisateur trouvé avec cet identifiant');
+      if (querySnapshot.docs.isNotEmpty) {
+        final userData = querySnapshot.docs.first.data();
+        final email = userData['email'] as String;
+        
+        // Utiliser l'email pour la connexion
+        return await signInWithEmailAndPassword(email, password);
+      } else {
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'Aucun utilisateur trouvé avec cet identifiant',
+        );
       }
-
-      // Récupérer l'email de l'utilisateur
-      final email = querySnapshot.docs.first.get('email') as String;
-
-      // Se connecter avec l'email et le mot de passe
-      return await signInWithEmailAndPassword(email, password);
     } catch (e) {
-      throw _handleAuthException(e);
+      LoggerService.error('Erreur lors de la connexion avec identifiant', e);
+      rethrow;
     }
   }
   
   // Créer un utilisateur Firebase Auth à partir des données Firestore
-  Future<User> createUserFromFirestore(String email, String password) async {
+  Future<User?> createUserFromFirestore(String email, String password) async {
     try {
       LoggerService.info('Tentative de création d\'un utilisateur avec email: $email');
       
@@ -146,11 +141,11 @@ class AuthService {
           .get();
       
       if (querySnapshot.docs.isEmpty) {
-        throw Exception('Aucun utilisateur trouvé dans Firestore avec cet email');
+        LoggerService.error('Aucun utilisateur trouvé dans Firestore avec cet email');
+        return null;
       }
       
       final userData = querySnapshot.docs.first.data();
-      LoggerService.debug('Données Firestore pour création: $userData');
       
       try {
         // Essayer de créer l'utilisateur
@@ -174,15 +169,16 @@ class AuthService {
             email: email,
             password: password,
           );
-          return signInCredential.user!;
+          return signInCredential.user;
         }
         rethrow;
       }
       
-      throw Exception('Échec de création du compte');
+      LoggerService.error('Échec de création du compte');
+      return null;
     } catch (e) {
       LoggerService.error('Erreur lors de la création du compte', e);
-      throw _handleAuthException(e);
+      rethrow;
     }
   }
   

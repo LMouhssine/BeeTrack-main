@@ -112,6 +112,59 @@ class RucheResponse {
   }
 }
 
+/// Modèle pour les données des capteurs IoT d'une ruche
+class DonneesCapteur {
+  final String id;
+  final String rucheId;
+  final DateTime timestamp;
+  final double? temperature;
+  final double? humidity;
+  final bool? couvercleOuvert;
+  final int? batterie;
+  final int? signalQualite;
+  final String? erreur;
+
+  DonneesCapteur({
+    required this.id,
+    required this.rucheId,
+    required this.timestamp,
+    this.temperature,
+    this.humidity,
+    this.couvercleOuvert,
+    this.batterie,
+    this.signalQualite,
+    this.erreur,
+  });
+
+  factory DonneesCapteur.fromJson(Map<String, dynamic> json) {
+    return DonneesCapteur(
+      id: json['id'] as String,
+      rucheId: json['rucheId'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      temperature: json['temperature'] as double?,
+      humidity: json['humidity'] as double?,
+      couvercleOuvert: json['couvercleOuvert'] as bool?,
+      batterie: json['batterie'] as int?,
+      signalQualite: json['signalQualite'] as int?,
+      erreur: json['erreur'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'rucheId': rucheId,
+      'timestamp': timestamp.toIso8601String(),
+      if (temperature != null) 'temperature': temperature,
+      if (humidity != null) 'humidity': humidity,
+      if (couvercleOuvert != null) 'couvercleOuvert': couvercleOuvert,
+      if (batterie != null) 'batterie': batterie,
+      if (signalQualite != null) 'signalQualite': signalQualite,
+      if (erreur != null) 'erreur': erreur,
+    };
+  }
+}
+
 /// Modèle pour les réponses d'erreur de l'API
 class ApiErrorResponse {
   final int status;

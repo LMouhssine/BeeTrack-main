@@ -5,6 +5,7 @@ import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/firebase_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class AjouterRucheScreen extends StatefulWidget {
   final String? rucherId; // Si fourni, pré-sélectionne ce rucher
@@ -135,11 +136,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
             textColor: Colors.white,
             onPressed: () {
               // Naviguer vers les détails de la ruche
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => RucheDetailScreen(rucheId: rucheResponse.id),
-                ),
-              );
+              GoRouter.of(context).go('/ruches/${rucheResponse.id}');
             },
           ),
         ),
@@ -154,8 +151,10 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
       LoggerService.error('Erreur lors de l\'ajout de la ruche', e);
       
       String errorMessage = 'Erreur lors de l\'ajout';
-      if (e is ApiException) {
-        errorMessage = _apiRucheService.getErrorMessage(e);
+      if (e is RucheApiException) {
+        errorMessage = e.message;
+      } else if (e is ApiException) {
+        errorMessage = e.message;
       }
       
       _showErrorSnackBar(errorMessage);

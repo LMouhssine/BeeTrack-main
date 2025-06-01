@@ -34,82 +34,44 @@ class ApiClientService {
     _dio.interceptors.add(ErrorInterceptor());
   }
 
-  /// Effectue un appel GET
-  Future<Response<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  /// Effectue une requête GET
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
     try {
-      LoggerService.debug('API GET: $path');
-      return await _dio.get<T>(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      final response = await _dio.get(path, queryParameters: queryParameters);
+      return response;
     } catch (e) {
       LoggerService.error('Erreur GET $path', e);
       rethrow;
     }
   }
 
-  /// Effectue un appel POST
-  Future<Response<T>> post<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  /// Effectue une requête POST
+  Future<Response> post(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      LoggerService.debug('API POST: $path');
-      return await _dio.post<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      final response = await _dio.post(path, data: data, queryParameters: queryParameters);
+      return response;
     } catch (e) {
       LoggerService.error('Erreur POST $path', e);
       rethrow;
     }
   }
 
-  /// Effectue un appel PUT
-  Future<Response<T>> put<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  /// Effectue une requête PUT
+  Future<Response> put(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      LoggerService.debug('API PUT: $path');
-      return await _dio.put<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      final response = await _dio.put(path, data: data, queryParameters: queryParameters);
+      return response;
     } catch (e) {
       LoggerService.error('Erreur PUT $path', e);
       rethrow;
     }
   }
 
-  /// Effectue un appel DELETE
-  Future<Response<T>> delete<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  /// Effectue une requête DELETE
+  Future<Response> delete(String path, {Map<String, dynamic>? queryParameters}) async {
     try {
-      LoggerService.debug('API DELETE: $path');
-      return await _dio.delete<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      final response = await _dio.delete(path, queryParameters: queryParameters);
+      return response;
     } catch (e) {
       LoggerService.error('Erreur DELETE $path', e);
       rethrow;
@@ -137,57 +99,39 @@ class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final User? currentUser = _auth.currentUser;
-      
-      if (currentUser != null) {
-        LoggerService.debug('Utilisateur connecté: $currentUser.uid ($currentUser.email)');
-        
-        // Obtenir le token JWT Firebase
-        final String? idToken = await currentUser.getIdToken(false); // false = ne pas forcer le refresh
-        
-        if (idToken != null && idToken.isNotEmpty) {
-          // Ajouter le token d'authentification
-          options.headers['Authorization'] = 'Bearer $idToken';
-          
-          // Ajouter l'ID de l'apiculteur pour l'API Spring Boot
-          options.headers['X-Apiculteur-ID'] = currentUser.uid;
-          
-          LoggerService.debug('Headers d\'authentification ajoutés:');
-          LoggerService.debug('- Authorization: Bearer $idToken.substring(0, 20)...');
-          LoggerService.debug('- X-Apiculteur-ID: $currentUser.uid');
-        } else {
-          LoggerService.warning('Token d\'authentification vide ou null');
-          // Essayer de forcer un refresh du token
-          try {
-            final String? refreshedToken = await currentUser.getIdToken(true); // true = forcer le refresh
-            if (refreshedToken != null && refreshedToken.isNotEmpty) {
-              options.headers['Authorization'] = 'Bearer $refreshedToken';
-              options.headers['X-Apiculteur-ID'] = currentUser.uid;
-              LoggerService.info('Token rafraîchi avec succès');
-            } else {
-              LoggerService.error('Impossible de rafraîchir le token d\'authentification');
-            }
-          } catch (tokenError) {
-            LoggerService.error('Erreur lors du rafraîchissement du token', tokenError);
-          }
-        }
-      } else {
-        LoggerService.warning('Aucun utilisateur connecté pour l\'authentification');
-        LoggerService.debug('État de Firebase Auth: $_auth.currentUser');
-      }
+      await _addAuthHeaders(options);
       
       // Ajouter des headers supplémentaires pour le debug
       options.headers['Content-Type'] = 'application/json';
       options.headers['Accept'] = 'application/json';
       
-      LoggerService.debug('Requête préparée: $options.method $options.uri');
-      LoggerService.debug('Headers finaux: $options.headers');
-      
       handler.next(options);
     } catch (e) {
-      LoggerService.error('Erreur critique dans l\'interceptor d\'authentification', e);
-      // Continuer même en cas d'erreur d'auth, mais logguer l'erreur
+      LoggerService.error('Erreur dans l\'interceptor d\'auth', e);
+      // Continuer même en cas d'erreur d'auth
       handler.next(options);
+    }
+  }
+
+  /// Ajoute les headers d'authentification à la requête
+  Future<void> _addAuthHeaders(RequestOptions options) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        // Obtenir le token d'authentification
+        final idToken = await currentUser.getIdToken();
+        
+        if (idToken != null && idToken.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $idToken';
+          options.headers['X-Apiculteur-ID'] = currentUser.uid;
+        } else {
+          LoggerService.warning('Token d\'authentification vide');
+        }
+      } else {
+        LoggerService.warning('Utilisateur non connecté');
+      }
+    } catch (e) {
+      LoggerService.error('Erreur lors de l\'ajout des headers d\'auth', e);
     }
   }
 }
@@ -196,14 +140,7 @@ class AuthInterceptor extends Interceptor {
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    LoggerService.error('Erreur HTTP $err.response?.statusCode: $err.message', err);
-
-    // Logguer les détails de la réponse pour le debug
-    if (err.response != null) {
-      LoggerService.debug('Status Code: $err.response!.statusCode');
-      LoggerService.debug('Headers: $err.response!.headers');
-      LoggerService.debug('Données de réponse: $err.response!.data');
-    }
+    LoggerService.error('Erreur HTTP ${err.response?.statusCode}: ${err.message}');
 
     ApiException apiException;
 
@@ -220,9 +157,6 @@ class ErrorInterceptor extends Interceptor {
         
         try {
           if (err.response?.data != null) {
-            LoggerService.debug('Tentative de parsing de la réponse d\'erreur: $err.response!.data');
-            
-            // Essayer différents formats de réponse d'erreur
             final responseData = err.response!.data;
             
             if (responseData is Map<String, dynamic>) {
@@ -237,13 +171,10 @@ class ErrorInterceptor extends Interceptor {
             } else if (responseData is String) {
               message = responseData;
             } else {
-              message = 'Erreur $statusCode: $responseData.toString()';
+              message = 'Erreur $statusCode: ${responseData.toString()}';
             }
-            
-            LoggerService.debug('Message d\'erreur parsé: $message');
           }
         } catch (parseError) {
-          LoggerService.debug('Impossible de parser la réponse d\'erreur: $parseError');
           // Utiliser le message d'erreur de base en cas d'échec de parsing
           if (statusCode == 401) {
             message = 'Authentification requise ou token invalide';
@@ -270,8 +201,6 @@ class ErrorInterceptor extends Interceptor {
       default:
         apiException = ApiException('Erreur réseau inattendue', 500);
     }
-
-    LoggerService.error('ApiException générée: $apiException.toString()');
 
     handler.reject(DioException(
       requestOptions: err.requestOptions,

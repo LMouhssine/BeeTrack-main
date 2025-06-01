@@ -7,7 +7,8 @@ import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
 import 'package:ruche_connectee/screens/ruchers/rucher_detail_screen.dart';
 import 'package:ruche_connectee/screens/ruchers/ajouter_rucher_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_list_screen.dart';
-import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
+import 'package:ruche_connectee/screens/ruches/ruche_detail_api_screen.dart';
+import 'package:ruche_connectee/screens/ruches/ajouter_ruche_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/test_rucher_screen.dart';
@@ -50,9 +51,14 @@ final router = GoRouter(
       builder: (context, state) => const RucheListScreen(),
     ),
     GoRoute(
+      path: '/ruches/ajouter',
+      builder: (context, state) => const AjouterRucheScreen(),
+    ),
+    GoRoute(
       path: '/ruches/:id',
-      builder: (context, state) => RucheDetailScreen(
+      builder: (context, state) => RucheDetailApiScreen(
         rucheId: state.pathParameters['id']!,
+        rucheNom: state.uri.queryParameters['nom'] ?? 'Ruche',
       ),
     ),
     GoRoute(

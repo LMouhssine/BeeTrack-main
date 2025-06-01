@@ -6,6 +6,7 @@ import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ajouter_ruche_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_screen.dart';
 import 'dart:async';
+import 'package:go_router/go_router.dart';
 
 class RuchesListScreen extends StatefulWidget {
   const RuchesListScreen({Key? key}) : super(key: key);
@@ -428,11 +429,7 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                     onSelected: (value) {
                                       switch (value) {
                                         case 'details':
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) => RucheDetailScreen(rucheId: ruche['id']),
-                                            ),
-                                          );
+                                          context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                           break;
                                         case 'edit':
                                           // TODO: Modifier la ruche
@@ -445,11 +442,7 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                     },
                                   ),
                                   onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => RucheDetailScreen(rucheId: ruche['id']),
-                                      ),
-                                    );
+                                    context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                   },
                                 ),
                               );
