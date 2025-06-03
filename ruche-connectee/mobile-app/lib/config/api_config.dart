@@ -37,6 +37,7 @@ class ApiConfig {
   static String rucheByIdUrl(String rucheId) => '$fullRuchesUrl/$rucheId';
   static String ruchesByRucherUrl(String rucherId) => '$fullRuchesUrl/rucher/$rucherId';
   static String mesures7JoursUrl(String rucheId) => '$fullRuchesUrl/$rucheId/mesures-7-jours';
+  static String derniereMesureUrl(String rucheId) => '$fullRuchesUrl/$rucheId/mesures/last';
   
   // Vérifier si on est en mode développement
   static bool get isDevelopment => baseUrl == _baseUrlDev;

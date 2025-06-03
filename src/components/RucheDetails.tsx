@@ -17,10 +17,12 @@ import {
   BookOpen,
   BarChart3,
   Signal,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from 'lucide-react';
 import { RucheService, Ruche, DonneesCapteur } from '../services/rucheService';
 import MesuresRuche from './MesuresRuche';
+import SurveillanceCouvercle from './SurveillanceCouvercle';
 
 interface RucheDetailsProps {
   rucheId: string;
@@ -33,7 +35,7 @@ const RucheDetails: React.FC<RucheDetailsProps> = ({ rucheId, onBack, onEdit, on
   const [ruche, setRuche] = useState<Ruche | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'details' | 'mesures'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'mesures' | 'surveillance'>('details');
   const [derniereMesure, setDerniereMesure] = useState<DonneesCapteur | null>(null);
   const [loadingCapteurs, setLoadingCapteurs] = useState(false);
 
@@ -285,6 +287,19 @@ const RucheDetails: React.FC<RucheDetailsProps> = ({ rucheId, onBack, onEdit, on
                 <span>Mesures</span>
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab('surveillance')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'surveillance'
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Eye size={16} />
+                <span>Surveillance</span>
+              </div>
+            </button>
           </nav>
         </div>
 
@@ -500,6 +515,16 @@ const RucheDetails: React.FC<RucheDetailsProps> = ({ rucheId, onBack, onEdit, on
           {activeTab === 'mesures' && (
             <div className="-m-6">
               <MesuresRuche rucheId={ruche.id!} rucheNom={ruche.nom} />
+            </div>
+          )}
+
+          {activeTab === 'surveillance' && (
+            <div className="-m-6">
+              <SurveillanceCouvercle 
+                rucheId={ruche.id!} 
+                rucheNom={ruche.nom}
+                apiculteurId={ruche.idApiculteur}
+              />
             </div>
           )}
         </div>

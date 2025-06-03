@@ -117,4 +117,58 @@ public class TestController {
             return ResponseEntity.status(500).body(errorResponse);
         }
     }
+
+    /**
+     * Test de récupération de la dernière mesure d'une ruche
+     * GET /test/derniere-mesure/{rucheId}
+     */
+    @GetMapping("/derniere-mesure/{rucheId}")
+    public ResponseEntity<?> testDerniereMesure(@PathVariable String rucheId) {
+        try {
+            var derniereMesure = rucheService.getDerniereMesure(rucheId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "OK");
+            response.put("rucheId", rucheId);
+            response.put("derniereMesure", derniereMesure);
+            response.put("message", derniereMesure != null ? 
+                "Dernière mesure trouvée" : "Aucune mesure trouvée pour cette ruche");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (ExecutionException | InterruptedException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "ERROR");
+            errorResponse.put("message", "Erreur lors de la récupération de la dernière mesure");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Test de récupération des mesures des 7 derniers jours
+     * GET /test/mesures-7-jours/{rucheId}
+     */
+    @GetMapping("/mesures-7-jours/{rucheId}")
+    public ResponseEntity<?> testMesures7Jours(@PathVariable String rucheId) {
+        try {
+            var mesures = rucheService.getMesures7DerniersJours(rucheId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "OK");
+            response.put("rucheId", rucheId);
+            response.put("nombreMesures", mesures.size());
+            response.put("mesures", mesures);
+            response.put("message", mesures.size() + " mesures trouvées pour les 7 derniers jours");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (ExecutionException | InterruptedException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "ERROR");
+            errorResponse.put("message", "Erreur lors de la récupération des mesures");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
 } 

@@ -190,8 +190,8 @@ public class RucheService {
         
         // Utiliser le FirebaseService pour exécuter la requête complexe
         List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithDateFilter(
-            COLLECTION_DONNEES,   // collection
-            "ruche_id",           // filterField
+            "donneesCapteurs",    // collection (utilisation de la convention camelCase)
+            "rucheId",            // filterField (utilisation de la convention camelCase)
             rucheId,              // filterValue
             "timestamp",          // dateField
             timestampLimite,      // dateLimit
@@ -203,6 +203,30 @@ public class RucheService {
         return documents.stream()
                 .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère la dernière mesure d'une ruche
+     * @param rucheId ID de la ruche
+     * @return La dernière mesure ou null si aucune mesure trouvée
+     */
+    public DonneesCapteur getDerniereMesure(String rucheId) throws ExecutionException, InterruptedException {
+        // Utiliser le FirebaseService pour récupérer la dernière mesure
+        List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithFilter(
+            "donneesCapteurs",    // collection
+            "rucheId",            // filterField
+            rucheId,              // filterValue
+            "timestamp",          // orderByField
+            false,                // ascending = false pour tri décroissant (plus récent en premier)
+            1                     // limit = 1 pour récupérer seulement la dernière mesure
+        );
+        
+        // Retourner la première (et unique) mesure si elle existe
+        if (!documents.isEmpty()) {
+            return documentToDonnees(documents.get(0).getId(), documents.get(0).getData());
+        }
+        
+        return null; // Aucune mesure trouvée
     }
 
     /**
@@ -342,8 +366,8 @@ public class RucheService {
 
         DonneesCapteur donnees = new DonneesCapteur();
         donnees.setId(id);
-        donnees.setRucheId((String) data.get("ruche_id"));
-        donnees.setCouvercleOuvert((Boolean) data.get("couvercle_ouvert"));
+        donnees.setRucheId((String) data.get("rucheId"));
+        donnees.setCouvercleOuvert((Boolean) data.get("couvercleOuvert"));
         donnees.setErreur((String) data.get("erreur"));
 
         if (data.get("temperature") instanceof Number) {
@@ -355,8 +379,8 @@ public class RucheService {
         if (data.get("batterie") instanceof Number) {
             donnees.setBatterie(((Number) data.get("batterie")).intValue());
         }
-        if (data.get("signal_qualite") instanceof Number) {
-            donnees.setSignalQualite(((Number) data.get("signal_qualite")).intValue());
+        if (data.get("signalQualite") instanceof Number) {
+            donnees.setSignalQualite(((Number) data.get("signalQualite")).intValue());
         }
 
         Object timestamp = data.get("timestamp");

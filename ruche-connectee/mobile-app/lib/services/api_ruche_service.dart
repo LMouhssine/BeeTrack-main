@@ -185,6 +185,46 @@ class ApiRucheService {
     }
   }
 
+  /// Récupère la dernière mesure d'une ruche
+  /// 
+  /// Paramètres :
+  /// - [idRuche] : ID de la ruche
+  /// 
+  /// Retourne la dernière mesure ou null si aucune mesure n'est disponible
+  Future<DonneesCapteur?> obtenirDerniereMesure(String idRuche) async {
+    try {
+      LoggerService.info('📊 Récupération de la dernière mesure pour la ruche: $idRuche (API)');
+      
+      final response = await _apiClient.get(
+        ApiConfig.derniereMesureUrl(idRuche),
+      );
+      
+      if (response.data == null) {
+        LoggerService.info('📊 Aucune mesure disponible pour la ruche: $idRuche');
+        return null;
+      }
+      
+      final mesure = DonneesCapteur.fromJson(response.data as Map<String, dynamic>);
+      
+      LoggerService.info('📊 Dernière mesure récupérée avec succès pour la ruche: $idRuche (${mesure.timestamp})');
+      
+      return mesure;
+      
+    } catch (e) {
+      LoggerService.error('Erreur lors de la récupération de la dernière mesure', e);
+      
+      if (e is ApiException && e.statusCode == 404) {
+        return null; // Aucune mesure trouvée
+      }
+      
+      if (e is ApiException) {
+        throw RucheApiException(e.message, e.statusCode);
+      }
+      
+      throw RucheApiException('Une erreur inattendue s\'est produite lors de la récupération de la dernière mesure', 500);
+    }
+  }
+
   /// Trie une liste de ruches par nom croissant (insensible à la casse)
   /// 
   /// Paramètres :

@@ -87,6 +87,35 @@ public class FirebaseService {
     }
 
     /**
+     * Récupère les documents d'une collection avec filtre, tri et limite
+     * @param collection Nom de la collection
+     * @param filterField Champ pour le filtre d'égalité
+     * @param filterValue Valeur pour le filtre d'égalité
+     * @param orderByField Champ pour le tri
+     * @param ascending True pour tri croissant, false pour décroissant
+     * @param limit Nombre maximum de documents à retourner
+     * @return Liste des documents correspondant aux critères
+     */
+    public List<QueryDocumentSnapshot> getDocumentsWithFilter(
+            String collection,
+            String filterField,
+            Object filterValue,
+            String orderByField,
+            boolean ascending,
+            int limit) throws ExecutionException, InterruptedException {
+        
+        CollectionReference colRef = firestore.collection(collection);
+        Query query = colRef
+            .whereEqualTo(filterField, filterValue)
+            .orderBy(orderByField, ascending ? Query.Direction.ASCENDING : Query.Direction.DESCENDING)
+            .limit(limit);
+        
+        ApiFuture<QuerySnapshot> future = query.get();
+        QuerySnapshot querySnapshot = future.get();
+        return querySnapshot.getDocuments();
+    }
+
+    /**
      * Crée ou met à jour un document
      */
     public void setDocument(String collection, String documentId, Map<String, Object> data) throws ExecutionException, InterruptedException {

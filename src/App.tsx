@@ -8,7 +8,13 @@ import RuchersList from './components/RuchersList';
 import RuchesList from './components/RuchesList';
 import RucheDetails from './components/RucheDetails';
 import Statistiques from './components/Statistiques';
+import TestDerniereMesure from './components/TestDerniereMesure';
+import AlerteCouvercleModal from './components/AlerteCouvercleModal';
+import NotificationToast from './components/NotificationToast';
+import TestAlerteCouvercle from './components/TestAlerteCouvercle';
 import { RucheService } from './services/rucheService';
+import { useAlertesCouvercle } from './hooks/useAlertesCouvercle';
+import { useNotifications } from './hooks/useNotifications';
 
 interface Apiculteur {
   id: string;
@@ -34,6 +40,13 @@ function App() {
   
   // État pour la navigation vers les détails des ruches
   const [selectedRucheId, setSelectedRucheId] = useState<string | null>(null);
+
+  // Hooks pour les notifications et alertes
+  const { notifications, addNotification, removeNotification } = useNotifications();
+  const alertes = useAlertesCouvercle({
+    apiculteurId: apiculteur?.id || '',
+    onNotification: addNotification
+  });
   
   console.log('🐝 App state initialized');
 
@@ -324,6 +337,8 @@ function App() {
           />
         )}
         {activeTab === 'statistiques' && <Statistiques />}
+        {activeTab === 'test-api' && <TestDerniereMesure />}
+        {activeTab === 'test-alerte' && <TestAlerteCouvercle />}
       </main>
 
       {/* Overlay pour fermer le dropdown */}
@@ -333,6 +348,30 @@ function App() {
           onClick={() => setIsUserDropdownOpen(false)}
         />
       )}
+
+      {/* Système d'alertes couvercle */}
+      {alertes.alerteActive && (
+        <AlerteCouvercleModal
+          isOpen={true}
+          rucheId={alertes.alerteActive.rucheId}
+          rucheNom={alertes.alerteActive.rucheNom}
+          mesure={alertes.alerteActive.mesure}
+          onIgnorerTemporairement={alertes.ignorerAlerte}
+          onIgnorerSession={alertes.ignorerPourSession}
+          onFermer={alertes.fermerAlerte}
+        />
+      )}
+
+      {/* Notifications toast */}
+      {notifications.map(notification => (
+        <NotificationToast
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+          duration={notification.duration}
+        />
+      ))}
     </div>
   );
 }

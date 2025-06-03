@@ -12,6 +12,7 @@ import 'package:ruche_connectee/screens/ruches/ajouter_ruche_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/test_rucher_screen.dart';
+import 'package:ruche_connectee/screens/test_alerte_couvercle_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -72,6 +73,10 @@ final router = GoRouter(
     GoRoute(
       path: '/test',
       builder: (context, state) => const TestRucherScreen(),
+    ),
+    GoRoute(
+      path: '/test-alerte',
+      builder: (context, state) => const TestAlerteCouvercleScreen(),
     ),
   ],
 ); 

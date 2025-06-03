@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Box, BarChart3 } from 'lucide-react';
+import { Home, Box, BarChart3, Settings, AlertTriangle } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -10,7 +10,9 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'ruchers', label: 'Ruchers', icon: Home },
     { id: 'ruches', label: 'Ruches', icon: Box },
-    { id: 'statistiques', label: 'Statistiques', icon: BarChart3 }
+    { id: 'statistiques', label: 'Statistiques', icon: BarChart3 },
+    { id: 'test-api', label: 'Test API', icon: Settings },
+    { id: 'test-alerte', label: 'Test Alerte', icon: AlertTriangle }
   ];
 
   return (

@@ -209,9 +209,43 @@ public class RucheMobileController {
             // Récupérer les mesures
             var mesures = rucheService.getMesures7DerniersJours(rucheId);
             return ResponseEntity.ok(mesures);
+            
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération des mesures"));
+        }
+    }
+
+    /**
+     * Récupère la dernière mesure d'une ruche
+     * GET /api/mobile/ruches/{rucheId}/derniere-mesure
+     */
+    @GetMapping("/{rucheId}/derniere-mesure")
+    public ResponseEntity<?> getDerniereMesure(
+            @PathVariable String rucheId,
+            @RequestHeader("X-Apiculteur-ID") String apiculteurId) {
+        try {
+            // Vérifier que la ruche existe et appartient à l'utilisateur
+            var ruche = rucheService.getRucheById(rucheId);
+            if (ruche == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!ruche.getApiculteurId().equals(apiculteurId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ErrorResponse("ACCESS_DENIED", "Accès non autorisé à cette ruche"));
+            }
+
+            // Récupérer la dernière mesure
+            var derniereMesure = rucheService.getDerniereMesure(rucheId);
+            if (derniereMesure == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            return ResponseEntity.ok(derniereMesure);
+            
+        } catch (ExecutionException | InterruptedException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération de la dernière mesure"));
         }
     }
 
