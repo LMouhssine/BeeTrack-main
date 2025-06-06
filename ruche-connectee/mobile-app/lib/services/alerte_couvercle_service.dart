@@ -131,7 +131,7 @@ class AlerteCouvercleService {
     
     // Programmer les vérifications périodiques
     final timer = Timer.periodic(
-      Duration(milliseconds: _intervalMs),
+      const Duration(milliseconds: _intervalMs),
       (_) => surveillerRuche(),
     );
     
