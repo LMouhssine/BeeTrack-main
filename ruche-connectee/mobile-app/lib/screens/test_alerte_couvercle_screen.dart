@@ -22,10 +22,12 @@ class _TestAlerteCouvercleScreenContent extends StatefulWidget {
   const _TestAlerteCouvercleScreenContent({Key? key}) : super(key: key);
 
   @override
-  State<_TestAlerteCouvercleScreenContent> createState() => _TestAlerteCouvercleScreenContentState();
+  State<_TestAlerteCouvercleScreenContent> createState() =>
+      _TestAlerteCouvercleScreenContentState();
 }
 
-class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleScreenContent> {
+class _TestAlerteCouvercleScreenContentState
+    extends State<_TestAlerteCouvercleScreenContent> {
   static const String testRucheId = 'test-ruche-001';
   static const String testApiculteurId = 'test-user';
 
@@ -49,7 +51,7 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
               ),
             );
           }
-          
+
           if (state.messageErreur != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -100,7 +102,9 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
                         );
                   },
                   onFermer: () {
-                    context.read<AlerteCouvercleBloc>().add(FermerAlerteEvent());
+                    context
+                        .read<AlerteCouvercleBloc>()
+                        .add(FermerAlerteEvent());
                   },
                 ),
             ],
@@ -184,8 +188,8 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
         Expanded(
           child: _buildStatusCard(
             'Statut Ignore',
-            statutIgnore?.ignore == true 
-                ? 'Ignoré (${statutIgnore!.type})' 
+            statutIgnore?.ignore == true
+                ? 'Ignoré (${statutIgnore!.type})'
                 : 'Normal',
             statutIgnore?.ignore == true ? Colors.amber : Colors.grey,
             statutIgnore?.ignore == true ? Icons.volume_off : Icons.volume_up,
@@ -195,7 +199,8 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
     );
   }
 
-  Widget _buildStatusCard(String title, String status, Color color, IconData icon) {
+  Widget _buildStatusCard(
+      String title, String status, Color color, IconData icon) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -271,7 +276,9 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
                     ),
                   ),
                 ElevatedButton.icon(
-                  onPressed: enSurveillance && !aAlerteActive ? () => _simulerAlerte(context) : null,
+                  onPressed: enSurveillance && !aAlerteActive
+                      ? () => _simulerAlerte(context)
+                      : null,
                   icon: const Icon(Icons.warning),
                   label: const Text('Simuler Alerte'),
                   style: ElevatedButton.styleFrom(
@@ -343,7 +350,7 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
 
   Widget _buildDebugInfo(AlerteCouvercleState state) {
     final statutIgnore = state.statutsIgnore[testRucheId];
-    
+
     return Card(
       color: Colors.grey.shade50,
       child: Padding(
@@ -359,8 +366,10 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
               ),
             ),
             const SizedBox(height: 12),
-            _buildDebugRow('Ruches surveillées', '${state.ruchesEnSurveillance.length}'),
-            _buildDebugRow('Alerte active', state.alerteActive != null ? 'Oui' : 'Non'),
+            _buildDebugRow(
+                'Ruches surveillées', '${state.ruchesEnSurveillance.length}'),
+            _buildDebugRow(
+                'Alerte active', state.alerteActive != null ? 'Oui' : 'Non'),
             if (statutIgnore?.ignore == true && statutIgnore?.finIgnore != null)
               _buildDebugRow('Fin ignore', statutIgnore!.finIgnore.toString()),
           ],
@@ -438,4 +447,4 @@ class _TestAlerteCouvercleScreenContentState extends State<_TestAlerteCouvercleS
           const ReactiverAlertesEvent(testRucheId),
         );
   }
-} 
+}

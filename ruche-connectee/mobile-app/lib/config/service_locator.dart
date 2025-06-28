@@ -14,27 +14,27 @@ final GetIt getIt = GetIt.instance;
 Future<void> setupServiceLocator() async {
   // Services Firebase existants
   getIt.registerLazySingleton<FirebaseService>(() => FirebaseService());
-  
+
   // Service d'authentification
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(getIt<FirebaseService>()),
   );
-  
+
   // Client API pour Spring Boot
   getIt.registerLazySingleton<ApiClientService>(
     () => ApiClientService(FirebaseAuth.instance),
   );
-  
+
   // Service des ruches via API
   getIt.registerLazySingleton<ApiRucheService>(
     () => ApiRucheService(getIt<ApiClientService>()),
   );
-  
+
   // Service d'alerte couvercle (utilise le singleton)
   getIt.registerLazySingleton<AlerteCouvercleService>(
     () => AlerteCouvercleService.instance..init(getIt<ApiRucheService>()),
   );
-  
+
   LoggerService.info('📦 Service Locator configuré avec succès');
 }
 
@@ -42,4 +42,4 @@ Future<void> setupServiceLocator() async {
 Future<void> resetServiceLocator() async {
   await getIt.reset();
   LoggerService.info('📦 Service Locator réinitialisé');
-} 
+}

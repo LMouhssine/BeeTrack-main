@@ -9,10 +9,12 @@ class RucherListScreenAlternative extends StatefulWidget {
   const RucherListScreenAlternative({Key? key}) : super(key: key);
 
   @override
-  State<RucherListScreenAlternative> createState() => _RucherListScreenAlternativeState();
+  State<RucherListScreenAlternative> createState() =>
+      _RucherListScreenAlternativeState();
 }
 
-class _RucherListScreenAlternativeState extends State<RucherListScreenAlternative> {
+class _RucherListScreenAlternativeState
+    extends State<RucherListScreenAlternative> {
   late final RucherService _rucherService;
   late Future<List<Map<String, dynamic>>> _ruchersFuture;
 
@@ -57,7 +59,8 @@ class _RucherListScreenAlternativeState extends State<RucherListScreenAlternativ
           }
 
           if (snapshot.hasError) {
-            LoggerService.error('Erreur lors du chargement des ruchers', snapshot.error);
+            LoggerService.error(
+                'Erreur lors du chargement des ruchers', snapshot.error);
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -233,4 +236,4 @@ class _RucherListScreenAlternativeState extends State<RucherListScreenAlternativ
       ),
     );
   }
-} 
+}

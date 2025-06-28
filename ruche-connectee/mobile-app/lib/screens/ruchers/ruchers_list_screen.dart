@@ -14,4 +14,4 @@ class RuchersListScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

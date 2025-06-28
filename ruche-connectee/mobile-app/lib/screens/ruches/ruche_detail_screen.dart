@@ -74,7 +74,9 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
             icon: const Icon(Icons.edit),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalité de modification en cours de développement')),
+                const SnackBar(
+                    content: Text(
+                        'Fonctionnalité de modification en cours de développement')),
               );
             },
           ),
@@ -130,16 +132,22 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              _buildInfoRow('Nom', _rucheData?['nom'] ?? 'Non défini'),
+                              _buildInfoRow(
+                                  'Nom', _rucheData?['nom'] ?? 'Non défini'),
                               const Divider(),
-                              _buildInfoRow('Position', _rucheData?['position'] ?? 'Non définie'),
+                              _buildInfoRow('Position',
+                                  _rucheData?['position'] ?? 'Non définie'),
                               const Divider(),
-                              _buildInfoRow('Rucher', _rucheData?['rucher_nom'] ?? 'Non défini'),
+                              _buildInfoRow('Rucher',
+                                  _rucheData?['rucher_nom'] ?? 'Non défini'),
                               const Divider(),
-                              _buildInfoRow('Type de ruche', _rucheData?['type_ruche'] ?? 'Non défini'),
-                              if (_rucheData?['description'] != null && _rucheData!['description'].isNotEmpty) ...[
+                              _buildInfoRow('Type de ruche',
+                                  _rucheData?['type_ruche'] ?? 'Non défini'),
+                              if (_rucheData?['description'] != null &&
+                                  _rucheData!['description'].isNotEmpty) ...[
                                 const Divider(),
-                                _buildInfoRow('Description', _rucheData!['description']),
+                                _buildInfoRow(
+                                    'Description', _rucheData!['description']),
                               ],
                               const Divider(),
                               _buildStatusRow(),
@@ -148,7 +156,7 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Données des capteurs
                       Card(
                         child: Padding(
@@ -182,25 +190,33 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
                               const Divider(),
                               _buildSensorRow(
                                 'Couvercle',
-                                _rucheData?['couvercle_ouvert'] == true ? 'Ouvert' : 'Fermé',
+                                _rucheData?['couvercle_ouvert'] == true
+                                    ? 'Ouvert'
+                                    : 'Fermé',
                                 '',
-                                _rucheData?['couvercle_ouvert'] == true ? Icons.lock_open : Icons.lock,
-                                _rucheData?['couvercle_ouvert'] == true ? Colors.red : Colors.green,
+                                _rucheData?['couvercle_ouvert'] == true
+                                    ? Icons.lock_open
+                                    : Icons.lock,
+                                _rucheData?['couvercle_ouvert'] == true
+                                    ? Colors.red
+                                    : Colors.green,
                               ),
                               const Divider(),
                               _buildSensorRow(
                                 'Batterie',
-                                _rucheData?['niveau_batterie']?.toString() ?? '--',
+                                _rucheData?['niveau_batterie']?.toString() ??
+                                    '--',
                                 '%',
                                 Icons.battery_full,
-                                _getBatteryColor(_rucheData?['niveau_batterie']),
+                                _getBatteryColor(
+                                    _rucheData?['niveau_batterie']),
                               ),
                             ],
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Informations techniques
                       Card(
                         child: Padding(
@@ -216,11 +232,19 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              _buildInfoRow('Date d\'installation', _formatDate(_rucheData?['dateInstallation'])),
+                              _buildInfoRow('Date d\'installation',
+                                  _formatDate(_rucheData?['dateInstallation'])),
                               const Divider(),
-                              _buildInfoRow('Dernière mise à jour', _formatDate(_rucheData?['derniere_mise_a_jour'])),
+                              _buildInfoRow(
+                                  'Dernière mise à jour',
+                                  _formatDate(
+                                      _rucheData?['derniere_mise_a_jour'])),
                               const Divider(),
-                              _buildInfoRow('Statut', _rucheData?['enService'] == true ? 'En service' : 'Hors service'),
+                              _buildInfoRow(
+                                  'Statut',
+                                  _rucheData?['enService'] == true
+                                      ? 'En service'
+                                      : 'Hors service'),
                             ],
                           ),
                         ),
@@ -263,7 +287,8 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
     );
   }
 
-  Widget _buildSensorRow(String label, String value, String unit, IconData icon, Color color) {
+  Widget _buildSensorRow(
+      String label, String value, String unit, IconData icon, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -341,7 +366,7 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
 
   String _formatDate(dynamic date) {
     if (date == null) return 'Non définie';
-    
+
     try {
       DateTime dateTime;
       if (date is Timestamp) {
@@ -353,10 +378,10 @@ class _RucheDetailScreenState extends State<RucheDetailScreen> {
       } else {
         return 'Format invalide';
       }
-      
+
       return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} à ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return 'Date invalide';
     }
   }
-} 
+}

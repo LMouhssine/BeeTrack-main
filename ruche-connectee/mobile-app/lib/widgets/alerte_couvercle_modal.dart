@@ -297,7 +297,8 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
     return Colors.red;
   }
 
-  Widget _buildMeasureChip(String label, String value, IconData icon, Color color) {
+  Widget _buildMeasureChip(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -422,7 +423,8 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
           DropdownButtonFormField<double>(
             value: _dureeSelectionnee,
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -448,7 +450,8 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => widget.onIgnorerTemporairement(_dureeSelectionnee),
+              onPressed: () =>
+                  widget.onIgnorerTemporairement(_dureeSelectionnee),
               icon: const Icon(Icons.schedule, size: 16),
               label: Text(
                 'Ignorer pour ${_dureeOptions.firstWhere((o) => o['value'] == _dureeSelectionnee)['label']}',
@@ -480,7 +483,8 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
         children: [
           Row(
             children: [
-              Icon(Icons.visibility_off, size: 18, color: Colors.purple.shade600),
+              Icon(Icons.visibility_off,
+                  size: 18, color: Colors.purple.shade600),
               const SizedBox(width: 8),
               Text(
                 'Ignorer pour cette session',
@@ -562,4 +566,4 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
       ),
     );
   }
-} 
+}

@@ -60,12 +60,14 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: enSurveillance ? Colors.green.shade100 : Colors.grey.shade100,
+            color:
+                enSurveillance ? Colors.green.shade100 : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             Icons.visibility,
-            color: enSurveillance ? Colors.green.shade600 : Colors.grey.shade500,
+            color:
+                enSurveillance ? Colors.green.shade600 : Colors.grey.shade500,
             size: 24,
           ),
         ),
@@ -94,7 +96,8 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: enSurveillance ? Colors.green.shade100 : Colors.grey.shade100,
+            color:
+                enSurveillance ? Colors.green.shade100 : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -114,7 +117,9 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: enSurveillance ? Colors.green.shade800 : Colors.grey.shade600,
+                  color: enSurveillance
+                      ? Colors.green.shade800
+                      : Colors.grey.shade600,
                 ),
               ),
             ],
@@ -244,7 +249,8 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildControls(BuildContext context, bool enSurveillance, StatutIgnore? statutIgnore) {
+  Widget _buildControls(
+      BuildContext context, bool enSurveillance, StatutIgnore? statutIgnore) {
     return Column(
       children: [
         if (!enSurveillance)
@@ -383,4 +389,4 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

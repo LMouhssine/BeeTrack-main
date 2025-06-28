@@ -79,4 +79,4 @@ final router = GoRouter(
       builder: (context, state) => const TestAlerteCouvercleScreen(),
     ),
   ],
-); 
+);

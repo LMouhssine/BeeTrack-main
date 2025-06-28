@@ -24,15 +24,15 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
   final _positionController = TextEditingController();
   final _typeRucheController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   bool _enService = true;
   DateTime _dateInstallation = DateTime.now();
   String? _selectedRucherId;
-  
+
   bool _isLoading = false;
   bool _isSubmitting = false;
   List<Map<String, dynamic>> _ruchers = [];
-  
+
   late final ApiRucheService _apiRucheService;
 
   @override
@@ -51,7 +51,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
     _descriptionController.dispose();
     super.dispose();
   }
-  
+
   void _initializeServices() {
     _apiRucheService = getIt<ApiRucheService>();
   }
@@ -59,7 +59,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
   Future<void> _loadRuchers() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final currentUser = getIt<FirebaseService>().auth.currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
@@ -112,11 +112,11 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
         idRucher: _selectedRucherId!,
         nom: _nomController.text.trim(),
         position: _positionController.text.trim(),
-        typeRuche: _typeRucheController.text.trim().isNotEmpty 
-            ? _typeRucheController.text.trim() 
+        typeRuche: _typeRucheController.text.trim().isNotEmpty
+            ? _typeRucheController.text.trim()
             : null,
-        description: _descriptionController.text.trim().isNotEmpty 
-            ? _descriptionController.text.trim() 
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
             : null,
         enService: _enService,
         dateInstallation: _dateInstallation,
@@ -145,17 +145,16 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
       Navigator.of(context).pop(true); // true indique que la ruche a été créée
-
     } catch (e) {
       LoggerService.error('Erreur lors de l\'ajout de la ruche', e);
-      
+
       String errorMessage = 'Erreur lors de l\'ajout';
       if (e is RucheApiException) {
         errorMessage = e.message;
       } else if (e is ApiException) {
         errorMessage = e.message;
       }
-      
+
       _showErrorSnackBar(errorMessage);
     } finally {
       setState(() => _isSubmitting = false);
@@ -172,7 +171,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
       ),
     );
   }
-  
+
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
@@ -194,8 +193,8 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')}/'
-           '${date.year}';
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
   }
 
   @override
@@ -248,7 +247,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
 
                     // Sélection du rucher
@@ -289,16 +288,19 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                       value: rucher['id'],
                                       child: Text(
                                         rucher['nom'] ?? 'Sans nom',
-                                        style: const TextStyle(fontWeight: FontWeight.w500),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w500),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     );
                                   }),
                                 ],
                               ],
-                              onChanged: _ruchers.isEmpty ? null : (value) {
-                                setState(() => _selectedRucherId = value);
-                              },
+                              onChanged: _ruchers.isEmpty
+                                  ? null
+                                  : (value) {
+                                      setState(() => _selectedRucherId = value);
+                                    },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Veuillez sélectionner un rucher';
@@ -320,7 +322,8 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(Icons.check_circle, color: Colors.green[600], size: 16),
+                                        Icon(Icons.check_circle,
+                                            color: Colors.green[600], size: 16),
                                         const SizedBox(width: 8),
                                         Text(
                                           'Rucher sélectionné',
@@ -335,21 +338,25 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                     const SizedBox(height: 4),
                                     // Afficher les détails du rucher sélectionné
                                     () {
-                                      final rucherSelectionne = _ruchers.firstWhere(
+                                      final rucherSelectionne =
+                                          _ruchers.firstWhere(
                                         (r) => r['id'] == _selectedRucherId,
                                         orElse: () => <String, dynamic>{},
                                       );
                                       return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            rucherSelectionne['nom'] ?? 'Sans nom',
+                                            rucherSelectionne['nom'] ??
+                                                'Sans nom',
                                             style: const TextStyle(
                                               fontWeight: FontWeight.w600,
                                               fontSize: 14,
                                             ),
                                           ),
-                                          if (rucherSelectionne['adresse'] != null)
+                                          if (rucherSelectionne['adresse'] !=
+                                              null)
                                             Text(
                                               rucherSelectionne['adresse'],
                                               style: TextStyle(
@@ -386,7 +393,7 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Nom de la ruche
                             TextFormField(
                               controller: _nomController,
@@ -406,9 +413,9 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                 return null;
                               },
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Position
                             TextFormField(
                               controller: _positionController,
@@ -425,9 +432,9 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                 return null;
                               },
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Type de ruche
                             TextFormField(
                               controller: _typeRucheController,
@@ -438,16 +445,17 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                 prefixIcon: Icon(Icons.category),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Description
                             TextFormField(
                               controller: _descriptionController,
                               maxLines: 3,
                               decoration: const InputDecoration(
                                 labelText: 'Description (optionnel)',
-                                hintText: 'Informations complémentaires sur la ruche...',
+                                hintText:
+                                    'Informations complémentaires sur la ruche...',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.description),
                                 alignLabelWithHint: true,
@@ -475,12 +483,12 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Statut en service
                             SwitchListTile(
                               title: const Text('Ruche en service'),
                               subtitle: Text(
-                                _enService 
+                                _enService
                                     ? 'La ruche est opérationnelle'
                                     : 'La ruche est hors service',
                               ),
@@ -490,12 +498,13 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                               },
                               secondary: Icon(
                                 _enService ? Icons.check_circle : Icons.warning,
-                                color: _enService ? Colors.green : Colors.orange,
+                                color:
+                                    _enService ? Colors.green : Colors.orange,
                               ),
                             ),
-                            
+
                             const Divider(),
-                            
+
                             // Date d'installation
                             ListTile(
                               leading: const Icon(Icons.calendar_today),
@@ -527,9 +536,11 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: _isSubmitting ? null : () {
-                              Navigator.of(context).pop();
-                            },
+                            onPressed: _isSubmitting
+                                ? null
+                                : () {
+                                    Navigator.of(context).pop();
+                                  },
                             child: const Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
                               child: Text('Annuler'),
@@ -553,11 +564,14 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
                                       width: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
                                       ),
                                     )
                                   : const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.add),
                                         SizedBox(width: 8),
@@ -577,4 +591,4 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
             ),
     );
   }
-} 
+}

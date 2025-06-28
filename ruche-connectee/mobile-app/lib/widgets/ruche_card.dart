@@ -28,11 +28,11 @@ class RucheCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-    
+
     // Déterminer la couleur de statut
     Color statusColor = Colors.green;
     String statusText = 'Normal';
-    
+
     if (lidOpen) {
       statusColor = Colors.red;
       statusText = 'Couvercle ouvert';
@@ -43,7 +43,7 @@ class RucheCard extends StatelessWidget {
       statusColor = Colors.orange;
       statusText = 'Humidité anormale';
     }
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -118,9 +118,9 @@ class RucheCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Données des capteurs
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -152,9 +152,9 @@ class RucheCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Pied de carte avec batterie et dernière mise à jour
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -169,9 +169,7 @@ class RucheCard extends StatelessWidget {
                                 : batteryLevel > 20
                                     ? Icons.battery_3_bar
                                     : Icons.battery_1_bar,
-                        color: batteryLevel > 20
-                            ? Colors.green
-                            : Colors.red,
+                        color: batteryLevel > 20 ? Colors.green : Colors.red,
                         size: 16,
                       ),
                       const SizedBox(width: 4),
@@ -199,7 +197,7 @@ class RucheCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildSensorData(
     BuildContext context,
     IconData icon,

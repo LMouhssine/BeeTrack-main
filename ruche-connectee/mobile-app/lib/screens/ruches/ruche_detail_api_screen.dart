@@ -45,7 +45,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   }
 
   Future<void> _loadData() async {
-    LoggerService.info('🐝 Chargement des données pour la ruche ${widget.rucheNom}');
+    LoggerService.info(
+        '🐝 Chargement des données pour la ruche ${widget.rucheNom}');
     await Future.wait([
       _loadRucheDetails(),
       _loadMesures7Jours(),
@@ -62,28 +63,28 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       // Essayer d'abord l'API Spring Boot
       try {
         final ruche = await _apiRucheService.obtenirRucheParId(widget.rucheId);
-        
+
         setState(() {
           _ruche = ruche;
           _isLoadingRuche = false;
         });
         LoggerService.info('✅ Détails de ruche chargés via API');
         return;
-        
       } catch (apiError) {
-        LoggerService.warning('⚠️ API indisponible, utilisation de Firestore...');
-        
+        LoggerService.warning(
+            '⚠️ API indisponible, utilisation de Firestore...');
+
         // Fallback vers Firestore
         try {
           final rucheFirestore = await _loadRucheFromFirestore();
-          
+
           setState(() {
             _ruche = rucheFirestore;
             _isLoadingRuche = false;
           });
-          
+
           LoggerService.info('🔥 Détails de ruche chargés depuis Firestore');
-          
+
           // Afficher un message d'information sur le fallback
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -96,13 +97,15 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           }
           return;
         } catch (firestoreError) {
-          LoggerService.error('❌ Échec du fallback Firestore pour les détails de ruche', firestoreError);
+          LoggerService.error(
+              '❌ Échec du fallback Firestore pour les détails de ruche',
+              firestoreError);
           rethrow;
         }
       }
-      
     } catch (e) {
-      LoggerService.error('Erreur lors du chargement des détails de la ruche', e);
+      LoggerService.error(
+          'Erreur lors du chargement des détails de la ruche', e);
       setState(() {
         _isLoadingRuche = false;
         _errorMessage = 'Erreur lors du chargement de la ruche';
@@ -136,16 +139,17 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
         typeRuche: data['typeRuche'],
         description: data['description'],
         enService: data['enService'] ?? true,
-        dateCreation: (data['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        dateCreation:
+            (data['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
         dateInstallation: (data['dateInstallation'] as Timestamp?)?.toDate(),
         actif: data['actif'] ?? true,
         idApiculteur: data['idApiculteur'] ?? '',
       );
 
       return rucheResponse;
-      
     } catch (e) {
-      LoggerService.error('Erreur lors de la récupération de la ruche depuis Firestore', e);
+      LoggerService.error(
+          'Erreur lors de la récupération de la ruche depuis Firestore', e);
       throw Exception('Impossible de récupérer la ruche depuis Firestore: $e');
     }
   }
@@ -153,21 +157,21 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   /// Récupère le nom du rucher depuis Firestore
   Future<String?> _getRucherNomFromFirestore(String? rucherId) async {
     if (rucherId == null) return null;
-    
+
     try {
       final rucherDoc = await getIt<FirebaseService>()
           .firestore
           .collection('ruchers')
           .doc(rucherId)
           .get();
-      
+
       if (rucherDoc.exists) {
         return rucherDoc.data()?['nom'] as String?;
       }
     } catch (e) {
       LoggerService.warning('Impossible de récupérer le nom du rucher: $e');
     }
-    
+
     return null;
   }
 
@@ -180,30 +184,32 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       // Essayer d'abord l'API Spring Boot
       try {
         LoggerService.info('🌐 Récupération des mesures via API...');
-        final mesures = await _apiRucheService.obtenirMesures7DerniersJours(widget.rucheId);
-        
+        final mesures =
+            await _apiRucheService.obtenirMesures7DerniersJours(widget.rucheId);
+
         setState(() {
           _mesures = mesures;
           _isLoadingMesures = false;
         });
-        
+
         LoggerService.info('✅ ${mesures.length} mesures récupérées via API');
         return;
-        
       } catch (apiError) {
-        LoggerService.warning('⚠️ API indisponible, utilisation de Firestore...');
-        
+        LoggerService.warning(
+            '⚠️ API indisponible, utilisation de Firestore...');
+
         // Fallback vers Firestore
         try {
           final mesuresFirestore = await _loadMesuresFromFirestore();
-          
+
           setState(() {
             _mesures = mesuresFirestore;
             _isLoadingMesures = false;
           });
-          
-          LoggerService.info('🔥 ${mesuresFirestore.length} mesures récupérées depuis Firestore');
-          
+
+          LoggerService.info(
+              '🔥 ${mesuresFirestore.length} mesures récupérées depuis Firestore');
+
           // Afficher un message d'information sur le fallback
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -220,7 +226,6 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           rethrow;
         }
       }
-      
     } catch (e) {
       LoggerService.error('Erreur lors du chargement des mesures', e);
       setState(() {
@@ -248,8 +253,9 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       for (final doc in querySnapshot.docs) {
         try {
           final data = doc.data();
-          final timestamp = (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-          
+          final timestamp =
+              (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
+
           // Filtrer côté client pour les 7 derniers jours
           if (timestamp.isAfter(dateLimite)) {
             mesures.add(DonneesCapteur(
@@ -272,17 +278,18 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
 
       // Trier par timestamp croissant
       mesures.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-      
+
       // Si aucune mesure, suggérer des solutions
       if (mesures.isEmpty) {
-        LoggerService.warning('⚠️ Aucune mesure trouvée. Utilisez le bouton "Générer des données de test"');
+        LoggerService.warning(
+            '⚠️ Aucune mesure trouvée. Utilisez le bouton "Générer des données de test"');
       }
-      
+
       return mesures;
-      
     } catch (e) {
       LoggerService.error('Erreur lors de la récupération depuis Firestore', e);
-      throw Exception('Impossible de récupérer les mesures depuis Firestore: $e');
+      throw Exception(
+          'Impossible de récupérer les mesures depuis Firestore: $e');
     }
   }
 
@@ -299,9 +306,9 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
 
   String _formatDateTime(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')} '
-           '${date.hour.toString().padLeft(2, '0')}:'
-           '${date.minute.toString().padLeft(2, '0')}';
+        '${date.month.toString().padLeft(2, '0')} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildRucheInfoCard() {
@@ -317,8 +324,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             Text(
               'Informations générales',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             _buildInfoRow('Nom', _ruche!.nom),
@@ -330,7 +337,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
               const Divider(),
               _buildInfoRow('Type de ruche', _ruche!.typeRuche!),
             ],
-            if (_ruche!.description != null && _ruche!.description!.isNotEmpty) ...[
+            if (_ruche!.description != null &&
+                _ruche!.description!.isNotEmpty) ...[
               const Divider(),
               _buildInfoRow('Description', _ruche!.description!),
             ],
@@ -387,7 +395,9 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _ruche!.enService ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
+              color: _ruche!.enService
+                  ? Colors.green.withValues(alpha: 0.2)
+                  : Colors.orange.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -426,7 +436,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.analytics_outlined, size: 64, color: Colors.grey),
+              const Icon(Icons.analytics_outlined,
+                  size: 64, color: Colors.grey),
               const SizedBox(height: 16),
               const Text(
                 'Aucune mesure disponible',
@@ -446,7 +457,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
               ),
               const SizedBox(height: 8),
@@ -464,7 +476,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
         ),
       );
     }
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -484,16 +496,30 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   Widget _buildMesuresStatsCard() {
     if (_mesures.isEmpty) return const SizedBox.shrink();
 
-    final tempMesures = _mesures.where((m) => m.temperature != null).map((m) => m.temperature!);
-    final humidityMesures = _mesures.where((m) => m.humidity != null).map((m) => m.humidity!);
+    final tempMesures =
+        _mesures.where((m) => m.temperature != null).map((m) => m.temperature!);
+    final humidityMesures =
+        _mesures.where((m) => m.humidity != null).map((m) => m.humidity!);
 
-    final tempMin = tempMesures.isNotEmpty ? tempMesures.reduce((a, b) => a < b ? a : b) : 0.0;
-    final tempMax = tempMesures.isNotEmpty ? tempMesures.reduce((a, b) => a > b ? a : b) : 0.0;
-    final tempMoy = tempMesures.isNotEmpty ? tempMesures.reduce((a, b) => a + b) / tempMesures.length : 0.0;
+    final tempMin = tempMesures.isNotEmpty
+        ? tempMesures.reduce((a, b) => a < b ? a : b)
+        : 0.0;
+    final tempMax = tempMesures.isNotEmpty
+        ? tempMesures.reduce((a, b) => a > b ? a : b)
+        : 0.0;
+    final tempMoy = tempMesures.isNotEmpty
+        ? tempMesures.reduce((a, b) => a + b) / tempMesures.length
+        : 0.0;
 
-    final humMin = humidityMesures.isNotEmpty ? humidityMesures.reduce((a, b) => a < b ? a : b) : 0.0;
-    final humMax = humidityMesures.isNotEmpty ? humidityMesures.reduce((a, b) => a > b ? a : b) : 0.0;
-    final humMoy = humidityMesures.isNotEmpty ? humidityMesures.reduce((a, b) => a + b) / humidityMesures.length : 0.0;
+    final humMin = humidityMesures.isNotEmpty
+        ? humidityMesures.reduce((a, b) => a < b ? a : b)
+        : 0.0;
+    final humMax = humidityMesures.isNotEmpty
+        ? humidityMesures.reduce((a, b) => a > b ? a : b)
+        : 0.0;
+    final humMoy = humidityMesures.isNotEmpty
+        ? humidityMesures.reduce((a, b) => a + b) / humidityMesures.length
+        : 0.0;
 
     return Card(
       child: Padding(
@@ -504,18 +530,20 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             Text(
               'Statistiques des 7 derniers jours',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: _buildStatColumn('Température', tempMin, tempMax, tempMoy, '°C', Colors.orange),
+                  child: _buildStatColumn('Température', tempMin, tempMax,
+                      tempMoy, '°C', Colors.orange),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildStatColumn('Humidité', humMin, humMax, humMoy, '%', Colors.blue),
+                  child: _buildStatColumn(
+                      'Humidité', humMin, humMax, humMoy, '%', Colors.blue),
                 ),
               ],
             ),
@@ -525,7 +553,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
     );
   }
 
-  Widget _buildStatColumn(String title, double min, double max, double moy, String unit, Color color) {
+  Widget _buildStatColumn(String title, double min, double max, double moy,
+      String unit, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -588,8 +617,10 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: true,
-                      horizontalInterval: 2, // Espacement des lignes horizontales
-                      verticalInterval: 86400000 * 1000, // 1 jour en millisecondes
+                      horizontalInterval:
+                          2, // Espacement des lignes horizontales
+                      verticalInterval:
+                          86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
                           color: Colors.grey.withValues(alpha: 0.2),
@@ -608,13 +639,17 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 35, // Plus d'espace pour les labels
-                          interval: 86400000 * 1000 * 1.5, // Afficher un label tous les 1.5 jours
+                          interval: 86400000 *
+                              1000 *
+                              1.5, // Afficher un label tous les 1.5 jours
                           getTitlesWidget: (value, meta) {
-                            final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                            final date = DateTime.fromMillisecondsSinceEpoch(
+                                value.toInt());
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Transform.rotate(
-                                angle: -0.5, // Légère rotation pour éviter le chevauchement
+                                angle:
+                                    -0.5, // Légère rotation pour éviter le chevauchement
                                 child: Text(
                                   '${date.day}/${date.month}',
                                   style: const TextStyle(
@@ -646,12 +681,15 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           },
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                      border:
+                          Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -666,11 +704,17 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         ),
                       ),
                     ],
-                    minY: tempData.isNotEmpty 
-                        ? tempData.map((e) => e.y).reduce((a, b) => a < b ? a : b) - 2
+                    minY: tempData.isNotEmpty
+                        ? tempData
+                                .map((e) => e.y)
+                                .reduce((a, b) => a < b ? a : b) -
+                            2
                         : 0,
-                    maxY: tempData.isNotEmpty 
-                        ? tempData.map((e) => e.y).reduce((a, b) => a > b ? a : b) + 2
+                    maxY: tempData.isNotEmpty
+                        ? tempData
+                                .map((e) => e.y)
+                                .reduce((a, b) => a > b ? a : b) +
+                            2
                         : 30,
                   ),
                 ),
@@ -713,8 +757,10 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: true,
-                      horizontalInterval: 10, // Espacement des lignes horizontales (10% pour humidité)
-                      verticalInterval: 86400000 * 1000, // 1 jour en millisecondes
+                      horizontalInterval:
+                          10, // Espacement des lignes horizontales (10% pour humidité)
+                      verticalInterval:
+                          86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
                           color: Colors.grey.withValues(alpha: 0.2),
@@ -733,13 +779,17 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 35, // Plus d'espace pour les labels
-                          interval: 86400000 * 1000 * 1.5, // Afficher un label tous les 1.5 jours
+                          interval: 86400000 *
+                              1000 *
+                              1.5, // Afficher un label tous les 1.5 jours
                           getTitlesWidget: (value, meta) {
-                            final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                            final date = DateTime.fromMillisecondsSinceEpoch(
+                                value.toInt());
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Transform.rotate(
-                                angle: -0.5, // Légère rotation pour éviter le chevauchement
+                                angle:
+                                    -0.5, // Légère rotation pour éviter le chevauchement
                                 child: Text(
                                   '${date.day}/${date.month}',
                                   style: const TextStyle(
@@ -771,12 +821,15 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           },
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                      border:
+                          Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -791,11 +844,19 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         ),
                       ),
                     ],
-                    minY: humidityData.isNotEmpty 
-                        ? (humidityData.map((e) => e.y).reduce((a, b) => a < b ? a : b) - 5).clamp(0, 100)
+                    minY: humidityData.isNotEmpty
+                        ? (humidityData
+                                    .map((e) => e.y)
+                                    .reduce((a, b) => a < b ? a : b) -
+                                5)
+                            .clamp(0, 100)
                         : 0,
-                    maxY: humidityData.isNotEmpty 
-                        ? (humidityData.map((e) => e.y).reduce((a, b) => a > b ? a : b) + 5).clamp(0, 100)
+                    maxY: humidityData.isNotEmpty
+                        ? (humidityData
+                                    .map((e) => e.y)
+                                    .reduce((a, b) => a > b ? a : b) +
+                                5)
+                            .clamp(0, 100)
                         : 100,
                   ),
                 ),
@@ -861,7 +922,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
               // Température
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -869,10 +931,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.thermostat, size: 18, color: Colors.orange[700]),
+                      Icon(Icons.thermostat,
+                          size: 18, color: Colors.orange[700]),
                       const SizedBox(width: 6),
                       Text(
-                        mesure.temperature != null ? '${mesure.temperature!.toStringAsFixed(1)}°C' : '--',
+                        mesure.temperature != null
+                            ? '${mesure.temperature!.toStringAsFixed(1)}°C'
+                            : '--',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -887,7 +952,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
               // Humidité
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -898,7 +964,9 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                       Icon(Icons.water_drop, size: 18, color: Colors.blue[700]),
                       const SizedBox(width: 6),
                       Text(
-                        mesure.humidity != null ? '${mesure.humidity!.toStringAsFixed(1)}%' : '--',
+                        mesure.humidity != null
+                            ? '${mesure.humidity!.toStringAsFixed(1)}%'
+                            : '--',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -913,7 +981,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 const SizedBox(width: 8),
                 // Batterie
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -921,7 +990,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.battery_full, size: 16, color: Colors.green[700]),
+                      Icon(Icons.battery_full,
+                          size: 16, color: Colors.green[700]),
                       const SizedBox(width: 4),
                       Text(
                         '${mesure.batterie}%',
@@ -990,23 +1060,27 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
 
       final firestore = getIt<FirebaseService>().firestore;
       final batch = firestore.batch();
-      
+
       // Générer 100 mesures sur les 7 derniers jours
       final now = DateTime.now();
       for (int i = 0; i < 100; i++) {
         // Répartir les mesures sur 7 jours
         final hoursAgo = (i / 100 * 7 * 24).round();
         final timestamp = now.subtract(Duration(hours: hoursAgo));
-        
+
         // Générer des valeurs réalistes avec variation
         const baseTemp = 25.0;
         final tempVariation = (i % 20 - 10) * 0.5; // Variation de -5 à +5°C
-        final temperature = baseTemp + tempVariation + (DateTime.now().millisecond % 100) / 100;
-        
+        final temperature =
+            baseTemp + tempVariation + (DateTime.now().millisecond % 100) / 100;
+
         const baseHumidity = 60.0;
-        final humidityVariation = (i % 30 - 15) * 0.8; // Variation de -12 à +12%
-        final humidity = baseHumidity + humidityVariation + (DateTime.now().microsecond % 100) / 100;
-        
+        final humidityVariation =
+            (i % 30 - 15) * 0.8; // Variation de -12 à +12%
+        final humidity = baseHumidity +
+            humidityVariation +
+            (DateTime.now().microsecond % 100) / 100;
+
         final docRef = firestore.collection('donneesCapteurs').doc();
         batch.set(docRef, {
           'rucheId': widget.rucheId,
@@ -1019,18 +1093,18 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           'erreur': null,
         });
       }
-      
+
       // Exécuter le batch
       await batch.commit();
-      
+
       LoggerService.info('✅ Données de test générées avec succès');
-      
+
       // Fermer le dialog de loading
       if (mounted) Navigator.of(context).pop();
-      
+
       // Recharger les mesures
       await _loadMesures7Jours();
-      
+
       // Afficher un message de succès
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1041,13 +1115,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
           ),
         );
       }
-      
     } catch (e) {
-      LoggerService.error('Erreur lors de la génération des données de test', e);
-      
+      LoggerService.error(
+          'Erreur lors de la génération des données de test', e);
+
       // Fermer le dialog de loading si ouvert
       if (mounted) Navigator.of(context).pop();
-      
+
       // Afficher l'erreur
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1112,4 +1186,4 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                 ),
     );
   }
-} 
+}

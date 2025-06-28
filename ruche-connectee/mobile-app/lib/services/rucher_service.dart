@@ -5,21 +5,21 @@ import 'package:ruche_connectee/services/logger_service.dart';
 
 class RucherService {
   final FirebaseService _firebaseService;
-  
+
   RucherService(this._firebaseService);
-  
+
   // Collection Firestore pour les ruchers
   static const String _collectionRuchers = 'ruchers';
-  
+
   /// Ajoute un nouveau rucher dans Firebase Firestore
-  /// 
+  ///
   /// Paramètres :
   /// - [nom] : nom du rucher
   /// - [adresse] : adresse texte du rucher
   /// - [description] : description du rucher
-  /// 
+  ///
   /// Retourne l'ID du document créé
-  /// 
+  ///
   /// Lève une exception si l'utilisateur n'est pas connecté
   Future<String> ajouterRucher({
     required String nom,
@@ -28,16 +28,18 @@ class RucherService {
   }) async {
     try {
       LoggerService.info('Tentative d\'ajout d\'un nouveau rucher: $nom');
-      
+
       // Vérifier que l'utilisateur est connecté
       final User? currentUser = _firebaseService.auth.currentUser;
       if (currentUser == null) {
-        LoggerService.error('Tentative d\'ajout de rucher sans utilisateur connecté');
-        throw Exception('Utilisateur non connecté. Veuillez vous connecter pour ajouter un rucher.');
+        LoggerService.error(
+            'Tentative d\'ajout de rucher sans utilisateur connecté');
+        throw Exception(
+            'Utilisateur non connecté. Veuillez vous connecter pour ajouter un rucher.');
       }
-      
+
       LoggerService.debug('Utilisateur connecté: ${currentUser.uid}');
-      
+
       // Préparer les données du rucher
       final Map<String, dynamic> rucherData = {
         'idApiculteur': currentUser.uid,
@@ -49,62 +51,66 @@ class RucherService {
         'actif': true,
         'nombreRuches': 0,
       };
-      
+
       LoggerService.debug('Données du rucher à créer: $rucherData');
-      
+
       // Ajouter le document dans Firestore
       final DocumentReference docRef = await _firebaseService.firestore
           .collection(_collectionRuchers)
           .add(rucherData);
-      
+
       LoggerService.info('Rucher créé avec succès. ID: ${docRef.id}');
-      
+
       return docRef.id;
-      
     } catch (e) {
       LoggerService.error('Erreur lors de l\'ajout du rucher', e);
-      
+
       // Gestion spécifique des erreurs Firebase
       if (e is FirebaseException) {
         switch (e.code) {
           case 'permission-denied':
             throw Exception('Permissions insuffisantes pour créer un rucher');
           case 'unavailable':
-            throw Exception('Service temporairement indisponible. Veuillez réessayer.');
+            throw Exception(
+                'Service temporairement indisponible. Veuillez réessayer.');
           default:
             throw Exception('Erreur Firebase: ${e.message}');
         }
       }
-      
+
       // Re-lancer l'exception si elle est déjà formatée
       if (e is Exception) {
         rethrow;
       }
-      
+
       // Erreur générique
-      throw Exception('Une erreur inattendue s\'est produite lors de l\'ajout du rucher: $e');
+      throw Exception(
+          'Une erreur inattendue s\'est produite lors de l\'ajout du rucher: $e');
     }
   }
-  
+
   /// Récupère tous les ruchers de l'utilisateur connecté (version optimisée avec index Firestore)
-  /// 
+  ///
   /// Cette méthode utilise l'index composite Firestore pour une performance optimale :
   /// - idApiculteur (Ascending)
-  /// - actif (Ascending) 
+  /// - actif (Ascending)
   /// - dateCreation (Descending)
-  /// 
+  ///
   /// Retourne une liste triée par date de création (plus récent en premier)
   Future<List<Map<String, dynamic>>> obtenirRuchersUtilisateurOptimise() async {
     try {
       // Vérifier que l'utilisateur est connecté
       final User? currentUser = _firebaseService.auth.currentUser;
       if (currentUser == null) {
-        LoggerService.error('Tentative de récupération des ruchers sans utilisateur connecté');
-        throw Exception('Utilisateur non connecté. Veuillez vous connecter pour accéder à vos ruchers.');
+        LoggerService.error(
+            'Tentative de récupération des ruchers sans utilisateur connecté');
+        throw Exception(
+            'Utilisateur non connecté. Veuillez vous connecter pour accéder à vos ruchers.');
       }
-      
-      LoggerService.info('🐝 Récupération optimisée des ruchers pour l\'utilisateur: ${currentUser.uid}');
-      
+
+      LoggerService.info(
+          '🐝 Récupération optimisée des ruchers pour l\'utilisateur: ${currentUser.uid}');
+
       // Requête optimisée utilisant l'index composite Firestore
       final QuerySnapshot querySnapshot = await _firebaseService.firestore
           .collection(_collectionRuchers)
@@ -112,44 +118,46 @@ class RucherService {
           .where('actif', isEqualTo: true)
           .orderBy('dateCreation', descending: true) // Plus récent en premier
           .get();
-      
-      final List<Map<String, dynamic>> ruchers = querySnapshot.docs
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            data['id'] = doc.id;
-            return data;
-          })
-          .toList();
-      
-      LoggerService.info('🐝 ${ruchers.length} rucher(s) récupéré(s) avec succès (version optimisée)');
-      
+
+      final List<Map<String, dynamic>> ruchers = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
+      LoggerService.info(
+          '🐝 ${ruchers.length} rucher(s) récupéré(s) avec succès (version optimisée)');
+
       return ruchers;
-      
     } catch (e) {
-      LoggerService.error('Erreur lors de la récupération optimisée des ruchers', e);
-      
+      LoggerService.error(
+          'Erreur lors de la récupération optimisée des ruchers', e);
+
       // Gestion spécifique des erreurs Firestore
       if (e is FirebaseException) {
         switch (e.code) {
           case 'failed-precondition':
-            LoggerService.warning('Index Firestore manquant, utilisation de la méthode de fallback');
+            LoggerService.warning(
+                'Index Firestore manquant, utilisation de la méthode de fallback');
             // Fallback vers la méthode avec filtrage côté client
             return await obtenirRuchersUtilisateur();
           case 'permission-denied':
-            throw Exception('Permissions insuffisantes pour accéder aux ruchers');
+            throw Exception(
+                'Permissions insuffisantes pour accéder aux ruchers');
           case 'unavailable':
-            throw Exception('Service Firestore temporairement indisponible. Veuillez réessayer.');
+            throw Exception(
+                'Service Firestore temporairement indisponible. Veuillez réessayer.');
           default:
             throw Exception('Erreur Firestore: ${e.message}');
         }
       }
-      
+
       rethrow;
     }
   }
 
   /// Récupère tous les ruchers de l'utilisateur connecté (version avec filtrage côté client)
-  /// 
+  ///
   /// Cette méthode est utilisée comme fallback si l'index composite n'est pas disponible
   Future<List<Map<String, dynamic>>> obtenirRuchersUtilisateur() async {
     try {
@@ -158,26 +166,25 @@ class RucherService {
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
-      
-      LoggerService.info('Récupération des ruchers pour l\'utilisateur: ${currentUser.uid}');
-      
+
+      LoggerService.info(
+          'Récupération des ruchers pour l\'utilisateur: ${currentUser.uid}');
+
       final QuerySnapshot querySnapshot = await _firebaseService.firestore
           .collection(_collectionRuchers)
           .where('idApiculteur', isEqualTo: currentUser.uid)
           .get();
-      
-      final List<Map<String, dynamic>> ruchers = querySnapshot.docs
-          .where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['actif'] == true; // Filtrer côté client
-          })
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            data['id'] = doc.id;
-            return data;
-          })
-          .toList();
-      
+
+      final List<Map<String, dynamic>> ruchers =
+          querySnapshot.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['actif'] == true; // Filtrer côté client
+      }).map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
       // Trier côté client par date de création
       ruchers.sort((a, b) {
         final dateA = a['dateCreation'] as Timestamp?;
@@ -187,17 +194,16 @@ class RucherService {
         if (dateB == null) return -1;
         return dateB.compareTo(dateA); // Ordre décroissant
       });
-      
+
       LoggerService.info('${ruchers.length} rucher(s) trouvé(s)');
-      
+
       return ruchers;
-      
     } catch (e) {
       LoggerService.error('Erreur lors de la récupération des ruchers', e);
       rethrow;
     }
   }
-  
+
   /// Récupère un rucher spécifique par son ID
   Future<Map<String, dynamic>?> obtenirRucherParId(String rucherId) async {
     try {
@@ -206,39 +212,39 @@ class RucherService {
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
-      
+
       LoggerService.info('Récupération du rucher: $rucherId');
-      
+
       final DocumentSnapshot docSnapshot = await _firebaseService.firestore
           .collection(_collectionRuchers)
           .doc(rucherId)
           .get();
-      
+
       if (!docSnapshot.exists) {
         LoggerService.warning('Rucher non trouvé: $rucherId');
         return null;
       }
-      
+
       final data = docSnapshot.data() as Map<String, dynamic>;
-      
+
       // Vérifier que le rucher appartient à l'utilisateur connecté
       if (data['idApiculteur'] != currentUser.uid) {
-        LoggerService.warning('Tentative d\'accès à un rucher non autorisé: $rucherId');
+        LoggerService.warning(
+            'Tentative d\'accès à un rucher non autorisé: $rucherId');
         throw Exception('Accès non autorisé à ce rucher');
       }
-      
+
       data['id'] = docSnapshot.id;
-      
+
       LoggerService.info('Rucher récupéré avec succès: $rucherId');
-      
+
       return data;
-      
     } catch (e) {
       LoggerService.error('Erreur lors de la récupération du rucher', e);
       rethrow;
     }
   }
-  
+
   /// Met à jour un rucher existant
   Future<void> mettreAJourRucher({
     required String rucherId,
@@ -252,15 +258,15 @@ class RucherService {
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
-      
+
       LoggerService.info('Mise à jour du rucher: $rucherId');
-      
+
       // Vérifier que le rucher existe et appartient à l'utilisateur
       final rucherExistant = await obtenirRucherParId(rucherId);
       if (rucherExistant == null) {
         throw Exception('Rucher non trouvé');
       }
-      
+
       // Préparer les données de mise à jour
       final Map<String, dynamic> updateData = {
         'nom': nom.trim(),
@@ -268,21 +274,20 @@ class RucherService {
         'description': description.trim(),
         'dateModification': FieldValue.serverTimestamp(),
       };
-      
+
       // Mettre à jour le document
       await _firebaseService.firestore
           .collection(_collectionRuchers)
           .doc(rucherId)
           .update(updateData);
-      
+
       LoggerService.info('Rucher mis à jour avec succès: $rucherId');
-      
     } catch (e) {
       LoggerService.error('Erreur lors de la mise à jour du rucher', e);
       rethrow;
     }
   }
-  
+
   /// Supprime un rucher (suppression logique)
   Future<void> supprimerRucher(String rucherId) async {
     try {
@@ -291,26 +296,27 @@ class RucherService {
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
-      
+
       LoggerService.info('Suppression du rucher: $rucherId');
-      
+
       // Vérifier que le rucher existe et appartient à l'utilisateur
       final rucherExistant = await obtenirRucherParId(rucherId);
       if (rucherExistant == null) {
         throw Exception('Rucher non trouvé');
       }
-      
+
       // Vérifier qu'il n'y a pas de ruches dans ce rucher
       final QuerySnapshot ruchesSnapshot = await _firebaseService.firestore
           .collection('ruches')
           .where('rucher_id', isEqualTo: rucherId)
           .where('actif', isEqualTo: true)
           .get();
-      
+
       if (ruchesSnapshot.docs.isNotEmpty) {
-        throw Exception('Impossible de supprimer un rucher contenant des ruches actives');
+        throw Exception(
+            'Impossible de supprimer un rucher contenant des ruches actives');
       }
-      
+
       // Suppression logique (marquer comme inactif)
       await _firebaseService.firestore
           .collection(_collectionRuchers)
@@ -319,27 +325,29 @@ class RucherService {
         'actif': false,
         'dateSuppression': FieldValue.serverTimestamp(),
       });
-      
+
       LoggerService.info('Rucher supprimé avec succès: $rucherId');
-      
     } catch (e) {
       LoggerService.error('Erreur lors de la suppression du rucher', e);
       rethrow;
     }
   }
-  
+
   /// Stream optimisé pour écouter les changements des ruchers de l'utilisateur connecté
-  /// 
+  ///
   /// Utilise l'index composite Firestore pour une performance optimale
   Stream<List<Map<String, dynamic>>> ecouterRuchersUtilisateurOptimise() {
     final User? currentUser = _firebaseService.auth.currentUser;
     if (currentUser == null) {
-      LoggerService.error('Tentative d\'écoute des ruchers sans utilisateur connecté');
-      return Stream.error(Exception('Utilisateur non connecté. Veuillez vous connecter pour écouter vos ruchers.'));
+      LoggerService.error(
+          'Tentative d\'écoute des ruchers sans utilisateur connecté');
+      return Stream.error(Exception(
+          'Utilisateur non connecté. Veuillez vous connecter pour écouter vos ruchers.'));
     }
-    
-    LoggerService.info('🐝 Démarrage de l\'écoute temps réel optimisée pour l\'utilisateur: ${currentUser.uid}');
-    
+
+    LoggerService.info(
+        '🐝 Démarrage de l\'écoute temps réel optimisée pour l\'utilisateur: ${currentUser.uid}');
+
     return _firebaseService.firestore
         .collection(_collectionRuchers)
         .where('idApiculteur', isEqualTo: currentUser.uid)
@@ -347,56 +355,54 @@ class RucherService {
         .orderBy('dateCreation', descending: true)
         .snapshots()
         .map((querySnapshot) {
-      final ruchers = querySnapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return data;
-          })
-          .toList();
-      
-      LoggerService.debug('🐝 Mise à jour temps réel: ${ruchers.length} rucher(s)');
-      
+      final ruchers = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
+      LoggerService.debug(
+          '🐝 Mise à jour temps réel: ${ruchers.length} rucher(s)');
+
       return ruchers;
     }).handleError((error) {
-      LoggerService.error('Erreur dans l\'écoute temps réel des ruchers', error);
-      
+      LoggerService.error(
+          'Erreur dans l\'écoute temps réel des ruchers', error);
+
       // En cas d'erreur d'index, fallback vers la méthode classique
       if (error is FirebaseException && error.code == 'failed-precondition') {
-        LoggerService.warning('Index manquant, fallback vers l\'écoute classique');
+        LoggerService.warning(
+            'Index manquant, fallback vers l\'écoute classique');
         return ecouterRuchersUtilisateur();
       }
-      
+
       throw error;
     });
   }
 
   /// Stream pour écouter les changements des ruchers de l'utilisateur connecté (version fallback)
-  /// 
+  ///
   /// Cette méthode est utilisée comme fallback si l'index composite n'est pas disponible
   Stream<List<Map<String, dynamic>>> ecouterRuchersUtilisateur() {
     final User? currentUser = _firebaseService.auth.currentUser;
     if (currentUser == null) {
       return Stream.error(Exception('Utilisateur non connecté'));
     }
-    
+
     return _firebaseService.firestore
         .collection(_collectionRuchers)
         .where('idApiculteur', isEqualTo: currentUser.uid)
         .snapshots()
         .map((querySnapshot) {
-      final ruchers = querySnapshot.docs
-          .where((doc) {
-            final data = doc.data();
-            return data['actif'] == true; // Filtrer côté client
-          })
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return data;
-          })
-          .toList();
-      
+      final ruchers = querySnapshot.docs.where((doc) {
+        final data = doc.data();
+        return data['actif'] == true; // Filtrer côté client
+      }).map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
       // Trier côté client par date de création
       ruchers.sort((a, b) {
         final dateA = a['dateCreation'] as Timestamp?;
@@ -406,8 +412,8 @@ class RucherService {
         if (dateB == null) return -1;
         return dateB.compareTo(dateA); // Ordre décroissant
       });
-      
+
       return ruchers;
     });
   }
-} 
+}

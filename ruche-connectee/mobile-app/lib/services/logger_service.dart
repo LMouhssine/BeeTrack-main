@@ -40,4 +40,4 @@ class LoggerService {
   static void fatal(String message) {
     _logger.f(message);
   }
-} 
+}

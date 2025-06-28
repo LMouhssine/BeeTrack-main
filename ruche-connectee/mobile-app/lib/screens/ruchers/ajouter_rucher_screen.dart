@@ -16,7 +16,7 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
   final _nomController = TextEditingController();
   final _adresseController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   bool _isLoading = false;
   late final RucherService _rucherService;
 
@@ -67,7 +67,6 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
 
       // Retourner à l'écran précédent
       Navigator.of(context).pop(true);
-
     } catch (e) {
       if (!mounted) return;
 
@@ -123,23 +122,24 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Nouveau rucher',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.amber.shade700,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.amber.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Créez un nouvel emplacement pour vos ruches',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                            color: Colors.grey.shade600,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
 
               // Champ nom du rucher
@@ -210,7 +210,8 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Description *',
-                  hintText: 'Décrivez votre rucher (environnement, particularités...)',
+                  hintText:
+                      'Décrivez votre rucher (environnement, particularités...)',
                   prefixIcon: const Icon(Icons.description),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -274,9 +275,11 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isLoading ? null : () {
-                        Navigator.of(context).pop();
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              Navigator.of(context).pop();
+                            },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -305,7 +308,8 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.black),
                               ),
                             )
                           : const Text(
@@ -322,4 +326,4 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
       ),
     );
   }
-} 
+}

@@ -34,7 +34,7 @@ class _RucheListScreenState extends State<RucheListScreen> {
       });
 
       final ruches = await _apiRucheService.obtenirRuchesUtilisateur();
-      
+
       setState(() {
         _ruches = ruches;
         _isLoading = false;
@@ -124,16 +124,18 @@ class _RucheListScreenState extends State<RucheListScreen> {
                             id: ruche.id,
                             name: ruche.nom,
                             rucherName: ruche.rucherNom ?? 'Rucher inconnu',
-                            temperature: 0.0, // Les données de capteurs ne sont pas dans l'API de base
+                            temperature:
+                                0.0, // Les données de capteurs ne sont pas dans l'API de base
                             humidity: 0.0,
                             lidOpen: false,
                             lastUpdate: ruche.dateCreation,
                             batteryLevel: 100,
-                            onTap: () => context.go('/ruches/${ruche.id}?nom=${Uri.encodeComponent(ruche.nom)}'),
+                            onTap: () => context.go(
+                                '/ruches/${ruche.id}?nom=${Uri.encodeComponent(ruche.nom)}'),
                           );
                         },
                       ),
                     ),
     );
   }
-} 
+}

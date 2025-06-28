@@ -19,26 +19,27 @@ class RucherDetailScreen extends StatefulWidget {
   State<RucherDetailScreen> createState() => _RucherDetailScreenState();
 }
 
-class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTickerProviderStateMixin {
+class _RucherDetailScreenState extends State<RucherDetailScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _locationController = TextEditingController();
-  
+
   // Controllers pour l'ajout de ruches
   final _rucheNomController = TextEditingController();
   final _ruchePositionController = TextEditingController();
   bool _rucheEnService = true;
   DateTime _dateInstallation = DateTime.now();
-  
+
   bool _isLoading = false;
   bool _isAddingRuche = false;
   Map<String, dynamic>? _rucherData;
   List<Map<String, dynamic>> _ruches = [];
-  
+
   // Services
   late final RucheService _rucheService;
   StreamSubscription<List<Map<String, dynamic>>>? _ruchesSubscription;
-  
+
   // Tab controller
   late TabController _tabController;
 
@@ -61,33 +62,32 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
     _tabController.dispose();
     super.dispose();
   }
-  
+
   void _initializeServices() {
     final firebaseService = GetIt.I<FirebaseService>();
     _rucheService = RucheService(firebaseService);
   }
-  
+
   void _startListeningToRuches() {
-    _ruchesSubscription = _rucheService
-        .ecouterRuchesParRucher(widget.rucherId)
-        .listen(
-          (ruches) {
-            if (mounted) {
-              setState(() {
-                _ruches = ruches;
-              });
-            }
-          },
-          onError: (error) {
-            LoggerService.error('Erreur d\'écoute temps réel des ruches', error);
-          },
-        );
+    _ruchesSubscription =
+        _rucheService.ecouterRuchesParRucher(widget.rucherId).listen(
+      (ruches) {
+        if (mounted) {
+          setState(() {
+            _ruches = ruches;
+          });
+        }
+      },
+      onError: (error) {
+        LoggerService.error('Erreur d\'écoute temps réel des ruches', error);
+      },
+    );
   }
 
   Future<void> _loadRucherData() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final docSnapshot = await GetIt.I<FirebaseService>()
           .firestore
           .collection('ruchers')
@@ -100,7 +100,8 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
         setState(() {
           _rucherData = docSnapshot.data();
           _nameController.text = _rucherData?['nom'] ?? '';
-          _locationController.text = _rucherData?['adresse'] ?? _rucherData?['localisation'] ?? '';
+          _locationController.text =
+              _rucherData?['adresse'] ?? _rucherData?['localisation'] ?? '';
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -169,7 +170,8 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       if (_ruches.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Impossible de supprimer un rucher contenant des ruches'),
+            content:
+                Text('Impossible de supprimer un rucher contenant des ruches'),
             backgroundColor: Colors.red,
           ),
         );
@@ -209,13 +211,13 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       }
     }
   }
-  
+
   // Méthodes pour la gestion des ruches
   Future<void> _ajouterRuche() async {
     if (!_validateRucheForm()) return;
-    
+
     setState(() => _isAddingRuche = true);
-    
+
     try {
       await _rucheService.ajouterRuche(
         idRucher: widget.rucherId,
@@ -224,27 +226,26 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
         enService: _rucheEnService,
         dateInstallation: _dateInstallation,
       );
-      
+
       _showSuccessSnackBar('Ruche créée avec succès');
       _clearRucheForm();
       if (!mounted) return;
       Navigator.of(context).pop(); // Fermer le dialog
-      
     } catch (e) {
       _showErrorSnackBar('Erreur lors de l\'ajout: $e');
     } finally {
       setState(() => _isAddingRuche = false);
     }
   }
-  
+
   Future<void> _supprimerRuche(String rucheId, String nomRuche) async {
     final bool? confirmed = await _showConfirmationDialog(
       'Supprimer la ruche',
       'Êtes-vous sûr de vouloir supprimer la ruche "$nomRuche" ?',
     );
-    
+
     if (confirmed != true) return;
-    
+
     try {
       await _rucheService.supprimerRuche(rucheId);
       _showSuccessSnackBar('Ruche supprimée avec succès');
@@ -252,28 +253,28 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       _showErrorSnackBar('Erreur lors de la suppression: $e');
     }
   }
-  
+
   bool _validateRucheForm() {
     if (_rucheNomController.text.trim().isEmpty) {
       _showErrorSnackBar('Le nom de la ruche est requis');
       return false;
     }
-    
+
     if (_ruchePositionController.text.trim().isEmpty) {
       _showErrorSnackBar('La position de la ruche est requise');
       return false;
     }
-    
+
     return true;
   }
-  
+
   void _clearRucheForm() {
     _rucheNomController.clear();
     _ruchePositionController.clear();
     _rucheEnService = true;
     _dateInstallation = DateTime.now();
   }
-  
+
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -283,7 +284,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       ),
     );
   }
-  
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -293,7 +294,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       ),
     );
   }
-  
+
   Future<bool?> _showConfirmationDialog(String title, String content) {
     return showDialog<bool>(
       context: context,
@@ -318,10 +319,10 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       },
     );
   }
-  
+
   void _showAjouterRucheDialog() {
     _clearRucheForm();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -413,10 +414,10 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       },
     );
   }
-  
+
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Non définie';
-    
+
     try {
       DateTime date;
       if (timestamp.runtimeType.toString().contains('Timestamp')) {
@@ -426,9 +427,10 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       } else {
         return 'Format invalide';
       }
-      
+
       return '${date.day.toString().padLeft(2, '0')}/'
-             '${date.month.toString().padLeft(2, '0')}/''${date.year}';
+          '${date.month.toString().padLeft(2, '0')}/'
+          '${date.year}';
     } catch (e) {
       return 'Erreur format';
     }
@@ -545,7 +547,7 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
       ),
     );
   }
-  
+
   Widget _buildRuchesTab() {
     return Column(
       children: [
@@ -632,19 +634,28 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Position: ${ruche['position'] ?? 'Non définie'}'),
+                            Text(
+                                'Position: ${ruche['position'] ?? 'Non définie'}'),
                             Row(
                               children: [
                                 Icon(
-                                  ruche['enService'] == true ? Icons.check_circle : Icons.warning,
+                                  ruche['enService'] == true
+                                      ? Icons.check_circle
+                                      : Icons.warning,
                                   size: 16,
-                                  color: ruche['enService'] == true ? Colors.green : Colors.orange,
+                                  color: ruche['enService'] == true
+                                      ? Colors.green
+                                      : Colors.orange,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  ruche['enService'] == true ? 'En service' : 'Hors service',
+                                  ruche['enService'] == true
+                                      ? 'En service'
+                                      : 'Hors service',
                                   style: TextStyle(
-                                    color: ruche['enService'] == true ? Colors.green : Colors.orange,
+                                    color: ruche['enService'] == true
+                                        ? Colors.green
+                                        : Colors.orange,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -653,7 +664,8 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                             if (ruche['dateInstallation'] != null)
                               Text(
                                 'Installée le: ${_formatDate(ruche['dateInstallation'])}',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
                               ),
                           ],
                         ),
@@ -685,7 +697,8 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                                 children: [
                                   Icon(Icons.delete, color: Colors.red),
                                   SizedBox(width: 8),
-                                  Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                  Text('Supprimer',
+                                      style: TextStyle(color: Colors.red)),
                                 ],
                               ),
                             ),
@@ -694,11 +707,13 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                             switch (value) {
                               case 'details':
                                 // Naviguer vers les détails de la ruche
-                                context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
+                                context.go(
+                                    '/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                 break;
                               case 'edit':
                                 // Fonctionnalité de modification à implémenter
-                                _showErrorSnackBar('Modification à implémenter');
+                                _showErrorSnackBar(
+                                    'Modification à implémenter');
                                 break;
                               case 'delete':
                                 _supprimerRuche(ruche['id'], ruche['nom']);
@@ -730,7 +745,8 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
                   children: [
                     Icon(Icons.delete, color: Colors.red),
                     SizedBox(width: 8),
-                    Text('Supprimer le rucher', style: TextStyle(color: Colors.red)),
+                    Text('Supprimer le rucher',
+                        style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
@@ -786,4 +802,4 @@ class _RucherDetailScreenState extends State<RucherDetailScreen> with SingleTick
             ),
     );
   }
-} 
+}

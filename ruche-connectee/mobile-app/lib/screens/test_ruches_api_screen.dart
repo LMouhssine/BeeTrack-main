@@ -20,7 +20,7 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
   List<DonneesCapteur> _mesures = [];
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   final TextEditingController _rucherIdController = TextEditingController();
   final TextEditingController _rucheIdController = TextEditingController();
 
@@ -59,14 +59,16 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
     });
 
     try {
-      final ruches = await _apiRucheService.obtenirRuchesParRucher(_rucherIdController.text.trim());
-      
+      final ruches = await _apiRucheService
+          .obtenirRuchesParRucher(_rucherIdController.text.trim());
+
       setState(() {
         _ruches = ruches;
         _isLoading = false;
       });
 
-      _showSuccessSnackBar('${ruches.length} ruche(s) récupérée(s) avec succès');
+      _showSuccessSnackBar(
+          '${ruches.length} ruche(s) récupérée(s) avec succès');
     } catch (e) {
       LoggerService.error('Erreur test ruches par rucher', e);
       setState(() {
@@ -89,14 +91,16 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
     });
 
     try {
-      final mesures = await _apiRucheService.obtenirMesures7DerniersJours(_rucheIdController.text.trim());
-      
+      final mesures = await _apiRucheService
+          .obtenirMesures7DerniersJours(_rucheIdController.text.trim());
+
       setState(() {
         _mesures = mesures;
         _isLoading = false;
       });
 
-      _showSuccessSnackBar('${mesures.length} mesure(s) récupérée(s) avec succès');
+      _showSuccessSnackBar(
+          '${mesures.length} mesure(s) récupérée(s) avec succès');
     } catch (e) {
       LoggerService.error('Erreur test mesures 7 jours', e);
       setState(() {
@@ -210,7 +214,6 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            
             if (_errorMessage != null) ...[
               Container(
                 padding: const EdgeInsets.all(12),
@@ -233,7 +236,6 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
                 ),
               ),
             ],
-
             if (_ruches.isNotEmpty) ...[
               Text(
                 '🐝 Ruches récupérées (${_ruches.length})',
@@ -244,20 +246,20 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               ),
               const SizedBox(height: 8),
               ...(_ruches.take(3).map((ruche) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    const Icon(Icons.hive, size: 16, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${ruche.nom} (Position: ${ruche.position})',
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.hive, size: 16, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${ruche.nom} (Position: ${ruche.position})',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ))),
+                  ))),
               if (_ruches.length > 3)
                 Text(
                   '... et ${_ruches.length - 3} autre(s) ruche(s)',
@@ -284,7 +286,6 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
                 label: const Text('Voir détails complets'),
               ),
             ],
-
             if (_mesures.isNotEmpty) ...[
               if (_ruches.isNotEmpty) const Divider(height: 24),
               Text(
@@ -296,22 +297,23 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               ),
               const SizedBox(height: 8),
               ...(_mesures.take(3).map((mesure) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    const Icon(Icons.analytics, size: 16, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${_formatDateTime(mesure.timestamp)}: '
-                        '${mesure.temperature?.toStringAsFixed(1) ?? '--'}°C, '
-                        '${mesure.humidity?.toStringAsFixed(1) ?? '--'}%',
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.analytics,
+                            size: 16, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${_formatDateTime(mesure.timestamp)}: '
+                            '${mesure.temperature?.toStringAsFixed(1) ?? '--'}°C, '
+                            '${mesure.humidity?.toStringAsFixed(1) ?? '--'}%',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ))),
+                  ))),
               if (_mesures.length > 3)
                 Text(
                   '... et ${_mesures.length - 3} autre(s) mesure(s)',
@@ -346,9 +348,9 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
 
   String _formatDateTime(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')} '
-           '${date.hour.toString().padLeft(2, '0')}:'
-           '${date.minute.toString().padLeft(2, '0')}';
+        '${date.month.toString().padLeft(2, '0')} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -400,29 +402,27 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
                 ],
               ),
             ),
-
             _buildTestSection(
               title: 'Ruches par Rucher',
-              description: 'Récupère toutes les ruches d\'un rucher spécifique, triées par nom croissant',
+              description:
+                  'Récupère toutes les ruches d\'un rucher spécifique, triées par nom croissant',
               controller: _rucherIdController,
               hintText: 'ID du rucher (ex: test-rucher-001)',
               onTest: _testRuchesParRucher,
             ),
-
             _buildTestSection(
               title: 'Mesures 7 Jours',
-              description: 'Récupère les mesures des capteurs des 7 derniers jours d\'une ruche',
+              description:
+                  'Récupère les mesures des capteurs des 7 derniers jours d\'une ruche',
               controller: _rucheIdController,
               hintText: 'ID de la ruche (ex: test-ruche-001)',
               onTest: _testMesures7Jours,
             ),
-
             _buildResultsSection(),
-
             const SizedBox(height: 32),
           ],
         ),
       ),
     );
   }
-} 
+}

@@ -35,16 +35,18 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
 
       if (user != null) {
         LoggerService.debug('Utilisateur trouvé: ${user.uid}');
-        
+
         // Essayer d'obtenir le token
         try {
           final token = await user.getIdToken(false);
           setState(() {
             _idToken = token;
           });
-          LoggerService.info('Token obtenu avec succès (${token?.length} caractères)');
+          LoggerService.info(
+              'Token obtenu avec succès (${token?.length} caractères)');
         } catch (tokenError) {
-          LoggerService.error('Erreur lors de l\'obtention du token', tokenError);
+          LoggerService.error(
+              'Erreur lors de l\'obtention du token', tokenError);
           setState(() {
             _error = 'Erreur token: $tokenError';
           });
@@ -53,7 +55,8 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
         LoggerService.warning('Aucun utilisateur connecté');
       }
     } catch (e) {
-      LoggerService.error('Erreur lors de la vérification de l\'authentification', e);
+      LoggerService.error(
+          'Erreur lors de la vérification de l\'authentification', e);
       setState(() {
         _error = 'Erreur auth: $e';
       });
@@ -78,7 +81,7 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
         _idToken = token;
       });
       LoggerService.info('Token rafraîchi avec succès');
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -131,31 +134,34 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // État de l'utilisateur
             _buildInfoRow(
               'Utilisateur connecté',
               _currentUser != null ? 'Oui' : 'Non',
               _currentUser != null ? Colors.green : Colors.red,
             ),
-            
+
             if (_currentUser != null) ...[
               _buildInfoRow('UID', _currentUser!.uid),
               _buildInfoRow('Email', _currentUser!.email ?? 'Non défini'),
               _buildInfoRow('Nom', _currentUser!.displayName ?? 'Non défini'),
-              _buildInfoRow('Email vérifié', _currentUser!.emailVerified ? 'Oui' : 'Non'),
-              
+              _buildInfoRow(
+                  'Email vérifié', _currentUser!.emailVerified ? 'Oui' : 'Non'),
+
               const SizedBox(height: 8),
-              
+
               // État du token
               _buildInfoRow(
                 'Token JWT',
-                _idToken != null ? 'Présent (${_idToken!.length} car.)' : 'Non disponible',
+                _idToken != null
+                    ? 'Présent (${_idToken!.length} car.)'
+                    : 'Non disponible',
                 _idToken != null ? Colors.green : Colors.red,
               ),
-              
+
               if (_idToken != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -168,7 +174,7 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
                 ),
               ],
             ],
-            
+
             if (_error != null) ...[
               const SizedBox(height: 12),
               Container(
@@ -187,9 +193,9 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 12),
-            
+
             // Boutons d'action
             Wrap(
               spacing: 8,
@@ -200,7 +206,8 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
                     icon: const Icon(Icons.refresh, size: 14),
                     label: const Text('Rafraîchir token'),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                     ),
                   ),
                 OutlinedButton.icon(
@@ -208,7 +215,8 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
                   icon: const Icon(Icons.check, size: 14),
                   label: const Text('Vérifier état'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
               ],
@@ -248,4 +256,4 @@ class _AuthDebugWidgetState extends State<AuthDebugWidget> {
       ),
     );
   }
-} 
+}

@@ -63,7 +63,8 @@ class _RucherListScreenState extends State<RucherListScreen> {
         stream: _ruchersStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            LoggerService.error('Erreur lors du chargement des ruchers', snapshot.error);
+            LoggerService.error(
+                'Erreur lors du chargement des ruchers', snapshot.error);
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -245,4 +246,4 @@ class _RucherListScreenState extends State<RucherListScreen> {
       ),
     );
   }
-} 
+}

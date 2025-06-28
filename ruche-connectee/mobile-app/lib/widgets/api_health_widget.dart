@@ -34,7 +34,7 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
 
     // Test 1: Health check public (sans authentification)
     await _checkPublicHealth();
-    
+
     // Test 2: Health check avec authentification
     await _checkAuthHealth();
 
@@ -48,7 +48,7 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
       // Appel direct sans authentification
       final dio = Dio();
       final response = await dio.get(ApiConfig.fullHealthUrl);
-      
+
       final health = HealthResponse.fromJson(response.data);
       setState(() {
         _healthStatus = health;
@@ -67,11 +67,11 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
   Future<void> _checkAuthHealth() async {
     try {
       final apiClient = getIt<ApiClientService>();
-      
+
       // Appel avec authentification
       final response = await apiClient.get(ApiConfig.healthAuthEndpoint);
       final health = HealthResponse.fromJson(response.data);
-      
+
       setState(() {
         _authHealthStatus = health;
       });
@@ -141,9 +141,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Test de connectivité public
             Row(
               children: [
@@ -156,7 +156,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text('Connectivité: ', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                const Text('Connectivité: ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
                 Text(
                   _getStatusText(false),
                   style: TextStyle(
@@ -167,9 +169,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 4),
-            
+
             // Test d'authentification
             Row(
               children: [
@@ -182,7 +184,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text('Authentification: ', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                const Text('Authentification: ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
                 Text(
                   _getStatusText(true),
                   style: TextStyle(
@@ -193,9 +197,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             Text(
               'URL: ${ApiConfig.baseUrl}',
               style: TextStyle(
@@ -203,7 +207,7 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 color: Colors.grey[600],
               ),
             ),
-            
+
             if (_errorMessage != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -214,7 +218,7 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 ),
               ),
             ],
-            
+
             if (_authErrorMessage != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -225,7 +229,7 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 ),
               ),
             ],
-            
+
             if (_healthStatus != null || _authHealthStatus != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -236,9 +240,9 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 12),
-            
+
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -255,4 +259,4 @@ class _ApiHealthWidgetState extends State<ApiHealthWidget> {
       ),
     );
   }
-} 
+}

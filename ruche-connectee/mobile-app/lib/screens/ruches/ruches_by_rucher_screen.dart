@@ -54,7 +54,8 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
         _errorMessage = null;
       });
 
-      final ruches = await _apiRucheService.obtenirRuchesParRucher(widget.rucherId);
+      final ruches =
+          await _apiRucheService.obtenirRuchesParRucher(widget.rucherId);
 
       setState(() {
         _ruches = ruches;
@@ -100,8 +101,8 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
   String _formatDate(DateTime? date) {
     if (date == null) return 'Non définie';
     return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')}/'
-           '${date.year}';
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
   }
 
   Widget _buildStatsCard() {
@@ -307,7 +308,7 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Position et type
               Row(
                 children: [
@@ -328,8 +329,9 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
                   ],
                 ],
               ),
-              
-              if (ruche.description != null && ruche.description!.isNotEmpty) ...[
+
+              if (ruche.description != null &&
+                  ruche.description!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
                   ruche.description!,
@@ -341,9 +343,9 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              
+
               const SizedBox(height: 12),
-              
+
               // Informations additionnelles
               Row(
                 children: [
@@ -357,7 +359,8 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                  Icon(Icons.arrow_forward_ios,
+                      size: 16, color: Colors.grey[400]),
                 ],
               ),
             ],
@@ -371,7 +374,9 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: enService ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
+        color: enService
+            ? Colors.green.withValues(alpha: 0.2)
+            : Colors.orange.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -460,4 +465,4 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
                 ),
     );
   }
-} 
+}

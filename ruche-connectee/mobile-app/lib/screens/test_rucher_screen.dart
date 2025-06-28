@@ -40,7 +40,6 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
       });
 
       LoggerService.info('Test réussi - Rucher créé: $rucherId');
-
     } catch (e) {
       setState(() {
         _result = 'Erreur: ${e.toString()}';
@@ -64,11 +63,11 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
       final ruchers = await _rucherService.obtenirRuchersUtilisateur();
 
       setState(() {
-        _result = 'Trouvé $ruchers.length rucher(s):\n${ruchers.map((r) => '- ${r['nom']} (${r['adresse']})').join('\n')}';
+        _result =
+            'Trouvé $ruchers.length rucher(s):\n${ruchers.map((r) => '- ${r['nom']} (${r['adresse']})').join('\n')}';
       });
 
       LoggerService.info('Test réussi - $ruchers.length ruchers trouvés');
-
     } catch (e) {
       setState(() {
         _result = 'Erreur: ${e.toString()}';
@@ -145,8 +144,8 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
                             child: Text(
                               _result.isEmpty ? 'Aucun test effectué' : _result,
                               style: TextStyle(
-                                color: _result.startsWith('Erreur') 
-                                    ? Colors.red 
+                                color: _result.startsWith('Erreur')
+                                    ? Colors.red
                                     : Colors.green,
                               ),
                             ),
@@ -162,4 +161,4 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
       ),
     );
   }
-} 
+}

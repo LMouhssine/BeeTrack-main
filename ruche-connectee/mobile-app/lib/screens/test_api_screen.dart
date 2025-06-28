@@ -66,14 +66,14 @@ class _TestApiScreenState extends State<TestApiScreen> {
           children: [
             // Widget de debug de l'authentification
             const AuthDebugWidget(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Widget de santé de l'API
             const ApiHealthWidget(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Section des ruches
             Card(
               child: Padding(
@@ -95,19 +95,18 @@ class _TestApiScreenState extends State<TestApiScreen> {
                         const Spacer(),
                         IconButton(
                           onPressed: _isLoading ? null : _loadRuches,
-                          icon: _isLoading 
+                          icon: _isLoading
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.refresh),
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 16),
-                    
                     if (_errorMessage != null) ...[
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -158,88 +157,92 @@ class _TestApiScreenState extends State<TestApiScreen> {
                           fontSize: 14,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 12),
-                      
+
                       // Liste des ruches
                       ...(_ruches.map((ruche) => Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.green[50],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green[200]!),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green[200]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  ruche.enService ? Icons.check_circle : Icons.warning,
-                                  color: ruche.enService ? Colors.green : Colors.orange,
-                                  size: 16,
+                                Row(
+                                  children: [
+                                    Icon(
+                                      ruche.enService
+                                          ? Icons.check_circle
+                                          : Icons.warning,
+                                      color: ruche.enService
+                                          ? Colors.green
+                                          : Colors.orange,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        ruche.nom,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      ruche.position,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    ruche.nom,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                if (ruche.rucherNom != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Rucher: ${ruche.rucherNom}',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
                                     ),
                                   ),
-                                ),
-                                Text(
-                                  ruche.position,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                                ],
+                                if (ruche.typeRuche != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Type: ${ruche.typeRuche}',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
+                                ],
+                                if (ruche.description != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    ruche.description!,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                            if (ruche.rucherNom != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rucher: ${ruche.rucherNom}',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                            if (ruche.typeRuche != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Type: ${ruche.typeRuche}',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                            if (ruche.description != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                ruche.description!,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ))),
+                          ))),
                     ],
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Boutons d'action
             Row(
               children: [
@@ -259,9 +262,9 @@ class _TestApiScreenState extends State<TestApiScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Informations techniques
             Card(
               child: Padding(
@@ -277,10 +280,13 @@ class _TestApiScreenState extends State<TestApiScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildInfoRow('Architecture', 'Flutter → Spring Boot → Firebase'),
-                    _buildInfoRow('Authentification', 'Firebase JWT + X-Apiculteur-ID'),
+                    _buildInfoRow(
+                        'Architecture', 'Flutter → Spring Boot → Firebase'),
+                    _buildInfoRow(
+                        'Authentification', 'Firebase JWT + X-Apiculteur-ID'),
                     _buildInfoRow('Format de données', 'JSON REST API'),
-                    _buildInfoRow('Nouveaux champs', 'typeRuche, description, enrichissement rucher'),
+                    _buildInfoRow('Nouveaux champs',
+                        'typeRuche, description, enrichissement rucher'),
                   ],
                 ),
               ),
@@ -320,4 +326,4 @@ class _TestApiScreenState extends State<TestApiScreen> {
       ),
     );
   }
-} 
+}

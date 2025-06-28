@@ -33,15 +33,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       setState(() => _isLoading = true);
       final user = await GetIt.I<AuthService>().getCurrentUser();
-      
+
       if (!mounted) return;
-      
+
       if (user != null) {
         _nameController.text = user.displayName ?? '';
         _emailController.text = user.email ?? '';
       }
     } catch (e) {
-      LoggerService.error('Erreur lors du chargement des données utilisateur', e);
+      LoggerService.error(
+          'Erreur lors du chargement des données utilisateur', e);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       setState(() => _isLoading = true);
-      
+
       // Mise à jour du profil
       final user = await GetIt.I<AuthService>().getCurrentUser();
       if (user != null) {
@@ -69,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profil mis à jour avec succès')),
       );
@@ -89,14 +90,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     try {
       await GetIt.I<AuthService>().signOut();
-      
+
       if (!mounted) return;
-      
+
       Navigator.of(context).pushReplacementNamed('/login');
     } catch (e) {
       LoggerService.error('Erreur lors de la déconnexion', e);
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la déconnexion: $e')),
       );
@@ -170,4 +171,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
     );
   }
-} 
+}

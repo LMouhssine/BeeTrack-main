@@ -19,7 +19,9 @@ class RucherDetailScreen extends StatelessWidget {
             icon: const Icon(Icons.edit),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalité de modification en cours de développement')),
+                const SnackBar(
+                    content: Text(
+                        'Fonctionnalité de modification en cours de développement')),
               );
             },
           ),
@@ -44,7 +46,8 @@ class RucherDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow('Localisation', 'Latitude: 48.8566° N\nLongitude: 2.3522° E'),
+                    _buildInfoRow('Localisation',
+                        'Latitude: 48.8566° N\nLongitude: 2.3522° E'),
                     const Divider(),
                     _buildInfoRow('Nombre de ruches', '5'),
                     const Divider(),
@@ -71,7 +74,8 @@ class RucherDetailScreen extends StatelessWidget {
                   child: ListTile(
                     leading: const Icon(Icons.hive),
                     title: Text('Ruche #${index + 1}'),
-                    subtitle: const Text('Dernière mise à jour: il y a 2 heures'),
+                    subtitle:
+                        const Text('Dernière mise à jour: il y a 2 heures'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.go('/ruches/$index'),
                   ),
@@ -84,7 +88,9 @@ class RucherDetailScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Fonctionnalité d\'ajout de ruche en cours de développement')),
+            const SnackBar(
+                content: Text(
+                    'Fonctionnalité d\'ajout de ruche en cours de développement')),
           );
         },
         child: const Icon(Icons.add),
@@ -117,4 +123,4 @@ class RucherDetailScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

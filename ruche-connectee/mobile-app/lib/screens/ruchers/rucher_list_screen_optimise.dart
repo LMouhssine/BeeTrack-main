@@ -7,17 +7,18 @@ import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/rucher_detail_screen.dart';
 
 /// Écran de liste des ruchers optimisé utilisant l'index Firestore composite
-/// 
+///
 /// Cette version utilise la méthode obtenirRuchersUtilisateurOptimise() qui tire parti
 /// de l'index composite Firestore pour une performance optimale :
 /// - idApiculteur (Ascending)
-/// - actif (Ascending) 
+/// - actif (Ascending)
 /// - dateCreation (Descending)
 class RucherListScreenOptimise extends StatefulWidget {
   const RucherListScreenOptimise({Key? key}) : super(key: key);
 
   @override
-  State<RucherListScreenOptimise> createState() => _RucherListScreenOptimiseState();
+  State<RucherListScreenOptimise> createState() =>
+      _RucherListScreenOptimiseState();
 }
 
 class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
@@ -42,16 +43,16 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
       });
 
       LoggerService.info('🐝 Chargement des ruchers avec méthode optimisée');
-      
+
       final ruchers = await _rucherService.obtenirRuchersUtilisateurOptimise();
-      
+
       setState(() {
         _ruchers = ruchers;
         _isLoading = false;
       });
 
-      LoggerService.info('🐝 ${ruchers.length} rucher(s) chargé(s) avec succès');
-
+      LoggerService.info(
+          '🐝 ${ruchers.length} rucher(s) chargé(s) avec succès');
     } catch (e) {
       LoggerService.error('Erreur lors du chargement des ruchers', e);
       setState(() {
@@ -353,7 +354,8 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
                 ),
               ],
             ),
-            if (rucher['description'] != null && rucher['description'].isNotEmpty) ...[
+            if (rucher['description'] != null &&
+                rucher['description'].isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 rucher['description'],
@@ -400,4 +402,4 @@ class _RucherListScreenOptimiseState extends State<RucherListScreenOptimise> {
       ),
     );
   }
-} 
+}

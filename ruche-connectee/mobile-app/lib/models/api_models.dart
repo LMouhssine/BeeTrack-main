@@ -28,7 +28,8 @@ class CreateRucheRequest {
       if (typeRuche != null) 'typeRuche': typeRuche,
       if (description != null) 'description': description,
       'enService': enService,
-      if (dateInstallation != null) 'dateInstallation': dateInstallation!.toIso8601String(),
+      if (dateInstallation != null)
+        'dateInstallation': dateInstallation!.toIso8601String(),
     };
   }
 
@@ -48,7 +49,7 @@ class RucheResponse {
   final DateTime dateCreation;
   final bool actif;
   final String idApiculteur;
-  
+
   // Informations du rucher (enrichies par l'API)
   final String? rucherNom;
   final String? rucherVille;
@@ -80,7 +81,7 @@ class RucheResponse {
       typeRuche: json['typeRuche'] as String?,
       description: json['description'] as String?,
       enService: json['enService'] as bool,
-      dateInstallation: json['dateInstallation'] != null 
+      dateInstallation: json['dateInstallation'] != null
           ? DateTime.parse(json['dateInstallation'] as String)
           : null,
       dateCreation: DateTime.parse(json['dateCreation'] as String),
@@ -101,7 +102,8 @@ class RucheResponse {
       if (typeRuche != null) 'typeRuche': typeRuche,
       if (description != null) 'description': description,
       'enService': enService,
-      if (dateInstallation != null) 'dateInstallation': dateInstallation!.toIso8601String(),
+      if (dateInstallation != null)
+        'dateInstallation': dateInstallation!.toIso8601String(),
       'dateCreation': dateCreation.toIso8601String(),
       'actif': actif,
       'idApiculteur': idApiculteur,
@@ -209,5 +211,6 @@ class HealthResponse {
     );
   }
 
-  bool get isHealthy => status.toLowerCase() == 'up' || status.toLowerCase() == 'ok';
-} 
+  bool get isHealthy =>
+      status.toLowerCase() == 'up' || status.toLowerCase() == 'ok';
+}

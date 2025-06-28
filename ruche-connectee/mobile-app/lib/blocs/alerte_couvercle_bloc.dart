@@ -191,10 +191,12 @@ class StatutIgnore extends Equatable {
 }
 
 // BLoC
-class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleState> {
+class AlerteCouvercleBloc
+    extends Bloc<AlerteCouvercleEvent, AlerteCouvercleState> {
   final AlerteCouvercleService _alerteService;
 
-  AlerteCouvercleBloc(this._alerteService) : super(const AlerteCouvercleState()) {
+  AlerteCouvercleBloc(this._alerteService)
+      : super(const AlerteCouvercleState()) {
     on<DemarrerSurveillanceEvent>(_onDemarrerSurveillance);
     on<ArreterSurveillanceEvent>(_onArreterSurveillance);
     on<ArreterToutesSurveillancesEvent>(_onArreterToutesSurveillances);
@@ -229,17 +231,18 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
 
       emit(state.copyWith(
         ruchesEnSurveillance: nouvelleSurveillance,
-        messageSucces: 'Surveillance démarrée pour ${event.rucheNom ?? "ruche ${event.rucheId}"}',
+        messageSucces:
+            'Surveillance démarrée pour ${event.rucheNom ?? "ruche ${event.rucheId}"}',
         clearErreur: true,
       ));
 
       // Vérifier le statut d'ignore pour cette ruche
       add(VerifierStatutIgnoreEvent(event.rucheId));
-
     } catch (e) {
       LoggerService.error('Erreur démarrage surveillance', e);
       emit(state.copyWith(
-        messageErreur: 'Erreur lors du démarrage de la surveillance: ${e.toString()}',
+        messageErreur:
+            'Erreur lors du démarrage de la surveillance: ${e.toString()}',
         clearSucces: true,
       ));
     }
@@ -255,21 +258,24 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
       final nouvelleSurveillance = Set<String>.from(state.ruchesEnSurveillance)
         ..remove(event.rucheId);
 
-      final nouvelleAlerte = state.alerteActive?.rucheId == event.rucheId ? null : state.alerteActive;
+      final nouvelleAlerte = state.alerteActive?.rucheId == event.rucheId
+          ? null
+          : state.alerteActive;
 
       final rucheNom = _alerteService.obtenirNomRuche(event.rucheId);
 
       emit(state.copyWith(
         ruchesEnSurveillance: nouvelleSurveillance,
         alerteActive: nouvelleAlerte,
-        messageSucces: 'Surveillance arrêtée pour ${rucheNom ?? "ruche ${event.rucheId}"}',
+        messageSucces:
+            'Surveillance arrêtée pour ${rucheNom ?? "ruche ${event.rucheId}"}',
         clearErreur: true,
       ));
-
     } catch (e) {
       LoggerService.error('Erreur arrêt surveillance', e);
       emit(state.copyWith(
-        messageErreur: 'Erreur lors de l\'arrêt de la surveillance: ${e.toString()}',
+        messageErreur:
+            'Erreur lors de l\'arrêt de la surveillance: ${e.toString()}',
         clearSucces: true,
       ));
     }
@@ -288,11 +294,11 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
         messageSucces: 'Toutes les surveillances ont été arrêtées',
         clearErreur: true,
       ));
-
     } catch (e) {
       LoggerService.error('Erreur arrêt toutes surveillances', e);
       emit(state.copyWith(
-        messageErreur: 'Erreur lors de l\'arrêt des surveillances: ${e.toString()}',
+        messageErreur:
+            'Erreur lors de l\'arrêt des surveillances: ${e.toString()}',
         clearSucces: true,
       ));
     }
@@ -303,7 +309,7 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
     Emitter<AlerteCouvercleState> emit,
   ) async {
     final rucheNom = _alerteService.obtenirNomRuche(event.rucheId);
-    
+
     final nouvelleAlerte = AlerteActive(
       rucheId: event.rucheId,
       rucheNom: rucheNom,
@@ -326,21 +332,23 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
     try {
       await _alerteService.ignorerAlerte(event.rucheId, event.dureeHeures);
 
-      final dureeText = event.dureeHeures == 0.5 ? '30 minutes' : 
-                       event.dureeHeures == 1 ? '1 heure' : 
-                       '${event.dureeHeures} heures';
+      final dureeText = event.dureeHeures == 0.5
+          ? '30 minutes'
+          : event.dureeHeures == 1
+              ? '1 heure'
+              : '${event.dureeHeures} heures';
 
       final rucheNom = _alerteService.obtenirNomRuche(event.rucheId);
 
       emit(state.copyWith(
         clearAlerte: true,
-        messageSucces: 'Alerte ignorée pour $dureeText pour ${rucheNom ?? "ruche ${event.rucheId}"}',
+        messageSucces:
+            'Alerte ignorée pour $dureeText pour ${rucheNom ?? "ruche ${event.rucheId}"}',
         clearErreur: true,
       ));
 
       // Mettre à jour le statut d'ignore
       add(VerifierStatutIgnoreEvent(event.rucheId));
-
     } catch (e) {
       LoggerService.error('Erreur ignore alerte', e);
       emit(state.copyWith(
@@ -361,13 +369,13 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
 
       emit(state.copyWith(
         clearAlerte: true,
-        messageSucces: 'Alerte ignorée pour cette session pour ${rucheNom ?? "ruche ${event.rucheId}"}',
+        messageSucces:
+            'Alerte ignorée pour cette session pour ${rucheNom ?? "ruche ${event.rucheId}"}',
         clearErreur: true,
       ));
 
       // Mettre à jour le statut d'ignore
       add(VerifierStatutIgnoreEvent(event.rucheId));
-
     } catch (e) {
       LoggerService.error('Erreur ignore session', e);
       emit(state.copyWith(
@@ -394,17 +402,18 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
       final rucheNom = _alerteService.obtenirNomRuche(event.rucheId);
 
       emit(state.copyWith(
-        messageSucces: 'Alertes réactivées pour ${rucheNom ?? "ruche ${event.rucheId}"}',
+        messageSucces:
+            'Alertes réactivées pour ${rucheNom ?? "ruche ${event.rucheId}"}',
         clearErreur: true,
       ));
 
       // Mettre à jour le statut d'ignore
       add(VerifierStatutIgnoreEvent(event.rucheId));
-
     } catch (e) {
       LoggerService.error('Erreur réactivation alertes', e);
       emit(state.copyWith(
-        messageErreur: 'Erreur lors de la réactivation des alertes: ${e.toString()}',
+        messageErreur:
+            'Erreur lors de la réactivation des alertes: ${e.toString()}',
         clearSucces: true,
       ));
     }
@@ -418,11 +427,11 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
       final statutMap = await _alerteService.obtenirStatutIgnore(event.rucheId);
       final statut = StatutIgnore.fromMap(statutMap);
 
-      final nouveauxStatuts = Map<String, StatutIgnore>.from(state.statutsIgnore);
+      final nouveauxStatuts =
+          Map<String, StatutIgnore>.from(state.statutsIgnore);
       nouveauxStatuts[event.rucheId] = statut;
 
       emit(state.copyWith(statutsIgnore: nouveauxStatuts));
-
     } catch (e) {
       LoggerService.error('Erreur vérification statut ignore', e);
     }
@@ -433,9 +442,10 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
     Emitter<AlerteCouvercleState> emit,
   ) async {
     final rucheNom = _alerteService.obtenirNomRuche(event.rucheId);
-    
+
     emit(state.copyWith(
-      messageErreur: 'Erreur de surveillance pour ${rucheNom ?? "ruche ${event.rucheId}"}: ${event.erreur}',
+      messageErreur:
+          'Erreur de surveillance pour ${rucheNom ?? "ruche ${event.rucheId}"}: ${event.erreur}',
       clearSucces: true,
     ));
   }
@@ -445,4 +455,4 @@ class AlerteCouvercleBloc extends Bloc<AlerteCouvercleEvent, AlerteCouvercleStat
     _alerteService.arreterToutesSurveillances();
     return super.close();
   }
-} 
+}

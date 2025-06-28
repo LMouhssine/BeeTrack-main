@@ -10,15 +10,15 @@ import 'package:ruche_connectee/firebase_options.dart';
 void main() async {
   // Assure que les widgets Flutter sont initialisés
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialise Firebase avec la configuration appropriée
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   // Configure l'injection de dépendances avec les nouveaux services API
   await setupServiceLocator();
-  
+
   // Lance l'application
   runApp(const RucheConnecteeApp());
 }
@@ -31,7 +31,8 @@ class RucheConnecteeApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(getIt<AuthService>())..add(CheckAuthStatusEvent()),
+          create: (context) =>
+              AuthBloc(getIt<AuthService>())..add(CheckAuthStatusEvent()),
         ),
       ],
       child: MaterialApp.router(

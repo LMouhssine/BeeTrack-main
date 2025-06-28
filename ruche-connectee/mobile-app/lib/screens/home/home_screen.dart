@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => const AjouterRucheScreen(),
       ),
     );
-    
+
     if (result == true) {
       _showSuccessMessage('Ruche ajoutée avec succès !');
     }
@@ -68,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 // Navigation vers l'ajout de rucher à implémenter
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Navigation vers ajout rucher à implémenter')),
+                  const SnackBar(
+                      content:
+                          Text('Navigation vers ajout rucher à implémenter')),
                 );
               },
             )
@@ -80,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 await _navigateToAddRuche();
               },
             ),
-          
+
           // Bouton Test Alerte Couvercle
           IconButton(
             icon: const Icon(Icons.warning_amber_rounded),
@@ -89,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context.go('/test-alerte');
             },
           ),
-          
+
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
@@ -143,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
           : null,
     );
   }
-  
+
   void _showLogoutDialog() {
     showDialog(
       context: context,

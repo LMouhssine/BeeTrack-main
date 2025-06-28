@@ -4,7 +4,7 @@ import 'package:ruche_connectee/services/firebase_service.dart';
 import 'dart:async';
 
 /// Exemple d'utilisation du RucheService dans un widget Flutter
-/// 
+///
 /// Ce widget démontre comment :
 /// - Ajouter une nouvelle ruche
 /// - Afficher la liste des ruches d'un rucher
@@ -29,28 +29,28 @@ class ExempleGestionRuches extends StatefulWidget {
 class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
   // Services
   late final RucheService _rucheService;
-  
+
   // État local
   List<Map<String, dynamic>> _ruches = [];
   bool _isLoading = false;
   bool _isAddingRuche = false;
-  
+
   // Controllers pour les formulaires
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _positionController = TextEditingController();
   bool _enService = true;
   DateTime _dateInstallation = DateTime.now();
-  
+
   // Subscription pour l'écoute temps réel
   StreamSubscription<List<Map<String, dynamic>>>? _ruchesSubscription;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeService();
     _startListeningToRuches();
   }
-  
+
   @override
   void dispose() {
     _ruchesSubscription?.cancel();
@@ -58,36 +58,35 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
     _positionController.dispose();
     super.dispose();
   }
-  
+
   void _initializeService() {
     final firebaseService = FirebaseService();
     _rucheService = RucheService(firebaseService);
   }
-  
+
   /// Démarre l'écoute des ruches en temps réel
   void _startListeningToRuches() {
-    _ruchesSubscription = _rucheService
-        .ecouterRuchesParRucher(widget.idRucher)
-        .listen(
-          (ruches) {
-            if (mounted) {
-              setState(() {
-                _ruches = ruches;
-              });
-            }
-          },
-          onError: (error) {
-            _showErrorSnackBar('Erreur d\'écoute temps réel: $error');
-          },
-        );
+    _ruchesSubscription =
+        _rucheService.ecouterRuchesParRucher(widget.idRucher).listen(
+      (ruches) {
+        if (mounted) {
+          setState(() {
+            _ruches = ruches;
+          });
+        }
+      },
+      onError: (error) {
+        _showErrorSnackBar('Erreur d\'écoute temps réel: $error');
+      },
+    );
   }
-  
+
   /// Ajoute une nouvelle ruche
   Future<void> _ajouterRuche() async {
     if (!_validateForm()) return;
-    
+
     setState(() => _isAddingRuche = true);
-    
+
     try {
       final rucheId = await _rucheService.ajouterRuche(
         idRucher: widget.idRucher,
@@ -96,30 +95,29 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
         enService: _enService,
         dateInstallation: _dateInstallation,
       );
-      
+
       _showSuccessSnackBar('Ruche créée avec succès (ID: $rucheId)');
       _clearForm();
       if (!mounted) return;
       Navigator.of(context).pop(); // Fermer le dialog
-      
     } catch (e) {
       _showErrorSnackBar('Erreur lors de l\'ajout: $e');
     } finally {
       setState(() => _isAddingRuche = false);
     }
   }
-  
+
   /// Supprime une ruche
   Future<void> _supprimerRuche(String rucheId, String nomRuche) async {
     final bool? confirmed = await _showConfirmationDialog(
       'Supprimer la ruche',
       'Êtes-vous sûr de vouloir supprimer la ruche "$nomRuche" ?',
     );
-    
+
     if (confirmed != true) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       await _rucheService.supprimerRuche(rucheId);
       _showSuccessSnackBar('Ruche supprimée avec succès');
@@ -129,22 +127,22 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       setState(() => _isLoading = false);
     }
   }
-  
+
   /// Valide le formulaire d'ajout
   bool _validateForm() {
     if (_nomController.text.trim().isEmpty) {
       _showErrorSnackBar('Le nom de la ruche est requis');
       return false;
     }
-    
+
     if (_positionController.text.trim().isEmpty) {
       _showErrorSnackBar('La position de la ruche est requise');
       return false;
     }
-    
+
     return true;
   }
-  
+
   /// Vide le formulaire
   void _clearForm() {
     _nomController.clear();
@@ -152,7 +150,7 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
     _enService = true;
     _dateInstallation = DateTime.now();
   }
-  
+
   /// Affiche un SnackBar de succès
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -163,7 +161,7 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       ),
     );
   }
-  
+
   /// Affiche un SnackBar d'erreur
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +172,7 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       ),
     );
   }
-  
+
   /// Affiche un dialog de confirmation
   Future<bool?> _showConfirmationDialog(String title, String content) {
     return showDialog<bool>(
@@ -200,11 +198,11 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       },
     );
   }
-  
+
   /// Affiche le dialog d'ajout de ruche
   void _showAjouterRucheDialog() {
     _clearForm();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -296,7 +294,7 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -365,7 +363,8 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Position: ${ruche['position'] ?? 'Non définie'}'),
+                            Text(
+                                'Position: ${ruche['position'] ?? 'Non définie'}'),
                             Text(
                               'Statut: ${ruche['enService'] == true ? 'En service' : 'Hors service'}',
                               style: TextStyle(
@@ -390,7 +389,8 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
                                 children: [
                                   Icon(Icons.delete, color: Colors.red),
                                   SizedBox(width: 8),
-                                  Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                  Text('Supprimer',
+                                      style: TextStyle(color: Colors.red)),
                                 ],
                               ),
                             ),
@@ -414,11 +414,11 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       ),
     );
   }
-  
+
   /// Formate une date Firestore pour l'affichage
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Non définie';
-    
+
     try {
       DateTime date;
       if (timestamp.runtimeType.toString().contains('Timestamp')) {
@@ -428,12 +428,12 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
       } else {
         return 'Format invalide';
       }
-      
+
       return '${date.day.toString().padLeft(2, '0')}/'
-             '${date.month.toString().padLeft(2, '0')}/'
-             '${date.year}';
+          '${date.month.toString().padLeft(2, '0')}/'
+          '${date.year}';
     } catch (e) {
       return 'Erreur format';
     }
   }
-} 
+}

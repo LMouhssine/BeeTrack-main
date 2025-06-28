@@ -89,7 +89,8 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Supprimer la ruche'),
-          content: Text('Êtes-vous sûr de vouloir supprimer la ruche "$nomRuche" ?'),
+          content:
+              Text('Êtes-vous sûr de vouloir supprimer la ruche "$nomRuche" ?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -131,7 +132,7 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
 
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'Non définie';
-    
+
     try {
       DateTime date;
       if (timestamp.runtimeType.toString().contains('Timestamp')) {
@@ -141,10 +142,10 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
       } else {
         return 'Format invalide';
       }
-      
+
       return '${date.day.toString().padLeft(2, '0')}/'
-             '${date.month.toString().padLeft(2, '0')}/'
-             '${date.year}';
+          '${date.month.toString().padLeft(2, '0')}/'
+          '${date.year}';
     } catch (e) {
       return 'Erreur format';
     }
@@ -274,12 +275,12 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
               children: [
                 // Statistiques
                 _buildStatsCard(),
-                
+
                 // Barre de recherche
                 _buildSearchBar(),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Liste des ruches
                 Expanded(
                   child: _filteredRuches.isEmpty
@@ -288,7 +289,9 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _searchQuery.isNotEmpty ? Icons.search_off : Icons.hive_outlined,
+                                _searchQuery.isNotEmpty
+                                    ? Icons.search_off
+                                    : Icons.hive_outlined,
                                 size: 64,
                                 color: Colors.grey,
                               ),
@@ -314,13 +317,16 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                 const SizedBox(height: 24),
                                 ElevatedButton.icon(
                                   onPressed: () async {
-                                    final result = await Navigator.of(context).push(
+                                    final result =
+                                        await Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => const AjouterRucheScreen(),
+                                        builder: (context) =>
+                                            const AjouterRucheScreen(),
                                       ),
                                     );
                                     if (result == true) {
-                                      _showSuccessSnackBar('Ruche ajoutée avec succès !');
+                                      _showSuccessSnackBar(
+                                          'Ruche ajoutée avec succès !');
                                     }
                                   },
                                   icon: const Icon(Icons.add),
@@ -353,7 +359,11 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                         ? Colors.green
                                         : Colors.orange,
                                     child: Text(
-                                      ruche['position']?.toString().substring(0, 1).toUpperCase() ?? '?',
+                                      ruche['position']
+                                              ?.toString()
+                                              .substring(0, 1)
+                                              .toUpperCase() ??
+                                          '?',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -362,24 +372,35 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                   ),
                                   title: Text(
                                     ruche['nom'] ?? 'Sans nom',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('Position: ${ruche['position'] ?? 'Non définie'}'),
+                                      Text(
+                                          'Position: ${ruche['position'] ?? 'Non définie'}'),
                                       Row(
                                         children: [
                                           Icon(
-                                            ruche['enService'] == true ? Icons.check_circle : Icons.warning,
+                                            ruche['enService'] == true
+                                                ? Icons.check_circle
+                                                : Icons.warning,
                                             size: 16,
-                                            color: ruche['enService'] == true ? Colors.green : Colors.orange,
+                                            color: ruche['enService'] == true
+                                                ? Colors.green
+                                                : Colors.orange,
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            ruche['enService'] == true ? 'En service' : 'Hors service',
+                                            ruche['enService'] == true
+                                                ? 'En service'
+                                                : 'Hors service',
                                             style: TextStyle(
-                                              color: ruche['enService'] == true ? Colors.green : Colors.orange,
+                                              color: ruche['enService'] == true
+                                                  ? Colors.green
+                                                  : Colors.orange,
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -388,7 +409,8 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                       if (ruche['dateInstallation'] != null)
                                         Text(
                                           'Installée le: ${_formatDate(ruche['dateInstallation'])}',
-                                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                          style: const TextStyle(
+                                              fontSize: 12, color: Colors.grey),
                                         ),
                                     ],
                                   ),
@@ -418,9 +440,12 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                         value: 'delete',
                                         child: Row(
                                           children: [
-                                            Icon(Icons.delete, color: Colors.red),
+                                            Icon(Icons.delete,
+                                                color: Colors.red),
                                             SizedBox(width: 8),
-                                            Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                            Text('Supprimer',
+                                                style: TextStyle(
+                                                    color: Colors.red)),
                                           ],
                                         ),
                                       ),
@@ -428,20 +453,24 @@ class _RuchesListScreenState extends State<RuchesListScreen> {
                                     onSelected: (value) {
                                       switch (value) {
                                         case 'details':
-                                          context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
+                                          context.go(
+                                              '/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                           break;
                                         case 'edit':
                                           // Fonctionnalité de modification à implémenter
-                                          _showErrorSnackBar('Modification à implémenter');
+                                          _showErrorSnackBar(
+                                              'Modification à implémenter');
                                           break;
                                         case 'delete':
-                                          _supprimerRuche(ruche['id'], ruche['nom'] ?? 'Sans nom');
+                                          _supprimerRuche(ruche['id'],
+                                              ruche['nom'] ?? 'Sans nom');
                                           break;
                                       }
                                     },
                                   ),
                                   onTap: () {
-                                    context.go('/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
+                                    context.go(
+                                        '/ruches/${ruche['id']}?nom=${Uri.encodeComponent(ruche['nom'] ?? 'Ruche')}');
                                   },
                                 ),
                               );

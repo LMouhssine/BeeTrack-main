@@ -17,13 +17,13 @@ class TestRuchesTriScreen extends StatefulWidget {
 
 class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
   final TextEditingController _rucherIdController = TextEditingController();
-  
+
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   List<Map<String, dynamic>> _ruchesFirebase = [];
   List<RucheResponse> _ruchesApi = [];
-  
+
   late final RucheService _rucheService;
   late final ApiRucheService _apiRucheService;
 
@@ -42,7 +42,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
   void _initializeServices() {
     final firebaseService = GetIt.I<FirebaseService>();
     final apiClientService = GetIt.I<ApiClientService>();
-    
+
     _rucheService = RucheService(firebaseService);
     _apiRucheService = ApiRucheService(apiClientService);
   }
@@ -64,15 +64,15 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
 
     try {
       LoggerService.info('🧪 Test tri Firebase pour rucher: $rucherId');
-      
+
       final ruches = await _rucheService.obtenirRuchesParRucher(rucherId);
-      
+
       setState(() {
         _ruchesFirebase = ruches;
       });
-      
-      LoggerService.info('🧪 Test Firebase réussi: ${ruches.length} ruches récupérées');
-      
+
+      LoggerService.info(
+          '🧪 Test Firebase réussi: ${ruches.length} ruches récupérées');
     } catch (e) {
       LoggerService.error('Erreur test Firebase', e);
       setState(() {
@@ -102,15 +102,15 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
 
     try {
       LoggerService.info('🧪 Test tri API pour rucher: $rucherId');
-      
+
       final ruches = await _apiRucheService.obtenirRuchesParRucher(rucherId);
-      
+
       setState(() {
         _ruchesApi = ruches;
       });
-      
-      LoggerService.info('🧪 Test API réussi: ${ruches.length} ruches récupérées');
-      
+
+      LoggerService.info(
+          '🧪 Test API réussi: ${ruches.length} ruches récupérées');
     } catch (e) {
       LoggerService.error('Erreur test API', e);
       setState(() {
@@ -206,7 +206,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
                 ),
               ),
             ),
-            
+
             // Indicateur de chargement
             if (_isLoading)
               const Card(
@@ -222,7 +222,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
                   ),
                 ),
               ),
-            
+
             // Message d'erreur
             if (_errorMessage != null)
               Card(
@@ -243,7 +243,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
                   ),
                 ),
               ),
-            
+
             // Résultats
             Expanded(
               child: Row(
@@ -307,9 +307,9 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // Résultats API
                   Expanded(
                     child: Card(
@@ -372,7 +372,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
                 ],
               ),
             ),
-            
+
             // Instructions
             Card(
               color: Colors.grey.shade100,
@@ -405,4 +405,4 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
       ),
     );
   }
-} 
+}

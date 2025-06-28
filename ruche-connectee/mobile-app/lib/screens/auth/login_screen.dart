@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
       try {
         final authService = GetIt.instance<AuthService>();
-        
+
         try {
           // Essayer d'abord de se connecter normalement
           await authService.signInWithEmailAndPassword(
@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _passwordController.text,
           );
         }
-        
+
         if (!mounted) return;
         context.go('/home');
       } catch (e) {
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-    
+
     setState(() => _isLoading = true);
     try {
       final authService = GetIt.instance<AuthService>();
@@ -134,7 +134,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre email';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
                       return 'Veuillez entrer un email valide';
                     }
                     return null;

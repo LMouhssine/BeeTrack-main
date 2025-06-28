@@ -45,4 +45,4 @@ class DefaultFirebaseOptions {
     iosClientId: "YOUR_IOS_CLIENT_ID",
     iosBundleId: "com.ruches.connectee",
   );
-} 
+}
