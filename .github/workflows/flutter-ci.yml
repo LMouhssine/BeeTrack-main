@@ -105,36 +105,4 @@ jobs:
         name: web-build
         path: ruche-connectee/mobile-app/build/web/
 
-  deploy-web:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: build-web
-    if: github.ref == 'refs/heads/main'
-    
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:
-    - name: Download web build
-      uses: actions/download-artifact@v4
-      with:
-        name: web-build
-        path: ./web-build
-        
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-      
-    - name: Upload to GitHub Pages
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./web-build
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4 
+ 
