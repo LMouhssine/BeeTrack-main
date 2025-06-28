@@ -396,8 +396,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: _ruche!.enService
-                  ? Colors.green.withValues(alpha: 0.2)
-                  : Colors.orange.withValues(alpha: 0.2),
+                  ? Colors.green.withOpacity(0.2)
+                  : Colors.orange.withOpacity(0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -623,13 +623,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: Colors.grey.withOpacity(0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: Colors.grey.withOpacity(0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -689,7 +689,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     borderData: FlBorderData(
                       show: true,
                       border:
-                          Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                          Border.all(color: Colors.grey.withOpacity(0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -700,7 +700,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.orange.withValues(alpha: 0.1),
+                          color: Colors.orange.withOpacity(0.1),
                         ),
                       ),
                     ],
@@ -763,13 +763,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: Colors.grey.withOpacity(0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: Colors.grey.withOpacity(0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -829,7 +829,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     borderData: FlBorderData(
                       show: true,
                       border:
-                          Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                          Border.all(color: Colors.grey.withOpacity(0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -840,7 +840,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.blue.withValues(alpha: 0.1),
+                          color: Colors.blue.withOpacity(0.1),
                         ),
                       ),
                     ],
@@ -896,7 +896,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -925,7 +925,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
+                    color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -955,7 +955,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -984,7 +984,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
