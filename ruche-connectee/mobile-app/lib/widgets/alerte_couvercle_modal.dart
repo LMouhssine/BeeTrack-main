@@ -302,9 +302,9 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -315,7 +315,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
             '$label: ',
             style: TextStyle(
               fontSize: 12,
-              color: color.withValues(alpha: 0.8),
+              color: color.withOpacity(0.8),
             ),
           ),
           Text(
