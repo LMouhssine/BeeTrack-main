@@ -11,14 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ruche_connectee/main.dart';
 
 void main() {
-  testWidgets('RucheConnecteeApp builds without crashing', (WidgetTester tester) async {
+  testWidgets('RucheConnecteeApp builds without crashing',
+      (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const RucheConnecteeApp());
 
     // Verify that the app builds successfully
     // Since the app uses Firebase and routing, we just check it doesn't crash during build
     expect(find.byType(MaterialApp), findsOneWidget);
-    
+
     // The app should be able to render without throwing exceptions
     await tester.pump();
   });
