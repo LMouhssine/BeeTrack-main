@@ -375,8 +375,8 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: enService
-                              ? Colors.green.withOpacity(0.2)
-                  : Colors.orange.withOpacity(0.2),
+            ? Colors.green.withOpacity(0.2)
+            : Colors.orange.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

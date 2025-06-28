@@ -688,8 +688,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border:
-                          Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -828,8 +827,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border:
-                          Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
