@@ -276,8 +276,9 @@ class AlerteCouvercleService {
       final maintenant = DateTime.now().millisecondsSinceEpoch;
 
       final rulesValides = rules.where((rule) {
-        if (rule.type == 'session')
+        if (rule.type == 'session') {
           return true; // Les règles de session ne expirent pas automatiquement
+        }
         if (rule.type == 'temporaire') {
           return maintenant < (rule.timestamp + rule.dureeMs);
         }
