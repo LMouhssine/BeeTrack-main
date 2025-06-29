@@ -220,7 +220,8 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1 * 255),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3 * 255)),
+                  border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.3 * 255)),
                 ),
                 child: Row(
                   children: [
@@ -370,7 +371,8 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               decoration: BoxDecoration(
                 color: Colors.blue.withValues(alpha: 0.1 * 255),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3 * 255)),
+                border:
+                    Border.all(color: Colors.blue.withValues(alpha: 0.3 * 255)),
               ),
               child: Row(
                 children: [

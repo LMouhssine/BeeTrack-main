@@ -396,8 +396,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: _ruche!.enService
-                                  ? Colors.green.withValues(alpha: 0.2 * 255)
-                : Colors.orange.withValues(alpha: 0.2 * 255),
+                  ? Colors.green.withValues(alpha: 0.2 * 255)
+                  : Colors.orange.withValues(alpha: 0.2 * 255),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -688,7 +688,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3 * 255)),
+                      border: Border.all(
+                          color: Colors.grey.withValues(alpha: 0.3 * 255)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -756,7 +757,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: true,
-                                                horizontalInterval:
+                      horizontalInterval:
                           10, // Espacement des lignes horizontales (10% pour humidité)
                       verticalInterval:
                           86400000 * 1000, // 1 jour en millisecondes
@@ -827,7 +828,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3 * 255)),
+                      border: Border.all(
+                          color: Colors.grey.withValues(alpha: 0.3 * 255)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
