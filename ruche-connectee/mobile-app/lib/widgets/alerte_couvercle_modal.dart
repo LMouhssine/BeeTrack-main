@@ -9,7 +9,7 @@ Color colorWithOpacity(Color color, double opacity) {
   final r = (argb >> 16) & 0xFF;
   final g = (argb >> 8) & 0xFF;
   final b = argb & 0xFF;
-  
+
   return Color.fromARGB(
     (opacity * 255).round(),
     r,
