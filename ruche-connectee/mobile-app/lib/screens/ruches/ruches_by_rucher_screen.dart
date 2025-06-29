@@ -384,9 +384,9 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-                 color: enService
-             ? colorWithOpacity(Colors.green, 0.2)
-             : colorWithOpacity(Colors.orange, 0.2),
+        color: enService
+            ? colorWithOpacity(Colors.green, 0.2)
+            : colorWithOpacity(Colors.orange, 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -395,7 +395,7 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
           Icon(
             enService ? Icons.check_circle : Icons.warning,
             size: 14,
-                           color: enService ? Colors.green : Colors.orange,
+            color: enService ? Colors.green : Colors.orange,
           ),
           const SizedBox(width: 4),
           Text(

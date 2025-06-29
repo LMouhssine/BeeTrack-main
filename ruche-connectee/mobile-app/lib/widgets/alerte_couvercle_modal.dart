@@ -91,7 +91,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                                              color: colorWithOpacity(Colors.black, 0.3),
+                      color: colorWithOpacity(Colors.black, 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -134,7 +134,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                              color: colorWithOpacity(Colors.white, 0.2),
+              color: colorWithOpacity(Colors.white, 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -312,9 +312,9 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-                  color: colorWithOpacity(color, 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colorWithOpacity(color, 0.3)),
+        color: colorWithOpacity(color, 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorWithOpacity(color, 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -325,7 +325,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
             '$label: ',
             style: TextStyle(
               fontSize: 12,
-                              color: colorWithOpacity(color, 0.8),
+              color: colorWithOpacity(color, 0.8),
             ),
           ),
           Text(
