@@ -9,6 +9,16 @@ import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+/// Helper function to create colors with opacity without deprecation warnings
+Color colorWithOpacity(Color color, double opacity) {
+  return Color.fromARGB(
+    (opacity * 255).round(),
+    (color.r * 255.0).round() & 0xff,
+    (color.g * 255.0).round() & 0xff,
+    (color.b * 255.0).round() & 0xff,
+  );
+}
+
 class RucheDetailApiScreen extends StatefulWidget {
   final String rucheId;
   final String rucheNom;
@@ -396,8 +406,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: _ruche!.enService
-                  ? Colors.green.withOpacity(0.2)
-                  : Colors.orange.withOpacity(0.2),
+                                  ? colorWithOpacity(Colors.green, 0.2)
+                : colorWithOpacity(Colors.orange, 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -623,13 +633,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: colorWithOpacity(Colors.grey, 0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: colorWithOpacity(Colors.grey, 0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -688,7 +698,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: colorWithOpacity(Colors.grey, 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -699,7 +709,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.orange.withOpacity(0.1),
+                          color: colorWithOpacity(Colors.orange, 0.1),
                         ),
                       ),
                     ],
@@ -762,13 +772,13 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                           86400000 * 1000, // 1 jour en millisecondes
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: colorWithOpacity(Colors.grey, 0.2),
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: colorWithOpacity(Colors.grey, 0.2),
                           strokeWidth: 1,
                         );
                       },
@@ -827,7 +837,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                     ),
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: colorWithOpacity(Colors.grey, 0.3)),
                     ),
                     lineBarsData: [
                       LineChartBarData(
@@ -838,7 +848,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.blue.withOpacity(0.1),
+                          color: colorWithOpacity(Colors.blue, 0.1),
                         ),
                       ),
                     ],
@@ -894,7 +904,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: colorWithOpacity(Colors.grey, 0.2)),
       ),
       child: Column(
         children: [
@@ -923,7 +933,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: colorWithOpacity(Colors.orange, 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -953,7 +963,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: colorWithOpacity(Colors.blue, 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -982,7 +992,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: colorWithOpacity(Colors.green, 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

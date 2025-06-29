@@ -7,6 +7,16 @@ import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ruches_by_rucher_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_api_screen.dart';
 
+/// Helper function to create colors with opacity without deprecation warnings
+Color colorWithOpacity(Color color, double opacity) {
+  return Color.fromARGB(
+    (opacity * 255).round(),
+    (color.r * 255.0).round() & 0xff,
+    (color.g * 255.0).round() & 0xff,
+    (color.b * 255.0).round() & 0xff,
+  );
+}
+
 class TestRuchesApiScreen extends StatefulWidget {
   const TestRuchesApiScreen({Key? key}) : super(key: key);
 
@@ -218,9 +228,9 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: colorWithOpacity(Colors.red, 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  border: Border.all(color: colorWithOpacity(Colors.red, 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -368,9 +378,9 @@ class _TestRuchesApiScreenState extends State<TestRuchesApiScreen> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: colorWithOpacity(Colors.blue, 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                border: Border.all(color: colorWithOpacity(Colors.blue, 0.3)),
               ),
               child: Row(
                 children: [

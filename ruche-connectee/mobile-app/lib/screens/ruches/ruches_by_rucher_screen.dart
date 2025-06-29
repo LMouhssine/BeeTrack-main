@@ -6,6 +6,16 @@ import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_api_screen.dart';
 
+/// Helper function to create colors with opacity without deprecation warnings
+Color colorWithOpacity(Color color, double opacity) {
+  return Color.fromARGB(
+    (opacity * 255).round(),
+    (color.r * 255.0).round() & 0xff,
+    (color.g * 255.0).round() & 0xff,
+    (color.b * 255.0).round() & 0xff,
+  );
+}
+
 class RuchesByRucherScreen extends StatefulWidget {
   final String rucherId;
   final String rucherNom;
@@ -374,9 +384,9 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: enService
-            ? Colors.green.withOpacity(0.2)
-            : Colors.orange.withOpacity(0.2),
+                 color: enService
+             ? colorWithOpacity(Colors.green, 0.2)
+             : colorWithOpacity(Colors.orange, 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -385,7 +395,7 @@ class _RuchesByRucherScreenState extends State<RuchesByRucherScreen> {
           Icon(
             enService ? Icons.check_circle : Icons.warning,
             size: 14,
-            color: enService ? Colors.green : Colors.orange,
+                           color: enService ? Colors.green : Colors.orange,
           ),
           const SizedBox(width: 4),
           Text(

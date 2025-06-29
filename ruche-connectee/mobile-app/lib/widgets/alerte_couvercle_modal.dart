@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ruche_connectee/models/api_models.dart';
 
+/// Helper function to create colors with opacity without deprecation warnings
+Color colorWithOpacity(Color color, double opacity) {
+  return Color.fromARGB(
+    (opacity * 255).round(),
+    (color.r * 255.0).round() & 0xff,
+    (color.g * 255.0).round() & 0xff,
+    (color.b * 255.0).round() & 0xff,
+  );
+}
+
 class AlerteCouvercleModal extends StatefulWidget {
   final String rucheId;
   final String? rucheNom;
@@ -81,7 +91,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                                              color: colorWithOpacity(Colors.black, 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -124,7 +134,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+                              color: colorWithOpacity(Colors.white, 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -302,9 +312,9 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+                  color: colorWithOpacity(color, 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colorWithOpacity(color, 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -315,7 +325,7 @@ class _AlerteCouvercleModalState extends State<AlerteCouvercleModal>
             '$label: ',
             style: TextStyle(
               fontSize: 12,
-              color: color.withOpacity(0.8),
+                              color: colorWithOpacity(color, 0.8),
             ),
           ),
           Text(
