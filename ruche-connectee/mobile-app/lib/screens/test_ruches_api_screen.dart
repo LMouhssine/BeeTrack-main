@@ -9,11 +9,17 @@ import 'package:ruche_connectee/screens/ruches/ruche_detail_api_screen.dart';
 
 /// Helper function to create colors with opacity without deprecation warnings
 Color colorWithOpacity(Color color, double opacity) {
+  // Extract RGB values using toARGB32() method
+  final argb = color.toARGB32();
+  final r = (argb >> 16) & 0xFF;
+  final g = (argb >> 8) & 0xFF;
+  final b = argb & 0xFF;
+  
   return Color.fromARGB(
     (opacity * 255).round(),
-    (color.r * 255.0).round() & 0xff,
-    (color.g * 255.0).round() & 0xff,
-    (color.b * 255.0).round() & 0xff,
+    r,
+    g,
+    b,
   );
 }
 
