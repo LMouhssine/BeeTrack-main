@@ -31,32 +31,37 @@ const Logo: React.FC<LogoProps> = ({
 
   const currentSize = sizeClasses[size];
 
-  // Icône SVG de ruche moderne avec design hexagonal
+  // Icône SVG de ruche identique à Icons.hive de Flutter
   const HiveIcon = () => (
     <svg
       className={`${currentSize.icon} text-amber-600`}
       viewBox="0 0 24 24"
-      fill="none"
+      fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Ruche principale avec structure hexagonale */}
-      <g fill="currentColor">
-        {/* Base de la ruche */}
-        <path d="M12 20L6 17L6 10L12 7L18 10L18 17L12 20Z" opacity="0.9"/>
+      {/* Ruche traditionnelle avec couches empilées comme Icons.hive */}
+      <g>
+        {/* Toit pointu de la ruche */}
+        <path d="M12 2L8 6h8l-4-4z"/>
         
-        {/* Couches hexagonales */}
-        <path d="M12 16L8 14L8 11L12 9L16 11L16 14L12 16Z" opacity="0.7"/>
-        <path d="M12 13L10 12L10 10.5L12 9.5L14 10.5L14 12L12 13Z" opacity="0.5"/>
+        {/* Couches de la ruche empilées */}
+        <rect x="7" y="6" width="10" height="2.5" rx="1"/>
+        <rect x="6.5" y="8.5" width="11" height="2.5" rx="1"/>
+        <rect x="6" y="11" width="12" height="2.5" rx="1"/>
+        <rect x="6.5" y="13.5" width="11" height="2.5" rx="1"/>
+        <rect x="7" y="16" width="10" height="2.5" rx="1"/>
+        <rect x="7.5" y="18.5" width="9" height="2.5" rx="1"/>
         
-        {/* Toit de la ruche */}
-        <path d="M12 7L8 5L12 3L16 5L12 7Z"/>
+        {/* Petite entrée au centre */}
+        <circle cx="12" cy="15" r="0.8"/>
         
-        {/* Entrée de la ruche */}
-        <circle cx="12" cy="15" r="1" fill="currentColor" opacity="0.8"/>
-        
-        {/* Petits détails hexagonaux */}
-        <polygon points="9,12 10,11.5 11,12 10,12.5" opacity="0.6"/>
-        <polygon points="13,12 14,11.5 15,12 14,12.5" opacity="0.6"/>
+        {/* Lignes de texture sur les couches */}
+        <line x1="8" y1="7.25" x2="16" y2="7.25" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
+        <line x1="7.5" y1="9.75" x2="16.5" y2="9.75" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
+        <line x1="7" y1="12.25" x2="17" y2="12.25" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
+        <line x1="7.5" y1="14.75" x2="16.5" y2="14.75" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
+        <line x1="8" y1="17.25" x2="16" y2="17.25" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
+        <line x1="8.5" y1="19.75" x2="15.5" y2="19.75" stroke="currentColor" strokeWidth="0.3" opacity="0.6"/>
       </g>
     </svg>
   );
