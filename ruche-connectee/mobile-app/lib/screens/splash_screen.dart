@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
+import 'package:ruche_connectee/widgets/bee_logo.dart';
 import 'package:get_it/get_it.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -69,13 +70,13 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo animé
+            // Logo animé avec le nouveau design
             ScaleTransition(
               scale: _animation,
-              child: const Icon(
-                Icons.hive,
+              child: const BeeLogo(
                 size: 120,
                 color: Colors.white,
+                beeColor: Colors.amber,
               ),
             ),
             const SizedBox(height: 24),
@@ -83,11 +84,13 @@ class _SplashScreenState extends State<SplashScreen>
             FadeTransition(
               opacity: _animation,
               child: const Text(
-                'Ruche Connectée',
+                'BEETRCK',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  fontFamily: 'monospace',
+                  letterSpacing: 4,
                 ),
               ),
             ),

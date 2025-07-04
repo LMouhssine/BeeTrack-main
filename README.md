@@ -1,15 +1,10 @@
 <div align="center">
 
-```
-██████╗ ███████╗███████╗████████╗██████╗  █████╗  ██████╗██╗  ██╗
-██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║ ██╔╝
-██████╔╝█████╗  █████╗     ██║   ██████╔╝███████║██║     █████╔╝ 
-██╔══██╗██╔══╝  ██╔══╝     ██║   ██╔══██╗██╔══██║██║     ██╔═██╗ 
-██████╔╝███████╗███████╗   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗
-╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-```
+<img src="public/logo.svg" alt="BeeTrack Logo" width="120" height="120">
 
-**Plateforme de Suivi des Ruches Connectées**
+# BEETRCK
+
+**Plateforme de Surveillance Intelligente pour Ruches Connectées**
 
 [![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue.svg)](https://www.typescriptlang.org/)

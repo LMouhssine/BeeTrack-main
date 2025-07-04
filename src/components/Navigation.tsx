@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, Box, BarChart3, Settings, AlertTriangle } from 'lucide-react';
+import Logo from './Logo';
 
 interface NavigationProps {
   activeTab: string;
@@ -18,8 +19,15 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 mb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-8">
-          {tabs.map((tab) => {
+        <div className="flex items-center justify-between">
+          {/* Logo à gauche */}
+          <div className="flex-shrink-0">
+            <Logo size="medium" variant="full" />
+          </div>
+          
+          {/* Navigation au centre */}
+          <div className="flex space-x-8">
+            {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             
@@ -38,6 +46,10 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
               </button>
             );
           })}
+          </div>
+          
+          {/* Espace à droite pour équilibrer */}
+          <div className="flex-shrink-0 w-32"></div>
         </div>
       </div>
     </nav>

@@ -1,0 +1,39 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hexagone de fond amber -->
+  <path
+    d="M25 25.98L50 10.98L75 25.98L75 59.02L50 74.02L25 59.02Z"
+    fill="#F59E0B"
+    stroke="none"
+  />
+  
+  <!-- Abeille stylisée -->
+  <g fill="#FCD34D" stroke="none">
+    <!-- Corps principal de l'abeille -->
+    <ellipse cx="50" cy="50" rx="8" ry="14" />
+    
+    <!-- Rayures sur le corps -->
+    <rect x="44" y="42" width="12" height="2.5" rx="1" fill="#1F2937"/>
+    <rect x="44" y="47" width="12" height="2.5" rx="1" fill="#1F2937"/>
+    <rect x="44" y="52" width="12" height="2.5" rx="1" fill="#1F2937"/>
+    <rect x="44" y="57" width="12" height="2.5" rx="1" fill="#1F2937"/>
+    
+    <!-- Tête -->
+    <circle cx="50" cy="35" r="5"/>
+    
+    <!-- Antennes -->
+    <line x1="47" y1="32" x2="45" y2="28" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="53" y1="32" x2="55" y2="28" stroke="#1F2937" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="45" cy="28" r="1.5" fill="#1F2937"/>
+    <circle cx="55" cy="28" r="1.5" fill="#1F2937"/>
+    
+    <!-- Aile gauche -->
+    <ellipse cx="40" cy="45" rx="6" ry="10" transform="rotate(-20 40 45)" opacity="0.7"/>
+    
+    <!-- Aile droite -->
+    <ellipse cx="60" cy="45" rx="6" ry="10" transform="rotate(20 60 45)" opacity="0.7"/>
+    
+    <!-- Détails des ailes -->
+    <path d="M38 40 Q42 38 44 42 Q42 46 38 44" fill="#1F2937" opacity="0.3"/>
+    <path d="M62 40 Q58 38 56 42 Q58 46 62 44" fill="#1F2937" opacity="0.3"/>
+  </g>
+</svg> 

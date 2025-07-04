@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Fond amber pour l'icône -->
+    <path android:fillColor="#F59E0B"
+        android:pathData="M0,0h108v108h-108z"/>
+    
+    <!-- Hexagone principal -->
+    <path android:fillColor="#1F2937"
+        android:pathData="M29,33.98L54,18.98L79,33.98L79,73.02L54,88.02L29,73.02Z"/>
+    
+    <!-- Corps de l'abeille -->
+    <ellipse android:fillColor="#FCD34D"
+        android:cx="54"
+        android:cy="54"
+        android:rx="8"
+        android:ry="14"/>
+    
+    <!-- Rayures du corps -->
+    <rect android:fillColor="#1F2937"
+        android:x="48"
+        android:y="46"
+        android:width="12"
+        android:height="2.5"
+        android:rx="1"/>
+    <rect android:fillColor="#1F2937"
+        android:x="48"
+        android:y="51"
+        android:width="12"
+        android:height="2.5"
+        android:rx="1"/>
+    <rect android:fillColor="#1F2937"
+        android:x="48"
+        android:y="56"
+        android:width="12"
+        android:height="2.5"
+        android:rx="1"/>
+    <rect android:fillColor="#1F2937"
+        android:x="48"
+        android:y="61"
+        android:width="12"
+        android:height="2.5"
+        android:rx="1"/>
+    
+    <!-- Tête -->
+    <circle android:fillColor="#FCD34D"
+        android:cx="54"
+        android:cy="39"
+        android:r="5"/>
+    
+    <!-- Antennes -->
+    <path android:strokeColor="#1F2937"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M51,36 L49,32"/>
+    <path android:strokeColor="#1F2937"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M57,36 L59,32"/>
+    <circle android:fillColor="#1F2937"
+        android:cx="49"
+        android:cy="32"
+        android:r="1.5"/>
+    <circle android:fillColor="#1F2937"
+        android:cx="59"
+        android:cy="32"
+        android:r="1.5"/>
+    
+    <!-- Ailes -->
+    <ellipse android:fillColor="#FCD34D"
+        android:fillAlpha="0.7"
+        android:cx="44"
+        android:cy="49"
+        android:rx="6"
+        android:ry="10"/>
+    <ellipse android:fillColor="#FCD34D"
+        android:fillAlpha="0.7"
+        android:cx="64"
+        android:cy="49"
+        android:rx="6"
+        android:ry="10"/>
+        
+</vector> 
