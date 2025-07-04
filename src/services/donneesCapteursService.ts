@@ -36,38 +36,101 @@ export class DonneesCapteursService {
         throw new Error('Utilisateur non connecté');
       }
 
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('rucheId', '==', rucheId),
-        orderBy('timestamp', 'desc'),
-        limit(1)
-      );
-
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        return null;
+      // Essayer d'abord la requête optimisée avec index
+      try {
+        return await this.getDerniereMesureAvecIndex(rucheId);
+      } catch (indexError: any) {
+        // Si l'index n'existe pas, utiliser la méthode alternative
+        if (indexError.message?.includes('requires an index')) {
+          console.warn('⚠️ Index manquant pour getDerniereMesure, utilisation de la méthode alternative');
+          return await this.getDerniereMesureSansIndex(rucheId);
+        }
+        throw indexError;
       }
-
-      const doc = querySnapshot.docs[0];
-      const data = doc.data();
-      
-      return {
-        id: doc.id,
-        rucheId: data.rucheId,
-        timestamp: data.timestamp?.toDate() || new Date(data.timestamp),
-        temperature: data.temperature,
-        humidity: data.humidity,
-        couvercleOuvert: data.couvercleOuvert,
-        batterie: data.batterie,
-        signalQualite: data.signalQualite,
-        erreur: data.erreur
-      };
 
     } catch (error: any) {
       console.error('Erreur lors de la récupération de la dernière mesure:', error);
       throw new Error(`Impossible de récupérer la dernière mesure: ${error.message}`);
     }
+  }
+
+  /**
+   * Méthode optimisée avec index composite (nécessite l'index Firebase)
+   */
+  private static async getDerniereMesureAvecIndex(rucheId: string): Promise<DonneesCapteur | null> {
+    const q = query(
+      collection(db, this.COLLECTION_NAME),
+      where('rucheId', '==', rucheId),
+      orderBy('timestamp', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    
+    return {
+      id: doc.id,
+      rucheId: data.rucheId,
+      timestamp: data.timestamp?.toDate() || new Date(data.timestamp),
+      temperature: data.temperature,
+      humidity: data.humidity,
+      couvercleOuvert: data.couvercleOuvert,
+      batterie: data.batterie,
+      signalQualite: data.signalQualite,
+      erreur: data.erreur
+    };
+  }
+
+  /**
+   * Méthode alternative sans index composite (moins efficace mais fonctionne toujours)
+   */
+  private static async getDerniereMesureSansIndex(rucheId: string): Promise<DonneesCapteur | null> {
+    console.log('🔄 Récupération dernière mesure via méthode alternative...');
+    
+    // Récupérer les dernières mesures et trouver la plus récente côté client
+    const q = query(
+      collection(db, this.COLLECTION_NAME),
+      where('rucheId', '==', rucheId),
+      limit(10) // Prendre les 10 dernières pour être sûr
+    );
+
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    let derniereMesure: DonneesCapteur | null = null;
+    let dernierTimestamp = new Date(0); // Date très ancienne
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const timestamp = data.timestamp?.toDate() || new Date(data.timestamp);
+      
+      if (timestamp > dernierTimestamp) {
+        dernierTimestamp = timestamp;
+        derniereMesure = {
+          id: doc.id,
+          rucheId: data.rucheId,
+          timestamp: timestamp,
+          temperature: data.temperature,
+          humidity: data.humidity,
+          couvercleOuvert: data.couvercleOuvert,
+          batterie: data.batterie,
+          signalQualite: data.signalQualite,
+          erreur: data.erreur
+        };
+      }
+    });
+
+    console.log('✅ Dernière mesure récupérée via méthode alternative');
+    return derniereMesure;
   }
 
   /**

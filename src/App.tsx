@@ -163,7 +163,7 @@ function App() {
   const renderMainContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard user={user} apiculteur={apiculteur} />;
+        return <Dashboard user={user} apiculteur={apiculteur} onNavigate={handleTabChange} />;
       case 'ruchers':
         return <RuchersList user={user} />;
       case 'ruches':
@@ -184,7 +184,7 @@ function App() {
       case 'test-alerte':
         return <TestAlerteCouvercle />;
       default:
-        return <Dashboard user={user} apiculteur={apiculteur} />;
+        return <Dashboard user={user} apiculteur={apiculteur} onNavigate={handleTabChange} />;
     }
   };
 
