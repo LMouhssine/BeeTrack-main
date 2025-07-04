@@ -6,20 +6,10 @@ import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/screens/ruches/ruche_detail_api_screen.dart';
 
-/// Helper function to create colors with opacity without deprecation warnings
+/// Helper function to create colors with opacity using Flutter's native method
 Color colorWithOpacity(Color color, double opacity) {
-  // Extract RGB values using toARGB32() method
-  final argb = color.toARGB32();
-  final r = (argb >> 16) & 0xFF;
-  final g = (argb >> 8) & 0xFF;
-  final b = argb & 0xFF;
-
-  return Color.fromARGB(
-    (opacity * 255).round(),
-    r,
-    g,
-    b,
-  );
+  // Use Flutter's built-in withOpacity method - simple and stable
+  return color.withOpacity(opacity);
 }
 
 class RuchesByRucherScreen extends StatefulWidget {
