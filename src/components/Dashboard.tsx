@@ -360,13 +360,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, apiculteur, onNavigate }) =
         </div>
 
         {/* Flux d'activités */}
-        <div className={isMobile || isTablet ? 'order-2' : ''}>
+        <div className={`${isMobile || isTablet ? 'order-2' : ''} flex flex-col`}>
           <ActivityFeed
             activities={activities}
             loading={false}
             onActivityClick={handleActivityClick}
             onRefresh={loadActivities}
-            maxItems={isMobile ? 5 : 10}
+            maxItems={isMobile ? 4 : 8}
             showFilters={!isMobile}
           />
         </div>

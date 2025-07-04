@@ -126,24 +126,24 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   };
 
   const ActivitySkeleton = () => (
-    <div className="flex items-start space-x-3 p-3 rounded-lg animate-pulse">
+    <div className="flex items-start space-x-3 p-2 rounded-lg animate-pulse">
       <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
-      <div className="flex-1 min-w-0 space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+        <div className="h-2.5 bg-gray-200 rounded w-1/2"></div>
       </div>
     </div>
   );
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <div className="flex items-center justify-between mb-6">
-          <div className="h-6 bg-gray-200 rounded w-1/3 animate-pulse"></div>
-          <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col h-fit">
+        <div className="flex items-center justify-between p-4 pb-2">
+          <div className="h-5 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+          <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
         </div>
-        <div className="space-y-4">
-          {[...Array(5)].map((_, index) => (
+        <div className="flex-1 p-4 pt-2 space-y-1">
+          {[...Array(4)].map((_, index) => (
             <ActivitySkeleton key={index} />
           ))}
         </div>
@@ -152,9 +152,9 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-slide-in-right">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-100 animate-slide-in-right flex flex-col h-fit">
       {/* En-tête avec filtres */}
-      <div className="flex flex-col space-y-4 mb-6">
+      <div className="flex flex-col space-y-2 p-4 pb-0">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold text-gray-900">Activité récente</h3>
           <div className="flex items-center space-x-2">
@@ -203,12 +203,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
       </div>
 
       {/* Liste des activités */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div className={`flex-1 p-4 pt-2 ${filteredActivities.length > 5 ? 'max-h-80 overflow-y-auto' : ''}`}>
         {filteredActivities.length === 0 ? (
-          <div className="text-center py-8">
-            <Activity size={48} className="text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 font-medium">Aucune activité</p>
-            <p className="text-gray-400 text-sm">
+          <div className="text-center py-3">
+            <Activity size={24} className="text-gray-300 mx-auto mb-1" />
+            <p className="text-gray-500 font-medium text-xs">Aucune activité</p>
+            <p className="text-gray-400 text-xs">
               {filter !== 'all' 
                 ? `Aucune activité de type "${getTypeLabel(filter)}" trouvée`
                 : 'Les activités récentes apparaîtront ici'
@@ -216,16 +216,17 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
             </p>
           </div>
         ) : (
-          filteredActivities.map((activity) => {
-            const Icon = getActivityIcon(activity.type);
-            const colorClass = getActivityColor(activity.type, activity.severity);
-            
-            return (
-              <div 
-                key={activity.id} 
-                className={`flex items-start space-x-3 p-3 rounded-lg transition-all duration-200 ${
-                  activity.read ? 'hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-400'
-                } ${onActivityClick ? 'cursor-pointer' : ''}`}
+          <div className="space-y-1">
+            {filteredActivities.map((activity) => {
+              const Icon = getActivityIcon(activity.type);
+              const colorClass = getActivityColor(activity.type, activity.severity);
+              
+              return (
+                <div 
+                  key={activity.id} 
+                  className={`flex items-start space-x-3 p-2 rounded-lg transition-all duration-200 ${
+                    activity.read ? 'hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-400'
+                  } ${onActivityClick ? 'cursor-pointer' : ''}`}
                 onClick={() => onActivityClick?.(activity)}
                 role={onActivityClick ? 'button' : undefined}
                 tabIndex={onActivityClick ? 0 : undefined}
@@ -273,17 +274,18 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
                   <ChevronRight size={16} className="text-gray-400 flex-shrink-0 mt-1" />
                 )}
               </div>
-            );
-          })
+              );
+            })}
+          </div>
+        )}
+        
+        {/* Bouton voir plus */}
+        {activities.length > maxItems && (
+          <button className="w-full mt-2 py-1.5 text-xs text-amber-600 hover:text-amber-700 font-medium border border-amber-200 hover:border-amber-300 rounded-md transition-colors-smooth focus-ring-amber">
+            Voir toute l'activité ({activities.length - filteredActivities.length} de plus)
+          </button>
         )}
       </div>
-      
-      {/* Bouton voir plus */}
-      {activities.length > maxItems && (
-        <button className="w-full mt-4 py-2 text-sm text-amber-600 hover:text-amber-700 font-medium border border-amber-200 hover:border-amber-300 rounded-lg transition-colors-smooth focus-ring-amber">
-          Voir toute l'activité ({activities.length - filteredActivities.length} de plus)
-        </button>
-      )}
     </div>
   );
 };
