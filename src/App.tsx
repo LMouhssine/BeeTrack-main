@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db } from './firebase-config';
 import { doc, getDoc } from 'firebase/firestore';
-import { LogIn, LogOut, User as UserIcon, AlertTriangle, ChevronDown, Settings } from 'lucide-react';
-import Navigation from './components/Navigation';
+import { LogIn, LogOut, User as UserIcon, AlertTriangle, ChevronDown, Settings, Menu, X, Bell, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
 import RuchersList from './components/RuchersList';
 import RuchesList from './components/RuchesList';
 import RucheDetails from './components/RucheDetails';
@@ -36,8 +37,10 @@ function App() {
   const [email, setEmail] = useState(''); // Identifiants de connexion Firebase Auth
   const [password, setPassword] = useState(''); // Créez un compte dans la console Firebase
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('ruchers');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   
   // État pour la navigation vers les détails des ruches
   const [selectedRucheId, setSelectedRucheId] = useState<string | null>(null);
@@ -143,6 +146,45 @@ function App() {
     setActiveTab(tab);
     if (tab !== 'ruches') {
       setSelectedRucheId(null); // Réinitialiser la sélection de ruche si on change d'onglet
+    }
+    // Fermer la sidebar mobile lors du changement d'onglet
+    setIsMobileSidebarOpen(false);
+  };
+
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  // Fonction pour rendre le contenu principal
+  const renderMainContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard user={user} apiculteur={apiculteur} />;
+      case 'ruchers':
+        return <RuchersList user={user} />;
+      case 'ruches':
+        if (selectedRucheId) {
+          return (
+            <RucheDetails 
+              rucheId={selectedRucheId} 
+              onBack={handleBackToRuchesList}
+              onDelete={handleDeleteRuche}
+            />
+          );
+        }
+        return <RuchesList onViewDetails={handleViewRucheDetails} />;
+      case 'statistiques':
+        return <Statistiques />;
+      case 'test-api':
+        return <TestDerniereMesure />;
+      case 'test-alerte':
+        return <TestAlerteCouvercle />;
+      default:
+        return <Dashboard user={user} apiculteur={apiculteur} />;
     }
   };
 
@@ -259,109 +301,255 @@ function App() {
 
   console.log('Rendering main app...');
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-amber-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Logo size="medium" />
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
+      <style>{`
+        body { overflow-x: hidden; }
+      `}</style>
+      {/* Sidebar pour desktop */}
+      <div className="hidden lg:block">
+        <Sidebar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebarCollapse}
+        />
+      </div>
+
+      {/* Sidebar mobile overlay */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={toggleMobileSidebar} />
+          <div className="relative w-64">
+            <Sidebar
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isCollapsed={false}
+              onToggleCollapse={() => {}}
+            />
+            <button
+              onClick={toggleMobileSidebar}
+              className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-lg"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contenu principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header mobile */}
+        <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleMobileSidebar}
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+              >
+                <Menu size={20} />
+              </button>
             </div>
             
-            {/* Menu utilisateur avec dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors duration-200"
-              >
-                <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
-                  <UserIcon size={16} className="text-amber-600" />
-                </div>
-                <div className="text-left hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">
-                    {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate max-w-32">
-                    {user?.email}
-                  </p>
-                </div>
-                <ChevronDown 
-                  size={16} 
-                  className={`text-gray-500 transition-transform duration-200 ${
-                    isUserDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
+            <Logo size="small" variant="full" />
+             
+            {/* Icônes d'action mobile */}
+            <div className="flex items-center space-x-1">
+              <button className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth">
+                <Bell size={18} />
               </button>
+              <button className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth">
+                <HelpCircle size={18} />
+              </button>
+              <button className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth">
+                <Settings size={18} />
+              </button>
+               
+              {/* Menu utilisateur mobile */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center space-x-2 p-2 text-gray-700 hover:bg-gray-50 rounded-lg ml-2"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
+                    <UserIcon size={16} className="text-amber-600" />
+                  </div>
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-gray-500 transition-transform duration-200 ${
+                      isUserDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-              {/* Dropdown Menu */}
-              {isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  {/* Info utilisateur */}
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-full">
-                        <UserIcon size={20} className="text-amber-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                        {apiculteur?.role && (
-                          <span className="inline-block mt-1 px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
-                            {apiculteur.role}
-                          </span>
-                        )}
+                {/* Dropdown Menu Mobile */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {/* Info utilisateur */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-full">
+                          <UserIcon size={20} className="text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                          {apiculteur?.role && (
+                            <span className="inline-block mt-1 px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                              {apiculteur.role}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Menu Items */}
-                  <div className="py-1">
-                    <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                      <UserIcon size={16} />
-                      <span>Mon Profil</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                      <Settings size={16} />
-                      <span>Paramètres</span>
-                    </button>
-                    <hr className="my-1" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
-                    >
-                      <LogOut size={16} />
-                      <span>Se déconnecter</span>
-                    </button>
+                    {/* Menu Items */}
+                    <div className="py-1">
+                      <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                        <UserIcon size={16} />
+                        <span>Mon Profil</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                        <Settings size={16} />
+                        <span>Paramètres</span>
+                      </button>
+                      <hr className="my-1" />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <LogOut size={16} />
+                        <span>Se déconnecter</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Navigation */}
-      <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
+        {/* Header desktop */}
+        <div className="hidden lg:block bg-white shadow-sm border-b border-gray-200">
+          <div className="px-6 py-3">
+            <div className="flex items-center justify-between">
+              {/* Bouton toggle sidebar */}
+              <button
+                onClick={toggleSidebarCollapse}
+                className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth focus-ring-amber"
+                title={isSidebarCollapsed ? "Étendre la sidebar" : "Réduire la sidebar"}
+              >
+                {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              </button>
+              
+              <div className="flex items-center space-x-4">
+                {/* Icônes d'action desktop */}
+                <div className="flex items-center space-x-2">
+                  <button 
+                    className="relative p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth focus-ring-amber"
+                    title="Notifications"
+                  >
+                    <Bell size={20} />
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs"></span>
+                  </button>
+                  <button 
+                    className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth focus-ring-amber"
+                    title="Aide"
+                  >
+                    <HelpCircle size={20} />
+                  </button>
+                  <button 
+                    className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors-smooth focus-ring-amber"
+                    title="Paramètres"
+                  >
+                    <Settings size={20} />
+                  </button>
+                </div>
+                
+                {/* Séparateur */}
+                <div className="h-8 w-px bg-gray-200"></div>
+                
+                {/* Menu utilisateur desktop */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors duration-200"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
+                      <UserIcon size={16} className="text-amber-600" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-gray-900">
+                        {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate max-w-32">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <ChevronDown 
+                      size={16} 
+                      className={`text-gray-500 transition-transform duration-200 ${
+                        isUserDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        {activeTab === 'ruchers' && <RuchersList user={user} />}
-        {activeTab === 'ruches' && !selectedRucheId && (
-          <RuchesList onViewDetails={handleViewRucheDetails} />
-        )}
-        {activeTab === 'ruches' && selectedRucheId && (
-          <RucheDetails 
-            rucheId={selectedRucheId} 
-            onBack={handleBackToRuchesList}
-            onDelete={handleDeleteRuche}
-          />
-        )}
-        {activeTab === 'statistiques' && <Statistiques />}
-        {activeTab === 'test-api' && <TestDerniereMesure />}
-        {activeTab === 'test-alerte' && <TestAlerteCouvercle />}
-      </main>
+                  {/* Dropdown Menu Desktop */}
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      {/* Info utilisateur */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-full">
+                            <UserIcon size={20} className="text-amber-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {apiculteur ? `${apiculteur.prenom} ${apiculteur.nom}` : 'Utilisateur'}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                            {apiculteur?.role && (
+                              <span className="inline-block mt-1 px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                                {apiculteur.role}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                          <UserIcon size={16} />
+                          <span>Mon Profil</span>
+                        </button>
+                        <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                          <Settings size={16} />
+                          <span>Paramètres</span>
+                        </button>
+                        <hr className="my-1" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                        >
+                          <LogOut size={16} />
+                          <span>Se déconnecter</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenu principal */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 main-scrollbar">
+          {renderMainContent()}
+        </main>
+      </div>
 
       {/* Overlay pour fermer le dropdown */}
       {isUserDropdownOpen && (
