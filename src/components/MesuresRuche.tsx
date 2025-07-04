@@ -66,7 +66,7 @@ const MesuresRuche: React.FC<MesuresRucheProps> = ({ rucheId, rucheNom }) => {
       setLoadingMessage('Chargement des mesures...');
       console.log('🔄 Chargement des mesures pour la ruche:', rucheId);
       
-      const mesuresData = await RucheService.obtenirMesures7DerniersJoursRobuste(rucheId);
+      const mesuresData = await RucheService.obtenirMesures7DerniersJours(rucheId);
       setMesures(mesuresData);
       console.log('✅ Mesures chargées:', mesuresData.length, 'mesures trouvées');
       
@@ -87,7 +87,7 @@ const MesuresRuche: React.FC<MesuresRucheProps> = ({ rucheId, rucheNom }) => {
       setError('');
       console.log('🔄 Rechargement des mesures après création de données...');
       
-      const mesuresData = await RucheService.obtenirMesures7DerniersJoursRobuste(rucheId);
+      const mesuresData = await RucheService.obtenirMesures7DerniersJours(rucheId);
       setMesures(mesuresData);
       console.log('✅ Mesures rechargées:', mesuresData.length, 'mesures trouvées');
       
@@ -142,18 +142,11 @@ const MesuresRuche: React.FC<MesuresRucheProps> = ({ rucheId, rucheNom }) => {
         console.log('✅ Données créées via l\'endpoint principal');
       } catch (error) {
         console.log('⚠️ Échec de l\'endpoint principal, essai de l\'endpoint dev...');
-        try {
-          // En cas d'échec, essayer l'endpoint de développement
-          console.log('🔄 Tentative avec l\'endpoint de développement...');
-          await RucheService.creerDonneesTestDev(rucheId, 10, 8);
-          console.log('✅ Données créées via l\'endpoint de développement');
-        } catch (devError) {
-          console.log('⚠️ Échec de l\'endpoint dev, création directe dans Firestore...');
-          // En dernier recours, créer directement dans Firestore
-          console.log('🔄 Tentative avec Firestore direct...');
-          await TestDataService.creerDonneesTestFirestore(rucheId, 10, 8);
-          console.log('✅ Données créées directement dans Firestore');
-        }
+        console.log('⚠️ Échec de l\'endpoint principal, création directe dans Firestore...');
+        // En cas d'échec, créer directement dans Firestore
+        console.log('🔄 Tentative avec Firestore direct...');
+        await TestDataService.creerDonneesTestFirestore(rucheId, 10, 8);
+        console.log('✅ Données créées directement dans Firestore');
       }
       
       setLoadingMessage('Rechargement des mesures...');
@@ -197,7 +190,8 @@ const MesuresRuche: React.FC<MesuresRucheProps> = ({ rucheId, rucheNom }) => {
       setLoadingMessage('Chargement depuis Firestore...');
       console.log('🔥 Chargement direct depuis Firestore pour la ruche:', rucheId);
       
-      const mesuresData = await RucheService.obtenirMesures7DerniersJoursFirestore(rucheId);
+      // Utiliser la méthode standard qui utilise déjà Firestore
+      const mesuresData = await RucheService.obtenirMesures7DerniersJours(rucheId);
       setMesures(mesuresData);
       console.log('✅ Mesures chargées depuis Firestore:', mesuresData.length, 'mesures trouvées');
       

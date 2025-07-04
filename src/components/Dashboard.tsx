@@ -15,8 +15,11 @@ import {
   Calendar,
   Clock,
   BarChart3,
-  Settings
+  Settings,
+  ChevronDown
 } from 'lucide-react';
+import { RucheService, RucheAvecRucher } from '../services/rucheService';
+import MesuresRuche from './MesuresRuche';
 
 interface DashboardProps {
   user: any;
@@ -45,11 +48,17 @@ interface RecentActivity {
 const Dashboard: React.FC<DashboardProps> = ({ user, apiculteur }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [ruches, setRuches] = useState<RucheAvecRucher[]>([]);
+  const [selectedRucheId, setSelectedRucheId] = useState<string>('');
+  const [loadingRuches, setLoadingRuches] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+
+    // Charger les ruches de l'utilisateur
+    loadRuches();
 
     // Simuler le chargement des données
     const loadTimer = setTimeout(() => {
@@ -62,18 +71,34 @@ const Dashboard: React.FC<DashboardProps> = ({ user, apiculteur }) => {
     };
   }, []);
 
-  // Données statistiques mockées (à remplacer par les vraies données)
+  const loadRuches = async () => {
+    try {
+      setLoadingRuches(true);
+      const ruchesData = await RucheService.obtenirRuchesUtilisateur();
+      setRuches(ruchesData);
+      // Sélectionner automatiquement la première ruche si elle existe
+      if (ruchesData.length > 0 && !selectedRucheId) {
+        setSelectedRucheId(ruchesData[0].id!);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des ruches:', error);
+    } finally {
+      setLoadingRuches(false);
+    }
+  };
+
+  // Données statistiques mises à jour avec les vraies données
   const statsCards: StatCard[] = [
     {
       title: 'Ruchers actifs',
-      value: 5,
+      value: new Set(ruches.map(r => r.idRucher)).size,
       icon: Home,
       trend: { value: 12, isPositive: true },
       color: 'bg-blue-500'
     },
     {
       title: 'Ruches surveillées',
-      value: 23,
+      value: ruches.length,
       icon: Hexagon,
       trend: { value: 8, isPositive: true },
       color: 'bg-amber-500'
@@ -87,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, apiculteur }) => {
     },
     {
       title: 'Ruches en ligne',
-      value: '21/23',
+      value: `${ruches.filter(r => r.enService).length}/${ruches.length}`,
       icon: Wifi,
       trend: { value: 95, isPositive: true },
       color: 'bg-green-500'
@@ -248,39 +273,69 @@ const Dashboard: React.FC<DashboardProps> = ({ user, apiculteur }) => {
       {/* Contenu principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Graphique principal */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg hover-lift p-6 border border-gray-100 animate-slide-in-left">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Aperçu des mesures</h3>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded-lg font-medium">24h</button>
-              <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">7j</button>
-              <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">30j</button>
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg hover-lift border border-gray-100 animate-slide-in-left">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Mesures en temps réel</h3>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded-lg font-medium">7j</button>
+                <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">24h</button>
+                <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">30j</button>
+              </div>
             </div>
+            
+            {/* Sélecteur de ruche */}
+            {ruches.length > 0 && (
+              <div className="flex items-center space-x-3">
+                <label className="text-sm font-medium text-gray-700">Ruche :</label>
+                <div className="relative">
+                  <select
+                    value={selectedRucheId}
+                    onChange={(e) => setSelectedRucheId(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  >
+                    {ruches.map((ruche) => (
+                      <option key={ruche.id} value={ruche.id}>
+                        {ruche.nom} - {ruche.rucherNom || 'Rucher inconnu'}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            )}
           </div>
           
-          {/* Placeholder pour graphique */}
-          <div className="h-64 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg flex items-center justify-center border-2 border-dashed border-amber-200">
-            <div className="text-center">
-              <Activity size={48} className="text-amber-400 mx-auto mb-4" />
-              <p className="text-amber-700 font-medium">Graphique des mesures</p>
-              <p className="text-amber-600 text-sm">Températures, humidité, poids...</p>
-            </div>
-          </div>
-          
-          {/* Légende */}
-          <div className="flex items-center justify-center space-x-6 mt-4">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-              <span className="text-sm text-gray-600">Température</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-              <span className="text-sm text-gray-600">Humidité</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span className="text-sm text-gray-600">Poids</span>
-            </div>
+          {/* Graphiques des mesures réelles */}
+          <div className="p-0">
+            {ruches.length === 0 ? (
+              <div className="h-64 flex items-center justify-center p-6">
+                <div className="text-center">
+                  <Hexagon size={48} className="text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium">Aucune ruche trouvée</p>
+                  <p className="text-gray-500 text-sm mb-4">Ajoutez des ruches pour voir les mesures</p>
+                  <button 
+                    onClick={() => window.location.href = '#ruches'}
+                    className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors"
+                  >
+                    Ajouter une ruche
+                  </button>
+                </div>
+              </div>
+            ) : selectedRucheId ? (
+              <MesuresRuche 
+                rucheId={selectedRucheId} 
+                rucheNom={ruches.find(r => r.id === selectedRucheId)?.nom || 'Ruche inconnue'} 
+              />
+            ) : (
+              <div className="h-64 flex items-center justify-center p-6">
+                <div className="text-center">
+                  <Activity size={48} className="text-amber-400 mx-auto mb-4" />
+                  <p className="text-amber-700 font-medium">Sélectionnez une ruche</p>
+                  <p className="text-amber-600 text-sm">Choisissez une ruche pour voir ses mesures</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

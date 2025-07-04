@@ -70,7 +70,7 @@ const RucheDetails: React.FC<RucheDetailsProps> = ({ rucheId, onBack, onEdit, on
       console.log('🔍 Chargement de la dernière mesure pour la ruche:', rucheId);
       
       // Récupérer les mesures des 7 derniers jours et prendre la plus récente
-      const mesures = await RucheService.obtenirMesures7DerniersJoursRobuste(rucheId);
+              const mesures = await RucheService.obtenirMesures7DerniersJours(rucheId);
       
       if (mesures.length > 0) {
         // Trier par timestamp décroissant et prendre la plus récente

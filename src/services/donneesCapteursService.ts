@@ -2,8 +2,6 @@ import {
   collection, 
   addDoc, 
   getDocs, 
-  doc, 
-  getDoc, 
   query, 
   where, 
   orderBy, 
@@ -82,25 +80,86 @@ export class DonneesCapteursService {
         throw new Error('Utilisateur non connecté');
       }
 
-      const maintenant = new Date();
-      const il7Jours = new Date(maintenant.getTime() - (7 * 24 * 60 * 60 * 1000));
+      // Essayer d'abord la requête optimisée avec index
+      try {
+        return await this.getMesures7DerniersJoursAvecIndex(rucheId);
+      } catch (indexError: any) {
+        console.warn('⚠️ Index manquant, utilisation de la méthode alternative:', indexError.message);
+        
+        // Fallback : requête sans filtre de date (moins efficace mais fonctionne)
+        return await this.getMesures7DerniersJoursSansIndex(rucheId);
+      }
 
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('rucheId', '==', rucheId),
-        where('timestamp', '>=', Timestamp.fromDate(il7Jours)),
-        orderBy('timestamp', 'asc')
-      );
+    } catch (error: any) {
+      console.error('Erreur lors de la récupération des mesures:', error);
+      throw new Error(`Impossible de récupérer les mesures: ${error.message}`);
+    }
+  }
 
-      const querySnapshot = await getDocs(q);
-      const mesures: DonneesCapteur[] = [];
+  /**
+   * Méthode optimisée avec index composite (nécessite l'index Firebase)
+   */
+  private static async getMesures7DerniersJoursAvecIndex(rucheId: string): Promise<DonneesCapteur[]> {
+    const maintenant = new Date();
+    const il7Jours = new Date(maintenant.getTime() - (7 * 24 * 60 * 60 * 1000));
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
+    const q = query(
+      collection(db, this.COLLECTION_NAME),
+      where('rucheId', '==', rucheId),
+      where('timestamp', '>=', Timestamp.fromDate(il7Jours)),
+      orderBy('timestamp', 'asc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const mesures: DonneesCapteur[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      mesures.push({
+        id: doc.id,
+        rucheId: data.rucheId,
+        timestamp: data.timestamp?.toDate() || new Date(data.timestamp),
+        temperature: data.temperature,
+        humidity: data.humidity,
+        couvercleOuvert: data.couvercleOuvert,
+        batterie: data.batterie,
+        signalQualite: data.signalQualite,
+        erreur: data.erreur
+      });
+    });
+
+    return mesures;
+  }
+
+  /**
+   * Méthode alternative sans index composite (moins efficace mais fonctionne toujours)
+   */
+  private static async getMesures7DerniersJoursSansIndex(rucheId: string): Promise<DonneesCapteur[]> {
+    console.log('🔄 Utilisation de la méthode alternative sans index...');
+    
+    // Récupérer toutes les mesures de la ruche et filtrer côté client
+    const q = query(
+      collection(db, this.COLLECTION_NAME),
+      where('rucheId', '==', rucheId),
+      orderBy('timestamp', 'desc'),
+      limit(500) // Limiter pour éviter de charger trop de données
+    );
+
+    const querySnapshot = await getDocs(q);
+    const mesures: DonneesCapteur[] = [];
+    const maintenant = new Date();
+    const il7Jours = new Date(maintenant.getTime() - (7 * 24 * 60 * 60 * 1000));
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const timestamp = data.timestamp?.toDate() || new Date(data.timestamp);
+      
+      // Filtrer côté client pour les 7 derniers jours
+      if (timestamp >= il7Jours) {
         mesures.push({
           id: doc.id,
           rucheId: data.rucheId,
-          timestamp: data.timestamp?.toDate() || new Date(data.timestamp),
+          timestamp: timestamp,
           temperature: data.temperature,
           humidity: data.humidity,
           couvercleOuvert: data.couvercleOuvert,
@@ -108,14 +167,14 @@ export class DonneesCapteursService {
           signalQualite: data.signalQualite,
           erreur: data.erreur
         });
-      });
+      }
+    });
 
-      return mesures;
-
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération des mesures:', error);
-      throw new Error(`Impossible de récupérer les mesures: ${error.message}`);
-    }
+    // Trier par timestamp croissant
+    mesures.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    
+    console.log(`✅ ${mesures.length} mesures récupérées via méthode alternative`);
+    return mesures;
   }
 
   /**
