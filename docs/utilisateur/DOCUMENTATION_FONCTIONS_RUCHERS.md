@@ -1,6 +1,6 @@
 # Documentation - Fonctions de Récupération des Ruchers
 
-## 🐝 Vue d'ensemble
+## 📋 Vue d'ensemble
 
 Ce document décrit les nouvelles fonctions créées pour récupérer les ruchers de l'utilisateur connecté dans l'application web BeeTrack.
 

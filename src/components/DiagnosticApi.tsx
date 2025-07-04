@@ -1,41 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, RefreshCw, Activity } from 'lucide-react';
-import { RucheService } from '../services/rucheService';
-import { API_BASE_URL, API_ENDPOINTS, buildApiUrl } from '../config/api-config';
+import { DonneesCapteursService } from '../services/donneesCapteursService';
+import { auth, db } from '../firebase-config';
 
-const DiagnosticApi: React.FC = () => {
+const DiagnosticFirebase: React.FC = () => {
   const [tests, setTests] = useState({
-    devHealth: { status: 'pending', message: '', time: 0 },
-    mainHealth: { status: 'pending', message: '', time: 0 },
+    auth: { status: 'pending', message: '', time: 0 },
+    firestore: { status: 'pending', message: '', time: 0 },
     createTestData: { status: 'pending', message: '', time: 0 },
   });
 
-  const testEndpoint = async (name: string, url: string, options: RequestInit = {}) => {
+  const testFirebaseService = async (name: string, testFunc: () => Promise<any>) => {
     const startTime = Date.now();
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-      });
-      
+      await testFunc();
       const endTime = Date.now();
-      const responseTime = endTime - startTime;
-      
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          status: 'success' as const,
-          message: `✅ OK (${response.status}) - ${data.message || 'Réponse reçue'}`,
-          time: responseTime,
-        };
-      } else {
-        return {
-          status: 'error' as const,
-          message: `❌ Erreur ${response.status}`,
-          time: responseTime,
-        };
-      }
+      return {
+        status: 'success' as const,
+        message: '✅ Connexion réussie',
+        time: endTime - startTime,
+      };
     } catch (error: any) {
       const endTime = Date.now();
       return {
@@ -48,41 +32,46 @@ const DiagnosticApi: React.FC = () => {
 
   const runTests = async () => {
     setTests({
-      devHealth: { status: 'pending', message: '⏳ Test en cours...', time: 0 },
-      mainHealth: { status: 'pending', message: '⏳ Test en cours...', time: 0 },
+      auth: { status: 'pending', message: '⏳ Test en cours...', time: 0 },
+      firestore: { status: 'pending', message: '⏳ Test en cours...', time: 0 },
       createTestData: { status: 'pending', message: '⏳ Test en cours...', time: 0 },
     });
 
-    // Test 1: Endpoint de développement
-    const devHealthResult = await testEndpoint(
-      'devHealth',
-      buildApiUrl(API_ENDPOINTS.DEV_HEALTH)
-    );
+    // Test 1: Authentification Firebase
+    const authResult = await testFirebaseService('auth', async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('Utilisateur non connecté');
+      }
+      return currentUser;
+    });
 
-    // Test 2: Endpoint principal de test
-    const mainHealthResult = await testEndpoint(
-      'mainHealth',
-      buildApiUrl(API_ENDPOINTS.TEST_HEALTH)
-    );
+    // Test 2: Connectivité Firestore
+    const firestoreResult = await testFirebaseService('firestore', async () => {
+      const isConnected = await DonneesCapteursService.testConnectivite();
+      if (!isConnected) {
+        throw new Error('Impossible de se connecter à Firestore');
+      }
+      return true;
+    });
 
-    // Test 3: Test de création de données (uniquement si l'endpoint dev fonctionne)
+    // Test 3: Test de création de données
     let createTestResult = {
       status: 'error' as const,
-      message: '⏭️ Ignoré (endpoint dev non disponible)',
+      message: '⏭️ Ignoré (utilisateur non connecté)',
       time: 0,
     };
 
-    if (devHealthResult.status === 'success') {
-      createTestResult = await testEndpoint(
-        'createTestData',
-        buildApiUrl(API_ENDPOINTS.DEV_CREATE_TEST_DATA('test-ruche-id')) + '?nombreJours=1&mesuresParJour=2',
-        { method: 'POST' }
-      );
+    if (authResult.status === 'success' && firestoreResult.status === 'success') {
+      createTestResult = await testFirebaseService('createTestData', async () => {
+        const nombreMesures = await DonneesCapteursService.creerDonneesTest('test-ruche-diagnostic', 1, 2);
+        return `${nombreMesures} mesures créées`;
+      });
     }
 
     setTests({
-      devHealth: devHealthResult,
-      mainHealth: mainHealthResult,
+      auth: authResult,
+      firestore: firestoreResult,
       createTestData: createTestResult,
     });
   };
@@ -105,7 +94,7 @@ const DiagnosticApi: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">🔧 Diagnostic API</h3>
+        <h3 className="text-lg font-medium text-gray-900">🔧 Diagnostic Firebase</h3>
         <button
           onClick={runTests}
           className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -117,29 +106,29 @@ const DiagnosticApi: React.FC = () => {
 
       <div className="space-y-3">
         <div className="text-sm text-gray-600 mb-3">
-          <strong>API Base URL:</strong> {API_BASE_URL}
+          <strong>Utilisateur actuel:</strong> {auth.currentUser?.email || 'Non connecté'}
         </div>
 
         <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-          {getStatusIcon(tests.devHealth.status)}
+          {getStatusIcon(tests.auth.status)}
           <div className="flex-1">
-            <p className="font-medium">Endpoint de développement</p>
-            <p className="text-sm text-gray-600">GET /dev/health</p>
-            <p className="text-sm">{tests.devHealth.message}</p>
-            {tests.devHealth.time > 0 && (
-              <p className="text-xs text-gray-500">⏱️ {tests.devHealth.time}ms</p>
+            <p className="font-medium">Authentification Firebase</p>
+            <p className="text-sm text-gray-600">Vérification de l'utilisateur connecté</p>
+            <p className="text-sm">{tests.auth.message}</p>
+            {tests.auth.time > 0 && (
+              <p className="text-xs text-gray-500">⏱️ {tests.auth.time}ms</p>
             )}
           </div>
         </div>
 
         <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-          {getStatusIcon(tests.mainHealth.status)}
+          {getStatusIcon(tests.firestore.status)}
           <div className="flex-1">
-            <p className="font-medium">Endpoint principal de test</p>
-            <p className="text-sm text-gray-600">GET /api/test/health</p>
-            <p className="text-sm">{tests.mainHealth.message}</p>
-            {tests.mainHealth.time > 0 && (
-              <p className="text-xs text-gray-500">⏱️ {tests.mainHealth.time}ms</p>
+            <p className="font-medium">Connectivité Firestore</p>
+            <p className="text-sm text-gray-600">Test de connexion à la base de données</p>
+            <p className="text-sm">{tests.firestore.message}</p>
+            {tests.firestore.time > 0 && (
+              <p className="text-xs text-gray-500">⏱️ {tests.firestore.time}ms</p>
             )}
           </div>
         </div>
@@ -148,7 +137,7 @@ const DiagnosticApi: React.FC = () => {
           {getStatusIcon(tests.createTestData.status)}
           <div className="flex-1">
             <p className="font-medium">Création de données de test</p>
-            <p className="text-sm text-gray-600">POST /dev/create-test-data/:id</p>
+            <p className="text-sm text-gray-600">Test d'écriture dans Firestore</p>
             <p className="text-sm">{tests.createTestData.message}</p>
             {tests.createTestData.time > 0 && (
               <p className="text-xs text-gray-500">⏱️ {tests.createTestData.time}ms</p>
@@ -161,9 +150,9 @@ const DiagnosticApi: React.FC = () => {
         <div className="text-sm text-gray-600">
           <p><strong>💡 Instructions:</strong></p>
           <ul className="list-disc list-inside space-y-1 mt-1">
-            <li>Si l'endpoint de développement fonctionne, vous pouvez créer des données de test</li>
-            <li>Si aucun endpoint ne fonctionne, vérifiez que l'API Spring Boot est démarrée</li>
-            <li>En cas d'erreur 401, il y a un problème de configuration de sécurité Spring Boot</li>
+            <li>Assurez-vous d'être connecté avec un compte Firebase valide</li>
+            <li>Si Firestore ne fonctionne pas, vérifiez la configuration Firebase</li>
+            <li>Le test de création de données vous permet de vérifier les permissions d'écriture</li>
           </ul>
         </div>
       </div>
@@ -171,4 +160,4 @@ const DiagnosticApi: React.FC = () => {
   );
 };
 
-export default DiagnosticApi; 
+export default DiagnosticFirebase; 

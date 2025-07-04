@@ -25,7 +25,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { RucheService, DonneesCapteur } from '../services/rucheService';
-import DiagnosticApi from './DiagnosticApi';
+import DiagnosticFirebase from './DiagnosticApi';
 import { TestDataService } from '../services/testDataService';
 
 interface MesuresRucheProps {
@@ -296,7 +296,7 @@ const MesuresRuche: React.FC<MesuresRucheProps> = ({ rucheId, rucheNom }) => {
         </div>
         
         {/* Diagnostic API en cas d'erreur */}
-        <DiagnosticApi />
+        <DiagnosticFirebase />
       </div>
     );
   }

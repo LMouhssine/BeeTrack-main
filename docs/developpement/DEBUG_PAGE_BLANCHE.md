@@ -18,10 +18,10 @@ L'application React se lance mais affiche une page blanche. Voici les étapes de
 2. **Appuyer** F12 pour ouvrir les outils de développement
 3. **Aller** dans l'onglet "Console"
 4. **Chercher** les messages :
-   - `🐝 Main.tsx loaded!`
-   - `🐝 App component initializing...`
-   - `🐝 App state initialized`
-   - `🐝 Setting up auth listener...`
+   - `✅ Main.tsx loaded!`
+- `✅ App component initializing...`
+- `✅ App state initialized`
+- `✅ Setting up auth listener...`
 
 ### 2. Vérifier les Erreurs
 
@@ -65,7 +65,7 @@ Vérifier que Tailwind est bien configuré dans `tailwind.config.js`
 ## 📋 Checklist de Débogage
 
 - [ ] **Console ouverte** : F12 → Console
-- [ ] **Logs visibles** : Messages 🐝 affichés
+- [ ] **Logs visibles** : Messages ✅ affichés
 - [ ] **Erreurs rouges** : Aucune erreur dans la console
 - [ ] **Réseau** : Onglet Network pour voir les requêtes
 - [ ] **Mode debug** : Test avec `useDebug = true`
@@ -81,7 +81,7 @@ const useDebug = true; // Changez false en true
 ### Action 2: Vérifier la Console
 1. Ouvrir http://localhost:5173
 2. F12 → Console
-3. Chercher les messages 🐝
+3. Chercher les messages ✅
 4. Noter toute erreur rouge
 
 ### Action 3: Tester une Version Minimale

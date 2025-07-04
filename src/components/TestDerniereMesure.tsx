@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ApiRucheService } from '../services/apiRucheService';
-import { DonneesCapteur } from '../services/rucheService';
+import { DonneesCapteursService, DonneesCapteur } from '../services/donneesCapteursService';
 
 interface TestDerniereMesureProps {
   rucheId?: string;
@@ -21,9 +20,9 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
   const testerConnectivite = async () => {
     try {
       setLoading(true);
-      const isConnected = await ApiRucheService.testConnectivite();
+      const isConnected = await DonneesCapteursService.testConnectivite();
       setConnectivite(isConnected);
-      setError(isConnected ? '' : 'API non accessible');
+      setError(isConnected ? '' : 'Firebase non accessible');
     } catch (err: any) {
       setError(`Erreur de connectivité: ${err.message}`);
       setConnectivite(false);
@@ -42,7 +41,7 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
       setLoading(true);
       setError('');
       
-      const mesure = await ApiRucheService.getDerniereMesure(rucheId, apiculteurId);
+      const mesure = await DonneesCapteursService.getDerniereMesure(rucheId);
       setDerniereMesure(mesure);
       
       if (!mesure) {
@@ -56,7 +55,7 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
     }
   };
 
-  const testerSansAuth = async () => {
+  const obtenirMesures7Jours = async () => {
     if (!rucheId.trim()) {
       setError('Veuillez saisir un ID de ruche');
       return;
@@ -66,11 +65,14 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
       setLoading(true);
       setError('');
       
-      const result = await ApiRucheService.testDerniereMesure(rucheId);
-      setDerniereMesure(result.derniereMesure);
+      const mesures = await DonneesCapteursService.getMesures7DerniersJours(rucheId);
       
-      if (!result.derniereMesure) {
-        setError(result.message || 'Aucune mesure trouvée');
+      if (mesures.length > 0) {
+        setDerniereMesure(mesures[mesures.length - 1]); // Afficher la dernière mesure
+        setError(`✅ ${mesures.length} mesures trouvées sur 7 jours`);
+      } else {
+        setError('Aucune mesure trouvée sur les 7 derniers jours');
+        setDerniereMesure(null);
       }
     } catch (err: any) {
       setError(err.message);
@@ -90,8 +92,8 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
       setLoading(true);
       setError('');
       
-      const result = await ApiRucheService.creerDonneesTest(rucheId, 7, 8);
-      setError(`✅ ${result.totalMesures} mesures créées avec succès`);
+      const nombreMesures = await DonneesCapteursService.creerDonneesTest(rucheId, 7, 8);
+      setError(`✅ ${nombreMesures} mesures créées avec succès`);
     } catch (err: any) {
       setError(`Erreur lors de la création: ${err.message}`);
     } finally {
@@ -113,7 +115,7 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        🧪 Test API - Dernière Mesure
+        🧪 Test Firebase - Données Capteurs
       </h2>
 
       {/* Configuration */}
@@ -151,7 +153,7 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
           disabled={loading}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
         >
-          {loading ? '⏳' : '🔗'} Test Connectivité
+          {loading ? '⏳' : '🔗'} Test Connectivité Firebase
         </button>
         
         <button
@@ -159,15 +161,15 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
           disabled={loading || !rucheId.trim()}
           className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
         >
-          {loading ? '⏳' : '📊'} Dernière Mesure (Auth)
+          {loading ? '⏳' : '📊'} Dernière Mesure
         </button>
         
         <button
-          onClick={testerSansAuth}
+          onClick={obtenirMesures7Jours}
           disabled={loading || !rucheId.trim()}
           className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50"
         >
-          {loading ? '⏳' : '🧪'} Test Sans Auth
+          {loading ? '⏳' : '📈'} Mesures 7 Jours
         </button>
         
         <button
@@ -184,7 +186,7 @@ const TestDerniereMesure: React.FC<TestDerniereMesureProps> = ({
         <div className={`p-3 rounded-md mb-4 ${
           connectivite ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
-          {connectivite ? '✅ API accessible' : '❌ API non accessible'}
+          {connectivite ? '✅ Firebase accessible' : '❌ Firebase non accessible'}
         </div>
       )}
 

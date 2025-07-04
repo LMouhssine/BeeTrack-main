@@ -16,7 +16,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { auth, db } from '../firebase-config';
-import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, buildApiUrl } from '../config/api-config';
+import { DonneesCapteursService, DonneesCapteur } from './donneesCapteursService';
 
 export interface Ruche {
   id?: string;
@@ -40,17 +40,7 @@ export interface RucheAvecRucher extends Ruche {
   rucherAdresse?: string;
 }
 
-export interface DonneesCapteur {
-  id?: string;
-  rucheId: string;
-  timestamp: Date;
-  temperature?: number;
-  humidity?: number;
-  couvercleOuvert?: boolean;
-  batterie?: number;
-  signalQualite?: number;
-  erreur?: string;
-}
+
 
 export class RucheService {
   private static readonly COLLECTION_NAME = 'ruches';
@@ -518,229 +508,20 @@ export class RucheService {
   }
 
   /**
-   * Récupère les mesures des 7 derniers jours d'une ruche depuis l'API Spring Boot
+   * Récupère les mesures des 7 derniers jours d'une ruche depuis Firebase
    */
   static async obtenirMesures7DerniersJours(rucheId: string): Promise<DonneesCapteur[]> {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('Utilisateur non connecté');
-      }
-
-      // Obtenir le token d'authentification Firebase
-      const token = await currentUser.getIdToken();
-
-      // Construire l'URL avec la nouvelle configuration
-      const url = buildApiUrl(API_ENDPOINTS.MESURES_7_JOURS(rucheId));
-
-      // Appeler l'API Spring Boot
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getAuthHeaders(currentUser.uid, token),
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Ruche non trouvée');
-        } else if (response.status === 403) {
-          throw new Error('Accès non autorisé à cette ruche');
-        } else if (response.status >= 500) {
-          throw new Error('Erreur du serveur. Veuillez réessayer plus tard.');
-        } else {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-      }
-
-      const data = await response.json();
-      
-      // Vérifier si c'est une réponse d'erreur
-      if (data.code && data.message) {
-        throw new Error(data.message);
-      }
-
-      // Convertir les données en objets DonneesCapteur
-      const mesures: DonneesCapteur[] = (data as any[]).map(item => ({
-        id: item.id,
-        rucheId: item.rucheId,
-        timestamp: new Date(item.timestamp),
-        temperature: item.temperature,
-        humidity: item.humidity,
-        couvercleOuvert: item.couvercleOuvert,
-        batterie: item.batterie,
-        signalQualite: item.signalQualite,
-        erreur: item.erreur,
-      }));
-
-      console.log(`📊 ${mesures.length} mesures récupérées pour la ruche ${rucheId}`);
-      return mesures;
-
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération des mesures:', error);
-      
-      if (error.message) {
-        throw error; // Relancer les erreurs personnalisées
-      } else if (error.name === 'TypeError' || error.message?.includes('fetch')) {
-        throw new Error('Impossible de contacter le serveur. Vérifiez votre connexion internet.');
-      } else {
-        throw new Error('Erreur lors de la récupération des mesures');
-      }
-    }
+    return await DonneesCapteursService.getMesures7DerniersJours(rucheId);
   }
 
-  /**
-   * Récupère les mesures des 7 derniers jours directement depuis Firestore (fallback)
-   */
-  static async obtenirMesures7DerniersJoursFirestore(rucheId: string): Promise<DonneesCapteur[]> {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('Utilisateur non connecté');
-      }
 
-      // Calculer la date d'il y a 7 jours
-      const dateLimite = new Date();
-      dateLimite.setDate(dateLimite.getDate() - 7);
 
-      console.log(`🔍 Recherche des mesures depuis le ${dateLimite.toLocaleDateString()} pour la ruche ${rucheId}`);
 
-      // Version simplifiée sans index - récupérer toutes les mesures de la ruche
-      const q = query(
-        collection(db, 'donneesCapteurs'),
-        where('rucheId', '==', rucheId)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const toutesLesMesures: DonneesCapteur[] = [];
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const timestamp = data.timestamp?.toDate() || new Date();
-        
-        // Filtrer côté client pour les 7 derniers jours
-        if (timestamp >= dateLimite) {
-          toutesLesMesures.push({
-            id: doc.id,
-            rucheId: data.rucheId,
-            timestamp: timestamp,
-            temperature: data.temperature,
-            humidity: data.humidity,
-            couvercleOuvert: data.couvercleOuvert,
-            batterie: data.batterie,
-            signalQualite: data.signalQualite,
-            erreur: data.erreur,
-          });
-        }
-      });
-
-      // Trier par timestamp croissant côté client
-      const mesures = toutesLesMesures.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
-      console.log(`🔥 ${mesures.length} mesures récupérées depuis Firestore pour la ruche ${rucheId} (filtrage client)`);
-      return mesures;
-
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération des mesures Firestore:', error);
-      
-      if (error.code === 'permission-denied') {
-        throw new Error('Permissions insuffisantes pour accéder aux données');
-      } else if (error.code === 'unavailable') {
-        throw new Error('Firestore temporairement indisponible');
-      } else {
-        throw new Error('Erreur lors de la récupération des mesures depuis Firestore');
-      }
-    }
-  }
 
   /**
-   * Méthode robuste qui essaie l'API puis Firestore en fallback
-   */
-  static async obtenirMesures7DerniersJoursRobuste(rucheId: string): Promise<DonneesCapteur[]> {
-    try {
-      // Essayer d'abord l'API Spring Boot
-      console.log('🌐 Tentative de récupération via API Spring Boot...');
-      return await this.obtenirMesures7DerniersJours(rucheId);
-    } catch (error: any) {
-      console.log('⚠️ Échec de l\'API Spring Boot, fallback vers Firestore...');
-      // En cas d'échec, utiliser Firestore directement
-      return await this.obtenirMesures7DerniersJoursFirestore(rucheId);
-    }
-  }
-
-  /**
-   * Crée des données de test pour une ruche (utilise l'API de test)
+   * Crée des données de test pour une ruche (utilise Firebase)
    */
   static async creerDonneesTest(rucheId: string, nombreJours: number = 10, mesuresParJour: number = 8): Promise<number> {
-    try {
-      // Construire l'URL avec la nouvelle configuration
-      const url = buildApiUrl(API_ENDPOINTS.CREER_DONNEES_TEST(rucheId)) + `?nombreJours=${nombreJours}&mesuresParJour=${mesuresParJour}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(`🧪 ${data.mesuresCreees} mesures de test créées pour la ruche ${rucheId}`);
-      return data.mesuresCreees;
-
-    } catch (error: any) {
-      console.error('Erreur lors de la création des données de test:', error);
-      throw new Error('Erreur lors de la création des données de test');
-    }
-  }
-
-  /**
-   * Crée des données de test via l'endpoint de développement (sans authentification)
-   */
-  static async creerDonneesTestDev(rucheId: string, nombreJours: number = 10, mesuresParJour: number = 8): Promise<number> {
-    try {
-      // Construire l'URL avec l'endpoint de développement
-      const url = buildApiUrl(API_ENDPOINTS.DEV_CREATE_TEST_DATA(rucheId)) + `?nombreJours=${nombreJours}&mesuresParJour=${mesuresParJour}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(`🧪 ${data.totalMesures} mesures de test créées pour la ruche ${rucheId} via l'endpoint de développement`);
-      return data.totalMesures;
-
-    } catch (error: any) {
-      console.error('Erreur lors de la création des données de test (dev):', error);
-      throw new Error('Erreur lors de la création des données de test (dev)');
-    }
-  }
-
-  /**
-   * Teste la connectivité avec l'endpoint de développement
-   */
-  static async testerConnectiviteDev(): Promise<boolean> {
-    try {
-      const url = buildApiUrl(API_ENDPOINTS.DEV_HEALTH);
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Erreur de connectivité dev:', error);
-      return false;
-    }
+    return await DonneesCapteursService.creerDonneesTest(rucheId, nombreJours, mesuresParJour);
   }
 } 

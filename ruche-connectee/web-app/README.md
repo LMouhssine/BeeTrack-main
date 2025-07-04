@@ -10,7 +10,7 @@ API REST Spring Boot pour le système de ruches connectées BeeTrack. Cette API 
 - Profils utilisateur complets
 - Connexion par email ou identifiant
 
-### 🐝 Gestion des Ruches
+### 📦 Gestion des Ruches
 - CRUD complet des ruches
 - Données de capteurs IoT en temps réel
 - Historique des mesures

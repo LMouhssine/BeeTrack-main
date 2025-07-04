@@ -8,7 +8,7 @@ Ce système implémente une surveillance en temps réel de l'état du couvercle 
 
 ### Services
 - **`AlerteCouvercleService`** : Service singleton pour gérer la surveillance et les règles d'ignore
-- **`ApiRucheService`** : Service pour les appels API vers le backend Spring Boot
+- **`DonneesCapteursService`** : Service Firebase pour l'accès aux données de capteurs en temps réel
 
 ### Hooks React
 - **`useAlertesCouvercle`** : Hook principal pour gérer les alertes dans les composants
@@ -24,7 +24,7 @@ Ce système implémente une surveillance en temps réel de l'état du couvercle 
 
 ### 1. Surveillance en Temps Réel
 - Vérification automatique toutes les 30 secondes
-- Appel à l'API `/mesures/last?idRuche={id}`
+- Lecture directe depuis Firebase Firestore
 - Détection de `couvercleOuvert === true`
 
 ### 2. Système d'Alertes
@@ -49,11 +49,10 @@ Ce système implémente une surveillance en temps réel de l'état du couvercle 
 ### Démarrer la Surveillance
 ```typescript
 const alertes = useAlertesCouvercle({
-  apiculteurId: 'user-id',
   onNotification: addNotification
 });
 
-// Démarrer surveillance d'une ruche
+// Démarrer surveillance d'une ruche (authentification Firebase automatique)
 alertes.demarrerSurveillance('ruche-id', 'Nom de la ruche');
 ```
 
@@ -92,16 +91,17 @@ private readonly INTERVAL_MS = 30000; // Fréquence de vérification
 private readonly STORAGE_KEY = 'beetrackAlertesIgnore'; // Clé localStorage
 ```
 
-### API Endpoint
+### Firebase Configuration
 ```typescript
-// Dans ApiRucheService
-const API_BASE_URL = 'http://localhost:8080';
-const endpoint = `/api/mobile/ruches/${rucheId}/derniere-mesure`;
+// Dans DonneesCapteursService
+const COLLECTION_NAME = 'donneesCapteurs';
+// Requête: collection('donneesCapteurs').where('rucheId', '==', rucheId)
 ```
 
 ## 🛡️ Gestion d'Erreurs
 
-- **Erreurs réseau** : Gestion gracieuse avec callback d'erreur
+- **Erreurs Firebase** : Gestion gracieuse avec callback d'erreur
+- **Authentification** : Vérification automatique de l'utilisateur connecté
 - **Données manquantes** : Vérification de nullité
 - **localStorage** : Try/catch pour les erreurs de stockage
 - **Nettoyage** : Arrêt automatique des surveillances au démontage
@@ -126,7 +126,7 @@ Les règles d'ignore sont stockées dans `localStorage` :
 
 1. **Initialisation** : Service singleton créé
 2. **Surveillance** : Interval démarré pour une ruche
-3. **Vérification** : Appel API toutes les 30s
+3. **Vérification** : Lecture Firebase Firestore toutes les 30s
 4. **Détection** : Si `couvercleOuvert === true`
 5. **Filtrage** : Vérification des règles d'ignore
 6. **Alerte** : Affichage modal si non ignoré
@@ -147,10 +147,10 @@ Les règles d'ignore sont stockées dans `localStorage` :
 
 ## 🔮 Extensions Possibles
 
-- WebSocket pour temps réel instantané
-- Notifications push navigateur
-- Historique des alertes
-- Règles d'ignore avancées (horaires, jours)
-- Intégration avec calendrier apicole
-- Alertes par email/SMS
-- Dashboard de surveillance globale 
+- **Temps réel Firebase** : onSnapshot pour alertes instantanées
+- **Notifications push** : Firebase Cloud Messaging
+- **Historique des alertes** : Collection Firebase dédiée
+- **Règles d'ignore avancées** : Conditions complexes dans Firestore
+- **Intégration calendrier** : Firebase Functions + API externes
+- **Alertes email/SMS** : Firebase Functions + services tiers
+- **Dashboard global** : Agrégation temps réel avec Firebase 

@@ -1,5 +1,4 @@
-import { ApiRucheService } from './apiRucheService';
-import { DonneesCapteur } from './rucheService';
+import { DonneesCapteursService, DonneesCapteur } from './donneesCapteursService';
 
 // Interface pour les règles d'ignore d'alerte
 interface AlerteIgnoreRule {
@@ -36,7 +35,6 @@ export class AlerteCouvercleService {
    */
   public demarrerSurveillance(
     rucheId: string, 
-    apiculteurId: string, 
     callback: AlerteCallback
   ): void {
     console.log(`🚨 Démarrage surveillance ruche ${rucheId}`);
@@ -52,7 +50,7 @@ export class AlerteCouvercleService {
       try {
         console.log(`🔍 Vérification ruche ${rucheId}`);
         
-        const mesure = await ApiRucheService.getDerniereMesure(rucheId, apiculteurId);
+        const mesure = await DonneesCapteursService.getDerniereMesure(rucheId);
         
         if (mesure && mesure.couvercleOuvert === true) {
           console.log(`⚠️ Couvercle ouvert détecté pour ruche ${rucheId}`);

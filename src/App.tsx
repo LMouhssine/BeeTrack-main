@@ -32,8 +32,8 @@ function App() {
   const [apiculteur, setApiculteur] = useState<Apiculteur | null>(null);
   const [loading, setLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(''); // Identifiants de connexion Firebase Auth
+  const [password, setPassword] = useState(''); // Créez un compte dans la console Firebase
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('ruchers');
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Play, Stop, TestTube } from 'lucide-react';
+import { AlertTriangle, Play, Square, TestTube } from 'lucide-react';
 import { useAlertesCouvercle } from '../hooks/useAlertesCouvercle';
 import { useNotifications } from '../hooks/useNotifications';
 import AlerteCouvercleModal from './AlerteCouvercleModal';
@@ -127,7 +127,7 @@ const TestAlerteCouvercle: React.FC = () => {
                 onClick={arreterTest}
                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                <Stop size={16} />
+                <Square size={16} />
                 <span>Arrêter Surveillance</span>
               </button>
             )}
