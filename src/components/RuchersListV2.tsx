@@ -19,7 +19,7 @@ const RuchersListV2: React.FC = () => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le rucher "${nom}" ?`)) {
       try {
         await supprimerRucher(id);
-        console.log('🐝 Rucher supprimé avec succès');
+        console.log('Rucher supprimé avec succès');
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         // L'erreur est déjà gérée par le hook
@@ -206,7 +206,7 @@ const AddRucherFormV2: React.FC<AddRucherFormV2Props> = ({ onClose, onSuccess, a
         description: formData.description.trim()
       });
 
-      console.log('🐝 Rucher créé avec succès');
+      console.log('Rucher créé avec succès');
       onSuccess();
     } catch (error: any) {
       console.error('Erreur lors de la création du rucher:', error);

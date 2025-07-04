@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Debug: React.FC = () => {
-  console.log('🐝 Debug component loaded!');
+  console.log('Debug component loaded!');
   
   return (
     <div className="min-h-screen bg-red-100 flex items-center justify-center">

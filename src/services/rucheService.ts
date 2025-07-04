@@ -61,7 +61,7 @@ export class RucheService {
       throw new Error('Aucun utilisateur connecté. Veuillez vous connecter pour ajouter une ruche.');
     }
 
-    console.log('🐝 Ajout d\'une ruche pour l\'utilisateur:', currentUser.uid);
+    console.log('Ajout d\'une ruche pour l\'utilisateur:', currentUser.uid);
 
     try {
       // Utiliser une transaction pour assurer la cohérence
@@ -139,7 +139,7 @@ export class RucheService {
         return rucheRef.id;
       });
 
-      console.log('🐝 Ruche ajoutée avec succès, ID:', result);
+      console.log('Ruche ajoutée avec succès, ID:', result);
       return result;
 
     } catch (error: any) {

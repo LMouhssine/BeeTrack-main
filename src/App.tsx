@@ -26,7 +26,7 @@ interface Apiculteur {
 }
 
 function App() {
-  console.log('🐝 App component initializing...');
+  console.log('App component initializing...');
   
   const [user, setUser] = useState<User | null>(null);
   const [apiculteur, setApiculteur] = useState<Apiculteur | null>(null);
@@ -48,10 +48,10 @@ function App() {
     onNotification: addNotification
   });
   
-  console.log('🐝 App state initialized');
+  console.log('App state initialized');
 
   useEffect(() => {
-    console.log('🐝 Setting up auth listener...');
+    console.log('Setting up auth listener...');
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
@@ -128,7 +128,7 @@ function App() {
   const handleDeleteRuche = async (rucheId: string) => {
     try {
       await RucheService.supprimerRuche(rucheId);
-      console.log('🐝 Ruche supprimée:', rucheId);
+      console.log('Ruche supprimée:', rucheId);
       // Retourner à la liste après suppression
       setSelectedRucheId(null);
     } catch (error: any) {
@@ -146,7 +146,7 @@ function App() {
   };
 
   if (loading) {
-    console.log('🐝 Rendering loading state...');
+    console.log('Rendering loading state...');
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100 flex items-center justify-center">
         <div className="text-center">
@@ -163,7 +163,7 @@ function App() {
         <div className="max-w-md w-full mx-4">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-amber-800 mb-2">🐝 Ruche Connectée</h1>
+              <h1 className="text-3xl font-bold text-amber-800 mb-2">BeeTrack</h1>
               <p className="text-gray-600">Application Web</p>
             </div>
 
@@ -234,7 +234,7 @@ function App() {
     );
   }
 
-  console.log('🐝 Rendering main app...');
+  console.log('Rendering main app...');
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-yellow-100">
       {/* Header */}
@@ -242,8 +242,9 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <span className="text-2xl">🐝</span>
-              <h1 className="text-xl font-bold text-amber-800">BeeTrack</h1>
+              <div className="text-xl font-bold text-amber-800 font-mono tracking-wider">
+                BEETRACK
+              </div>
             </div>
             
             {/* Menu utilisateur avec dropdown */}

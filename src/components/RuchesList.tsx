@@ -73,7 +73,7 @@ const RuchesList: React.FC<RuchesListProps> = ({ onViewDetails }) => {
       
       const ruchesData = await RucheService.obtenirRuchesUtilisateur();
       setRuches(ruchesData);
-      console.log('🐝 Ruches chargées:', ruchesData.length);
+      console.log('Ruches chargées:', ruchesData.length);
       
     } catch (error: any) {
       console.error('Erreur lors du chargement des ruches:', error);
@@ -90,7 +90,7 @@ const RuchesList: React.FC<RuchesListProps> = ({ onViewDetails }) => {
 
     try {
       await RucheService.supprimerRuche(id);
-      console.log('🐝 Ruche supprimée:', id);
+      console.log('Ruche supprimée:', id);
       await loadRuches(); // Recharger la liste
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);

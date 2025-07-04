@@ -26,7 +26,7 @@ const RuchersList: React.FC<RuchersListProps> = ({ user }) => {
       // Utilisation de la nouvelle fonction qui récupère automatiquement l'utilisateur connecté
       const ruchersData = await RucherService.obtenirRuchersUtilisateurConnecte();
       setRuchers(ruchersData);
-      console.log(`🐝 ${ruchersData.length} rucher(s) chargé(s) avec succès`);
+      console.log(`${ruchersData.length} rucher(s) chargé(s) avec succès`);
     } catch (error: any) {
       console.error('Erreur lors du chargement des ruchers:', error);
       setError(error.message || 'Impossible de charger les ruchers');

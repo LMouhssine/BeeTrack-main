@@ -60,7 +60,7 @@ export class RucherService {
       throw new Error('Aucun utilisateur connecté. Veuillez vous connecter pour ajouter un rucher.');
     }
 
-    console.log('🐝 Ajout d\'un rucher pour l\'utilisateur:', currentUser.uid);
+    console.log('Ajout d\'un rucher pour l\'utilisateur:', currentUser.uid);
 
     try {
       const nouveauRucher = {
@@ -72,7 +72,7 @@ export class RucherService {
       };
 
       const docRef = await addDoc(collection(db, this.COLLECTION_NAME), nouveauRucher);
-      console.log('🐝 Rucher ajouté avec succès, ID:', docRef.id);
+      console.log('Rucher ajouté avec succès, ID:', docRef.id);
       return docRef.id;
     } catch (error: any) {
       console.error('Erreur lors de l\'ajout du rucher:', error);
@@ -234,7 +234,7 @@ export class RucherService {
       throw new Error('Aucun utilisateur connecté. Veuillez vous connecter pour accéder à vos ruchers.');
     }
 
-    console.log('🐝 Récupération des ruchers pour l\'utilisateur:', currentUser.uid);
+    console.log('Récupération des ruchers pour l\'utilisateur:', currentUser.uid);
 
     try {
       // Requête Firestore avec filtres et tri
@@ -262,7 +262,7 @@ export class RucherService {
         });
       });
 
-      console.log(`🐝 ${ruchers.length} rucher(s) récupéré(s) avec succès`);
+      console.log(`${ruchers.length} rucher(s) récupéré(s) avec succès`);
       return ruchers;
 
     } catch (error: any) {
@@ -296,7 +296,7 @@ export class RucherService {
       throw new Error('Aucun utilisateur connecté. Veuillez vous connecter pour écouter vos ruchers.');
     }
 
-    console.log('🐝 Démarrage de l\'écoute temps réel pour l\'utilisateur:', currentUser.uid);
+    console.log('Démarrage de l\'écoute temps réel pour l\'utilisateur:', currentUser.uid);
 
     const q = query(
       collection(db, this.COLLECTION_NAME),
@@ -322,7 +322,7 @@ export class RucherService {
           });
         });
         
-        console.log(`🐝 Mise à jour temps réel: ${ruchers.length} rucher(s)`);
+        console.log(`Mise à jour temps réel: ${ruchers.length} rucher(s)`);
         callback(ruchers);
       },
       (error) => {

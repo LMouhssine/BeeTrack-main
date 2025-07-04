@@ -100,7 +100,7 @@ const AjouterRucheModal: React.FC<AjouterRucheModalProps> = ({
       };
 
       const nouvelleRucheId = await RucheService.ajouterRuche(rucheData);
-      console.log('🐝 Ruche créée avec succès, ID:', nouvelleRucheId);
+      console.log('Ruche créée avec succès, ID:', nouvelleRucheId);
 
       setSuccess(`Ruche "${formData.nom}" créée avec succès !`);
       
