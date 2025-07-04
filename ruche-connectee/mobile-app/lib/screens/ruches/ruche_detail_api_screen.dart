@@ -11,8 +11,8 @@ import 'package:fl_chart/fl_chart.dart';
 
 /// Helper function to create colors with opacity using Flutter's native method
 Color colorWithOpacity(Color color, double opacity) {
-  // Use Flutter's built-in withOpacity method - simple and stable
-  return color.withOpacity(opacity);
+  // Use Flutter's built-in withValues method - updated to avoid deprecation
+  return color.withValues(alpha: (opacity * 255).round());
 }
 
 class RucheDetailApiScreen extends StatefulWidget {
