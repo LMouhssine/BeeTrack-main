@@ -48,12 +48,8 @@ public class RucheController {
      */
     @GetMapping("/apiculteur/{apiculteurId}")
     public ResponseEntity<List<Ruche>> getRuchesByApiculteur(@PathVariable String apiculteurId) {
-        try {
-            List<Ruche> ruches = rucheService.getRuchesByApiculteur(apiculteurId);
-            return ResponseEntity.ok(ruches);
-        } catch (ExecutionException | InterruptedException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<Ruche> ruches = rucheService.getRuchesByApiculteur(apiculteurId);
+        return ResponseEntity.ok(ruches);
     }
 
     /**
@@ -74,12 +70,8 @@ public class RucheController {
      */
     @PostMapping
     public ResponseEntity<Ruche> createRuche(@Valid @RequestBody Ruche ruche) {
-        try {
-            Ruche nouvelleRuche = rucheService.createRuche(ruche);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nouvelleRuche);
-        } catch (ExecutionException | InterruptedException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Ruche nouvelleRuche = rucheService.createRuche(ruche);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nouvelleRuche);
     }
 
     /**
@@ -87,12 +79,8 @@ public class RucheController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Ruche> updateRuche(@PathVariable String id, @Valid @RequestBody Ruche ruche) {
-        try {
-            Ruche rucheMiseAJour = rucheService.updateRuche(id, ruche);
-            return ResponseEntity.ok(rucheMiseAJour);
-        } catch (ExecutionException | InterruptedException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Ruche rucheMiseAJour = rucheService.updateRuche(id, ruche);
+        return ResponseEntity.ok(rucheMiseAJour);
     }
 
     /**
@@ -100,12 +88,8 @@ public class RucheController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desactiverRuche(@PathVariable String id) {
-        try {
-            rucheService.desactiverRuche(id);
-            return ResponseEntity.noContent().build();
-        } catch (ExecutionException | InterruptedException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        rucheService.desactiverRuche(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -129,12 +113,8 @@ public class RucheController {
     public ResponseEntity<List<DonneesCapteur>> getHistoriqueDonnees(
             @PathVariable String rucheId,
             @RequestParam(defaultValue = "100") int limite) {
-        try {
-            List<DonneesCapteur> historique = rucheService.getHistoriqueDonnees(rucheId, limite);
-            return ResponseEntity.ok(historique);
-        } catch (ExecutionException | InterruptedException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<DonneesCapteur> historique = rucheService.getHistoriqueDonnees(rucheId, limite);
+        return ResponseEntity.ok(historique);
     }
 
     /**

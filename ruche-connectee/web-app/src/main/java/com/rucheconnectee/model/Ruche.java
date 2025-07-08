@@ -58,6 +58,15 @@ public class Ruche {
     @JsonProperty("actif")
     private boolean actif = true;
     
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
+    
+    @JsonProperty("poids")
+    private Double poids;
+    
+    @JsonProperty("derniere_sync")
+    private LocalDateTime derniereSync;
+    
     // Seuils d'alerte
     @JsonProperty("seuil_temp_min")
     private Double seuilTempMin = 15.0;
@@ -233,5 +242,29 @@ public class Ruche {
 
     public void setSeuilHumiditeMax(Double seuilHumiditeMax) {
         this.seuilHumiditeMax = seuilHumiditeMax;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Double getPoids() {
+        return poids;
+    }
+
+    public void setPoids(Double poids) {
+        this.poids = poids;
+    }
+
+    public LocalDateTime getDerniereSync() {
+        return derniereSync;
+    }
+
+    public void setDerniereSync(LocalDateTime derniereSync) {
+        this.derniereSync = derniereSync;
     }
 } 

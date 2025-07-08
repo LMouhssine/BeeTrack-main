@@ -47,6 +47,9 @@ public class Rucher {
     @JsonProperty("notes")
     private String notes;
 
+    @JsonProperty("coordonnees")
+    private String coordonnees;
+
     // Constructors
     public Rucher() {}
 
@@ -153,5 +156,13 @@ public class Rucher {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCoordonnees() {
+        return coordonnees;
+    }
+
+    public void setCoordonnees(String coordonnees) {
+        this.coordonnees = coordonnees;
     }
 } 

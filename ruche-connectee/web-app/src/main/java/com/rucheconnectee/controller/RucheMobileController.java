@@ -212,7 +212,6 @@ public class RucheMobileController {
             // Récupérer les mesures
             var mesures = rucheService.getMesures7DerniersJours(rucheId);
             return ResponseEntity.ok(mesures);
-            
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération des mesures"));
@@ -245,7 +244,6 @@ public class RucheMobileController {
             }
             
             return ResponseEntity.ok(derniereMesure);
-            
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération de la dernière mesure"));

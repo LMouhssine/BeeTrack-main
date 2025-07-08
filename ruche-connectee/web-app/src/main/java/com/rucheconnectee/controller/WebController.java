@@ -77,8 +77,12 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         try {
-            // Récupérer l'utilisateur actuel ou utiliser un utilisateur de test
-            var apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            if (authentication == null) {
+                return "redirect:/login";
+            }
+            
+            // Récupérer l'utilisateur actuel
+            var apiculteur = apiculteurService.getApiculteurByEmail(authentication.getName());
             
             if (apiculteur != null) {
                 var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
@@ -95,15 +99,16 @@ public class WebController {
                 // Définir les variables de layout
                 model.addAttribute("currentPage", "dashboard");
                 model.addAttribute("pageTitle", "Tableau de bord");
+                model.addAttribute("userRole", "Apiculteur");
                 
                 return "dashboard";
             } else {
-                model.addAttribute("error", "Aucun utilisateur trouvé. Veuillez vérifier votre configuration.");
-                return "login";
+                model.addAttribute("error", "Utilisateur non trouvé. Veuillez vous reconnecter.");
+                return "redirect:/login";
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Erreur de connexion Firebase: " + e.getMessage());
-            return "login";
+            model.addAttribute("error", "Erreur lors du chargement du dashboard: " + e.getMessage());
+            return "redirect:/login";
         }
     }
 

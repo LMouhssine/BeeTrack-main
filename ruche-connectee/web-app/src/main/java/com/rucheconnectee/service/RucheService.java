@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @ConditionalOnProperty(name = "firebase.project-id")
-public class RucheService {
+public abstract class RucheService {
 
     @Autowired
     private FirebaseService firebaseService;
@@ -33,27 +33,13 @@ public class RucheService {
     private static final String COLLECTION_RUCHES = "ruches";
     private static final String COLLECTION_DONNEES = "donnees_capteurs";
 
-    /**
-     * Récupère une ruche par son ID
-     */
-    public Ruche getRucheById(String id) throws ExecutionException, InterruptedException {
-        var document = firebaseService.getDocument(COLLECTION_RUCHES, id);
-        if (document.exists()) {
-            return documentToRuche(document.getId(), document.getData());
-        }
-        return null;
-    }
-
-    /**
-     * Récupère toutes les ruches d'un apiculteur
-     */
-    public List<Ruche> getRuchesByApiculteur(String apiculteurId) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_RUCHES, "apiculteur_id", apiculteurId);
-        return documents.stream()
-                .filter(doc -> (Boolean) doc.getData().getOrDefault("actif", true))
-                .map(doc -> documentToRuche(doc.getId(), doc.getData()))
-                .collect(Collectors.toList());
-    }
+    public abstract Ruche getRucheById(String id) throws ExecutionException, InterruptedException;
+    public abstract List<Ruche> getRuchesByApiculteur(String apiculteurId);
+    public abstract List<DonneesCapteur> getHistoriqueDonnees(String rucheId, int limit);
+    public abstract Ruche createRuche(Ruche ruche);
+    public abstract Ruche updateRuche(String id, Ruche ruche);
+    public abstract void deleteRuche(String id);
+    public abstract void desactiverRuche(String id);
 
     /**
      * Récupère toutes les ruches d'un rucher
@@ -64,86 +50,6 @@ public class RucheService {
                 .filter(doc -> (Boolean) doc.getData().getOrDefault("actif", true))
                 .map(doc -> documentToRuche(doc.getId(), doc.getData()))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Crée une nouvelle ruche
-     */
-    public Ruche createRuche(Ruche ruche) throws ExecutionException, InterruptedException {
-        // Récupérer le nom du rucher
-        if (ruche.getRucherId() != null) {
-            var rucher = rucherService.getRucherById(ruche.getRucherId());
-            if (rucher != null) {
-                ruche.setRucherNom(rucher.getNom());
-                // Incrémenter le nombre de ruches du rucher
-                rucherService.incrementerNombreRuches(ruche.getRucherId());
-            }
-        }
-
-        ruche.setDateInstallation(LocalDateTime.now());
-        ruche.setActif(true);
-        ruche.setDerniereMiseAJour(LocalDateTime.now());
-
-        Map<String, Object> data = rucheToMap(ruche);
-        String id = firebaseService.addDocument(COLLECTION_RUCHES, data);
-        ruche.setId(id);
-
-        return ruche;
-    }
-
-    /**
-     * Met à jour une ruche
-     */
-    public Ruche updateRuche(String id, Ruche ruche) throws ExecutionException, InterruptedException {
-        // Récupérer l'ancienne ruche pour vérifier le changement de rucher
-        Ruche ancienneRuche = getRucheById(id);
-        
-        if (ancienneRuche != null && !ancienneRuche.getRucherId().equals(ruche.getRucherId())) {
-            // Décrémenter l'ancien rucher
-            if (ancienneRuche.getRucherId() != null) {
-                rucherService.decrementerNombreRuches(ancienneRuche.getRucherId());
-            }
-            // Incrémenter le nouveau rucher
-            if (ruche.getRucherId() != null) {
-                rucherService.incrementerNombreRuches(ruche.getRucherId());
-                var rucher = rucherService.getRucherById(ruche.getRucherId());
-                if (rucher != null) {
-                    ruche.setRucherNom(rucher.getNom());
-                }
-            }
-        }
-
-        Map<String, Object> updates = rucheToMap(ruche);
-        firebaseService.updateDocument(COLLECTION_RUCHES, id, updates);
-        
-        ruche.setId(id);
-        return ruche;
-    }
-
-    /**
-     * Désactive une ruche (soft delete)
-     */
-    public void desactiverRuche(String id) throws ExecutionException, InterruptedException {
-        Ruche ruche = getRucheById(id);
-        if (ruche != null && ruche.getRucherId() != null) {
-            rucherService.decrementerNombreRuches(ruche.getRucherId());
-        }
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("actif", false);
-        firebaseService.updateDocument(COLLECTION_RUCHES, id, updates);
-    }
-
-    /**
-     * Supprime définitivement une ruche
-     */
-    public void deleteRuche(String id) throws ExecutionException, InterruptedException {
-        Ruche ruche = getRucheById(id);
-        if (ruche != null && ruche.getRucherId() != null) {
-            rucherService.decrementerNombreRuches(ruche.getRucherId());
-        }
-
-        firebaseService.deleteDocument(COLLECTION_RUCHES, id);
     }
 
     /**
@@ -163,17 +69,6 @@ public class RucheService {
         updates.put("derniere_mise_a_jour", com.google.cloud.Timestamp.now());
 
         firebaseService.updateDocument(COLLECTION_RUCHES, rucheId, updates);
-    }
-
-    /**
-     * Récupère l'historique des données d'une ruche
-     */
-    public List<DonneesCapteur> getHistoriqueDonnees(String rucheId, int limite) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_DONNEES, "ruche_id", rucheId);
-        return documents.stream()
-                .limit(limite)
-                .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
-                .collect(Collectors.toList());
     }
 
     /**
@@ -323,44 +218,6 @@ public class RucheService {
     }
 
     /**
-     * Convertit un objet Ruche en Map pour Firestore
-     */
-    private Map<String, Object> rucheToMap(Ruche ruche) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("nom", ruche.getNom());
-        data.put("apiculteur_id", ruche.getApiculteurId());
-        data.put("rucher_id", ruche.getRucherId());
-        data.put("rucher_nom", ruche.getRucherNom());
-        data.put("description", ruche.getDescription());
-        data.put("type_ruche", ruche.getTypeRuche());
-        data.put("actif", ruche.isActif());
-        data.put("temperature", ruche.getTemperature());
-        data.put("humidite", ruche.getHumidite());
-        data.put("couvercle_ouvert", ruche.getCouvercleOuvert());
-        data.put("niveau_batterie", ruche.getNiveauBatterie());
-        data.put("position_lat", ruche.getPositionLat());
-        data.put("position_lng", ruche.getPositionLng());
-        data.put("seuil_temp_min", ruche.getSeuilTempMin());
-        data.put("seuil_temp_max", ruche.getSeuilTempMax());
-        data.put("seuil_humidite_min", ruche.getSeuilHumiditeMin());
-        data.put("seuil_humidite_max", ruche.getSeuilHumiditeMax());
-
-        if (ruche.getDateInstallation() != null) {
-            data.put("date_installation", com.google.cloud.Timestamp.of(
-                    java.util.Date.from(ruche.getDateInstallation().atZone(java.time.ZoneId.systemDefault()).toInstant())
-            ));
-        }
-
-        if (ruche.getDerniereMiseAJour() != null) {
-            data.put("derniere_mise_a_jour", com.google.cloud.Timestamp.of(
-                    java.util.Date.from(ruche.getDerniereMiseAJour().atZone(java.time.ZoneId.systemDefault()).toInstant())
-            ));
-        }
-
-        return data;
-    }
-
-    /**
      * Convertit un document Firestore en objet DonneesCapteur
      */
     private DonneesCapteur documentToDonnees(String id, Map<String, Object> data) {
@@ -369,9 +226,7 @@ public class RucheService {
         DonneesCapteur donnees = new DonneesCapteur();
         donnees.setId(id);
         donnees.setRucheId((String) data.get("rucheId"));
-        donnees.setCouvercleOuvert((Boolean) data.get("couvercleOuvert"));
-        donnees.setErreur((String) data.get("erreur"));
-
+        
         if (data.get("temperature") instanceof Number) {
             donnees.setTemperature(((Number) data.get("temperature")).doubleValue());
         }
@@ -381,13 +236,12 @@ public class RucheService {
         if (data.get("batterie") instanceof Number) {
             donnees.setBatterie(((Number) data.get("batterie")).intValue());
         }
-        if (data.get("signalQualite") instanceof Number) {
-            donnees.setSignalQualite(((Number) data.get("signalQualite")).intValue());
-        }
-
-        Object timestamp = data.get("timestamp");
-        if (timestamp instanceof com.google.cloud.Timestamp) {
-            donnees.setTimestamp(((com.google.cloud.Timestamp) timestamp).toDate().toInstant()
+        
+        donnees.setCouvercleOuvert((Boolean) data.getOrDefault("couvercleOuvert", false));
+        
+        // Gestion du timestamp
+        if (data.get("timestamp") instanceof com.google.cloud.Timestamp) {
+            donnees.setTimestamp(((com.google.cloud.Timestamp) data.get("timestamp")).toDate().toInstant()
                     .atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
         }
 
@@ -399,22 +253,12 @@ public class RucheService {
      */
     private Map<String, Object> donneesToMap(DonneesCapteur donnees) {
         Map<String, Object> data = new HashMap<>();
-        data.put("ruche_id", donnees.getRucheId());
+        data.put("rucheId", donnees.getRucheId());
         data.put("temperature", donnees.getTemperature());
         data.put("humidity", donnees.getHumidity());
-        data.put("couvercle_ouvert", donnees.getCouvercleOuvert());
         data.put("batterie", donnees.getBatterie());
-        data.put("signal_qualite", donnees.getSignalQualite());
-        data.put("erreur", donnees.getErreur());
-
-        if (donnees.getTimestamp() != null) {
-            data.put("timestamp", com.google.cloud.Timestamp.of(
-                    java.util.Date.from(donnees.getTimestamp().atZone(java.time.ZoneId.systemDefault()).toInstant())
-            ));
-        } else {
-            data.put("timestamp", com.google.cloud.Timestamp.now());
-        }
-
+        data.put("couvercleOuvert", donnees.getCouvercleOuvert());
+        data.put("timestamp", com.google.cloud.Timestamp.now());
         return data;
     }
 
@@ -530,7 +374,6 @@ public class RucheService {
                 donnees.setHumidity(40.0 + Math.random() * 30.0);   // 40-70%
                 donnees.setCouvercleOuvert(Math.random() < 0.1);    // 10% de chance d'être ouvert
                 donnees.setBatterie(80 + (int)(Math.random() * 20)); // 80-100%
-                donnees.setSignalQualite(70 + (int)(Math.random() * 30)); // 70-100%
                 
                 // Sauvegarder la mesure
                 Map<String, Object> donneesData = donneesToMap(donnees);

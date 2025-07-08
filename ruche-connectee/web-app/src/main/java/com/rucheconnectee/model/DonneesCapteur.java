@@ -35,6 +35,12 @@ public class DonneesCapteur {
     @JsonProperty("erreur")
     private String erreur;
 
+    @JsonProperty("humidite")
+    private Double humidite;
+
+    @JsonProperty("poids")
+    private Double poids;
+
     // Constructors
     public DonneesCapteur() {}
 
@@ -109,5 +115,21 @@ public class DonneesCapteur {
 
     public void setErreur(String erreur) {
         this.erreur = erreur;
+    }
+
+    public Double getHumidite() {
+        return humidite;
+    }
+
+    public void setHumidite(Double humidite) {
+        this.humidite = humidite;
+    }
+
+    public Double getPoids() {
+        return poids;
+    }
+
+    public void setPoids(Double poids) {
+        this.poids = poids;
     }
 } 
