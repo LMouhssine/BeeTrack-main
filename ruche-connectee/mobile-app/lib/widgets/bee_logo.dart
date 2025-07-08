@@ -141,15 +141,18 @@ class BeeLogoPainter extends CustomPainter {
     );
 
     // Ailes
-    final leftWingCenter = Offset(center.dx - scale * 0.3, center.dy - scale * 0.1);
-    final rightWingCenter = Offset(center.dx + scale * 0.3, center.dy - scale * 0.1);
+    final leftWingCenter =
+        Offset(center.dx - scale * 0.3, center.dy - scale * 0.1);
+    final rightWingCenter =
+        Offset(center.dx + scale * 0.3, center.dy - scale * 0.1);
 
     // Aile gauche
     canvas.save();
     canvas.translate(leftWingCenter.dx, leftWingCenter.dy);
     canvas.rotate(-0.3); // Rotation de -20 degrés
     canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero, width: scale * 0.3, height: scale * 0.6),
+      Rect.fromCenter(
+          center: Offset.zero, width: scale * 0.3, height: scale * 0.6),
       wingPaint,
     );
     canvas.restore();
@@ -159,7 +162,8 @@ class BeeLogoPainter extends CustomPainter {
     canvas.translate(rightWingCenter.dx, rightWingCenter.dy);
     canvas.rotate(0.3); // Rotation de 20 degrés
     canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero, width: scale * 0.3, height: scale * 0.6),
+      Rect.fromCenter(
+          center: Offset.zero, width: scale * 0.3, height: scale * 0.6),
       wingPaint,
     );
     canvas.restore();
@@ -173,4 +177,4 @@ class BeeLogoPainter extends CustomPainter {
 
 // Fonction helper pour cos et sin
 double cos(double radians) => math.cos(radians);
-double sin(double radians) => math.sin(radians); 
+double sin(double radians) => math.sin(radians);
