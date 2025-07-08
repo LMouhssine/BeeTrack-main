@@ -4,7 +4,6 @@ import 'package:ruche_connectee/models/api_models.dart';
 
 /// Helper function to create colors with opacity using Flutter's native method
 Color colorWithOpacity(Color color, double opacity) {
-  // Use Flutter's built-in withValues method - updated to avoid deprecation
   return color.withValues(alpha: opacity * 255);
 }
 
