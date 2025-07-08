@@ -14,43 +14,25 @@
         android:pathData="M29,33.98L54,18.98L79,33.98L79,73.02L54,88.02L29,73.02Z"/>
     
     <!-- Corps de l'abeille -->
-    <ellipse android:fillColor="#FCD34D"
-        android:cx="54"
-        android:cy="54"
-        android:rx="8"
-        android:ry="14"/>
+    <path android:fillColor="#FCD34D"
+        android:pathData="M46,54 A8,14 0 0 0 62,54 A8,14 0 0 0 46,54"/>
     
     <!-- Rayures du corps -->
-    <rect android:fillColor="#1F2937"
-        android:x="48"
-        android:y="46"
-        android:width="12"
-        android:height="2.5"
-        android:rx="1"/>
-    <rect android:fillColor="#1F2937"
-        android:x="48"
-        android:y="51"
-        android:width="12"
-        android:height="2.5"
-        android:rx="1"/>
-    <rect android:fillColor="#1F2937"
-        android:x="48"
-        android:y="56"
-        android:width="12"
-        android:height="2.5"
-        android:rx="1"/>
-    <rect android:fillColor="#1F2937"
-        android:x="48"
-        android:y="61"
-        android:width="12"
-        android:height="2.5"
-        android:rx="1"/>
+    <path android:fillColor="#1F2937"
+        android:pathData="M48,46 L60,46 Q61,46 61,47 L61,47.5 Q61,48.5 60,48.5 L48,48.5 Q47,48.5 47,47.5 L47,47 Q47,46 48,46"/>
+    
+    <path android:fillColor="#1F2937"
+        android:pathData="M48,51 L60,51 Q61,51 61,52 L61,52.5 Q61,53.5 60,53.5 L48,53.5 Q47,53.5 47,52.5 L47,52 Q47,51 48,51"/>
+    
+    <path android:fillColor="#1F2937"
+        android:pathData="M48,56 L60,56 Q61,56 61,57 L61,57.5 Q61,58.5 60,58.5 L48,58.5 Q47,58.5 47,57.5 L47,57 Q47,56 48,56"/>
+    
+    <path android:fillColor="#1F2937"
+        android:pathData="M48,61 L60,61 Q61,61 61,62 L61,62.5 Q61,63.5 60,63.5 L48,63.5 Q47,63.5 47,62.5 L47,62 Q47,61 48,61"/>
     
     <!-- Tête -->
-    <circle android:fillColor="#FCD34D"
-        android:cx="54"
-        android:cy="39"
-        android:r="5"/>
+    <path android:fillColor="#FCD34D"
+        android:pathData="M54,34 A5,5 0 0 1 54,44 A5,5 0 0 1 54,34"/>
     
     <!-- Antennes -->
     <path android:strokeColor="#1F2937"
@@ -61,27 +43,17 @@
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:pathData="M57,36 L59,32"/>
-    <circle android:fillColor="#1F2937"
-        android:cx="49"
-        android:cy="32"
-        android:r="1.5"/>
-    <circle android:fillColor="#1F2937"
-        android:cx="59"
-        android:cy="32"
-        android:r="1.5"/>
+    <path android:fillColor="#1F2937"
+        android:pathData="M47.5,32 A1.5,1.5 0 0 1 50.5,32 A1.5,1.5 0 0 1 47.5,32"/>
+    <path android:fillColor="#1F2937"
+        android:pathData="M57.5,32 A1.5,1.5 0 0 1 60.5,32 A1.5,1.5 0 0 1 57.5,32"/>
     
     <!-- Ailes -->
-    <ellipse android:fillColor="#FCD34D"
+    <path android:fillColor="#FCD34D"
         android:fillAlpha="0.7"
-        android:cx="44"
-        android:cy="49"
-        android:rx="6"
-        android:ry="10"/>
-    <ellipse android:fillColor="#FCD34D"
+        android:pathData="M38,49 A6,10 0 0 1 50,49 A6,10 0 0 1 38,49"/>
+    <path android:fillColor="#FCD34D"
         android:fillAlpha="0.7"
-        android:cx="64"
-        android:cy="49"
-        android:rx="6"
-        android:ry="10"/>
+        android:pathData="M58,49 A6,10 0 0 1 70,49 A6,10 0 0 1 58,49"/>
         
 </vector> 

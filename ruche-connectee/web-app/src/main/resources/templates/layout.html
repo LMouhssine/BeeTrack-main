@@ -3,32 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BeeTrack - Système de gestion et de surveillance de ruches connectées">
+    <meta name="theme-color" content="#F59E0B">
     <title th:text="${title != null ? title + ' - BeeTrack' : 'BeeTrack - Gestion de Ruches Connectées'}">BeeTrack</title>
+    
+    <!-- Preload des ressources critiques -->
+    <link rel="preload" th:href="@{/css/app.css}" as="style">
+    <link rel="preload" th:href="@{/js/app.js}" as="script">
+    <link rel="preload" href="https://unpkg.com/lucide@latest/dist/umd/lucide.js" as="script">
     
     <!-- CSS -->
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     
-    <!-- Lucide Icons via CDN (similaire à l'app React) -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" th:href="@{/logo.svg}">
-    
-    <!-- Meta tags -->
-    <meta name="description" content="BeeTrack - Système de gestion et de surveillance de ruches connectées">
-    <meta name="author" content="BeeTrack">
+    <link rel="apple-touch-icon" th:href="@{/logo.svg}">
 </head>
 <body>
+    <!-- Skip to main content pour l'accessibilité -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
     <!-- Overlay pour mobile sidebar -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+    <div id="sidebar-overlay" class="overlay" role="presentation" aria-hidden="true"></div>
     
     <!-- Sidebar -->
-    <nav id="sidebar" class="sidebar" th:fragment="sidebar">
+    <nav id="sidebar" class="sidebar" th:fragment="sidebar" aria-label="Menu principal">
         <!-- Logo/Brand -->
         <div class="sidebar-brand">
-            <a href="/dashboard" class="logo" th:href="@{/dashboard}">
-                <div class="logo-icon">🐝</div>
+            <a href="/dashboard" class="logo" th:href="@{/dashboard}" aria-label="Accueil BeeTrack">
+                <div class="logo-icon" aria-hidden="true">🐝</div>
                 <span class="logo-text">BeeTrack</span>
             </a>
         </div>
@@ -38,69 +42,77 @@
             <li class="nav-item">
                 <a href="/dashboard" th:href="@{/dashboard}" 
                    class="nav-link" 
-                   th:classappend="${currentPage == 'dashboard' ? 'active' : ''}">
-                    <i data-lucide="home" class="nav-icon"></i>
+                   th:classappend="${currentPage == 'dashboard' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'dashboard' ? 'page' : 'false'}">
+                    <i data-lucide="home" class="nav-icon" aria-hidden="true"></i>
                     <span>Tableau de bord</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/ruchers" th:href="@{/ruchers}" 
                    class="nav-link"
-                   th:classappend="${currentPage == 'ruchers' ? 'active' : ''}">
-                    <i data-lucide="map-pin" class="nav-icon"></i>
+                   th:classappend="${currentPage == 'ruchers' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'ruchers' ? 'page' : 'false'}">
+                    <i data-lucide="map-pin" class="nav-icon" aria-hidden="true"></i>
                     <span>Ruchers</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/ruches" th:href="@{/ruches}" 
                    class="nav-link"
-                   th:classappend="${currentPage == 'ruches' ? 'active' : ''}">
-                    <i data-lucide="hexagon" class="nav-icon"></i>
+                   th:classappend="${currentPage == 'ruches' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'ruches' ? 'page' : 'false'}">
+                    <i data-lucide="hexagon" class="nav-icon" aria-hidden="true"></i>
                     <span>Ruches</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/statistiques" th:href="@{/statistiques}" 
                    class="nav-link"
-                   th:classappend="${currentPage == 'statistiques' ? 'active' : ''}">
-                    <i data-lucide="bar-chart-3" class="nav-icon"></i>
+                   th:classappend="${currentPage == 'statistiques' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'statistiques' ? 'page' : 'false'}">
+                    <i data-lucide="bar-chart-3" class="nav-icon" aria-hidden="true"></i>
                     <span>Statistiques</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/alertes" th:href="@{/alertes}" 
                    class="nav-link"
-                   th:classappend="${currentPage == 'alertes' ? 'active' : ''}">
-                    <i data-lucide="alert-triangle" class="nav-icon"></i>
+                   th:classappend="${currentPage == 'alertes' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'alertes' ? 'page' : 'false'}">
+                    <i data-lucide="alert-triangle" class="nav-icon" aria-hidden="true"></i>
                     <span>Alertes</span>
+                    <span class="notification-badge" th:if="${alertCount > 0}" th:text="${alertCount}" aria-label="Nombre d'alertes"></span>
                 </a>
             </li>
         </ul>
         
         <!-- Footer Sidebar -->
-        <div class="sidebar-footer" style="margin-top: auto; padding: 1rem;">
+        <div class="sidebar-footer">
             <div class="nav-item">
                 <a href="/profil" th:href="@{/profil}" class="nav-link">
-                    <i data-lucide="user" class="nav-icon"></i>
+                    <i data-lucide="user" class="nav-icon" aria-hidden="true"></i>
                     <span>Profil</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/logout" th:href="@{/logout}" class="nav-link">
-                    <i data-lucide="log-out" class="nav-icon"></i>
-                    <span>Déconnexion</span>
-                </a>
+                <form th:action="@{/logout}" method="post" class="nav-link-form">
+                    <button type="submit" class="nav-link btn-link">
+                        <i data-lucide="log-out" class="nav-icon" aria-hidden="true"></i>
+                        <span>Déconnexion</span>
+                    </button>
+                </form>
             </div>
         </div>
     </nav>
     
     <!-- Contenu principal -->
-    <main id="main-content" class="main-content">
+    <main id="main-content" class="main-content" role="main">
         <!-- Header -->
-        <header class="app-header">
+        <header class="app-header" role="banner">
             <div class="header-left">
-                <button id="sidebar-toggle" class="btn mobile-menu-toggle" type="button">
-                    <i data-lucide="menu"></i>
+                <button id="sidebar-toggle" class="btn mobile-menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="sidebar">
+                    <i data-lucide="menu" aria-hidden="true"></i>
                 </button>
                 <h1 class="page-title" th:text="${pageTitle ?: 'Tableau de bord'}">Tableau de bord</h1>
             </div>
@@ -108,9 +120,10 @@
             <div class="header-right">
                 <!-- Notifications -->
                 <div class="notifications-dropdown">
-                    <button class="btn btn-secondary" type="button">
-                        <i data-lucide="bell"></i>
-                        <span class="notification-badge" th:if="${notificationCount > 0}" th:text="${notificationCount}">3</span>
+                    <button class="btn btn-icon" type="button" aria-label="Notifications" aria-expanded="false">
+                        <i data-lucide="bell" aria-hidden="true"></i>
+                        <span class="notification-badge" th:if="${notificationCount > 0}" th:text="${notificationCount}" 
+                              aria-label="Nombre de notifications"></span>
                     </button>
                 </div>
                 
@@ -118,30 +131,30 @@
                 <div class="user-menu">
                     <div class="user-info">
                         <span class="user-name" th:text="${#authentication.name}">Utilisateur</span>
-                        <span class="user-role text-sm text-gray-500" th:text="${userRole}">Apiculteur</span>
+                        <span class="user-role" th:text="${userRole}">Apiculteur</span>
                     </div>
-                    <button class="user-avatar">
-                        <i data-lucide="user-circle"></i>
+                    <button class="btn btn-icon user-avatar" aria-label="Menu utilisateur" aria-expanded="false">
+                        <i data-lucide="user-circle" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
         </header>
         
         <!-- Messages d'alerte -->
-        <div id="notifications">
+        <div id="notifications" role="alert" aria-live="polite">
             <div th:if="${message}" 
                  class="alert fade-in" 
                  th:classappend="${'alert-' + (messageType ?: 'info')}">
                 <span th:text="${message}">Message</span>
-                <button type="button" class="close" onclick="this.parentElement.remove()">
-                    <span>&times;</span>
+                <button type="button" class="close" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             
             <div th:if="${error}" class="alert alert-danger fade-in">
                 <span th:text="${error}">Erreur</span>
-                <button type="button" class="close" onclick="this.parentElement.remove()">
-                    <span>&times;</span>
+                <button type="button" class="close" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
         </div>
@@ -155,15 +168,20 @@
     </main>
     
     <!-- JavaScript -->
-    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/webjars/chartjs/Chart.min.js}"></script>
-    <script th:src="@{/js/app.js}"></script>
+    <script th:src="@{/webjars/jquery/jquery.min.js}" defer></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+    <script th:src="@{/webjars/chartjs/Chart.min.js}" defer></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+    <script th:src="@{/js/app.js}" defer></script>
     
-    <!-- Initialiser les icônes Lucide -->
+    <!-- Initialiser l'application -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
+            // Initialiser les icônes Lucide
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
             // Initialiser l'application BeeTrack
             if (typeof BeeTrack !== 'undefined') {
                 BeeTrack.init();
