@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.rucheconnectee.model.Apiculteur;
 import com.rucheconnectee.service.ApiculteurService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,11 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Contrôleur REST pour la gestion des apiculteurs.
- * Reproduit les fonctionnalités d'authentification de l'application mobile.
+ * Désactivé en mode développement sans Firebase.
  */
 @RestController
 @RequestMapping("/api/apiculteurs")
+@ConditionalOnProperty(name = "firebase.project-id")
 @CrossOrigin(origins = "*")
 public class ApiculteurController {
 

@@ -3,6 +3,7 @@ package com.rucheconnectee.controller;
 import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.RucheService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +15,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Contrôleur de test pour vérifier les nouvelles fonctionnalités.
- * À utiliser uniquement en développement.
+ * Contrôleur de test pour vérifier les services.
+ * Désactivé en mode développement sans Firebase.
  */
 @RestController
 @RequestMapping("/api/test")
+@ConditionalOnProperty(name = "firebase.project-id")
 @CrossOrigin(origins = "*")
 public class TestController {
 

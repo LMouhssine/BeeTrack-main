@@ -4,6 +4,7 @@ import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.RucheService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +15,12 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Contrôleur REST pour la gestion des ruches.
+ * Désactivé en mode développement sans Firebase.
  * Reproduit les fonctionnalités de gestion des ruches de l'application mobile.
  */
 @RestController
 @RequestMapping("/api/ruches")
+@ConditionalOnProperty(name = "firebase.project-id")
 @CrossOrigin(origins = "*")
 public class RucheController {
 

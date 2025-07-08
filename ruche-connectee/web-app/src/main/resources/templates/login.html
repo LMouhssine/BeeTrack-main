@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - BeeTrack</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/logo.svg}">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <!-- Header avec logo -->
+            <div class="login-header">
+                <div class="logo mb-4">
+                    <div class="logo-icon">🐝</div>
+                    <span class="logo-text">BeeTrack</span>
+                </div>
+                <h1 class="login-title">Connexion</h1>
+                <p class="login-subtitle">Accédez à votre système de gestion de ruches</p>
+            </div>
+            
+            <!-- Messages d'erreur -->
+            <div th:if="${error}" class="alert alert-danger mb-4">
+                <i data-lucide="alert-circle" class="me-2"></i>
+                <span th:text="${error}">Erreur de connexion</span>
+            </div>
+            
+            <div th:if="${message}" class="alert alert-info mb-4">
+                <i data-lucide="info" class="me-2"></i>
+                <span th:text="${message}">Message</span>
+            </div>
+            
+            <!-- Formulaire de connexion -->
+            <form th:action="@{/login}" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <i data-lucide="mail" class="me-2"></i>
+                        Adresse email
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="username" 
+                           class="form-control" 
+                           placeholder="votre.email@exemple.com"
+                           required
+                           autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i data-lucide="lock" class="me-2"></i>
+                        Mot de passe
+                    </label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-control" 
+                           placeholder="Votre mot de passe"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               id="remember-me" 
+                               name="remember-me" 
+                               class="form-check-input">
+                        <label for="remember-me" class="form-check-label">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-full">
+                    <i data-lucide="log-in" class="me-2"></i>
+                    Se connecter
+                </button>
+            </form>
+            
+            <!-- Liens supplémentaires -->
+            <div class="login-footer mt-4 text-center">
+                <a href="#" class="text-amber-600">Mot de passe oublié ?</a>
+            </div>
+            
+            <!-- Informations de démonstration -->
+            <div class="demo-info mt-4 p-3" style="background: #f8fafc; border-radius: 0.5rem; border-left: 4px solid var(--primary-amber-600);">
+                <h6 class="font-semibold text-amber-700 mb-2">
+                    <i data-lucide="info" class="me-2"></i>
+                    Compte de démonstration
+                </h6>
+                <p class="text-sm text-gray-600 mb-1">
+                    <strong>Email :</strong> demo@beetrack.com
+                </p>
+                <p class="text-sm text-gray-600 mb-0">
+                    <strong>Mot de passe :</strong> demo123
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script th:src="@{/webjars/jquery/3.7.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+    
+    <!-- Initialiser les icônes -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            
+            // Animation d'entrée
+            const loginCard = document.querySelector('.login-card');
+            if (loginCard) {
+                setTimeout(() => {
+                    loginCard.style.opacity = '1';
+                    loginCard.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        });
+    </script>
+    
+    <style>
+        .login-body {
+            background: linear-gradient(135deg, var(--primary-amber-600) 0%, var(--primary-amber-800) 100%);
+        }
+        
+        .login-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .demo-info {
+            font-size: 0.875rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-amber-600);
+            border-color: var(--primary-amber-600);
+        }
+        
+        .form-check-input:focus {
+            border-color: var(--primary-amber-600);
+            box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
+        }
+    </style>
+</body>
+</html>

@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.concurrent.ExecutionException;
  * Reproduit la logique du FirebaseService de l'application mobile.
  */
 @Service
+@ConditionalOnProperty(name = "firebase.project-id")
 public class FirebaseService {
 
     @Autowired

@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -17,12 +18,14 @@ import java.io.InputStream;
 
 /**
  * Configuration Firebase pour l'authentification et Firestore.
- * Initialise la connexion avec Firebase en utilisant les credentials de service.
+ * S'active uniquement si Firebase est configuré (mode production).
+ * En mode développement, utilise les services mockés.
  */
 @Configuration
+@ConditionalOnProperty(name = "firebase.project-id")
 public class FirebaseConfig {
 
-    @Value("${firebase.project-id}")
+    @Value("${firebase.project-id:}")
     private String projectId;
 
     @Value("${firebase.credentials-path:firebase-service-account.json}")
@@ -30,6 +33,11 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() {
+        if (projectId == null || projectId.isEmpty()) {
+            System.out.println("Firebase désactivé - Mode développement avec données mockées");
+            return;
+        }
+
         try {
             if (FirebaseApp.getApps().isEmpty()) {
                 InputStream serviceAccount = new ClassPathResource(credentialsPath).getInputStream();
@@ -40,18 +48,22 @@ public class FirebaseConfig {
                         .build();
 
                 FirebaseApp.initializeApp(options);
+                System.out.println("Firebase initialisé avec succès pour le projet: " + projectId);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Erreur lors de l'initialisation de Firebase", e);
+            System.err.println("Erreur lors de l'initialisation de Firebase: " + e.getMessage());
+            System.out.println("Fonctionnement en mode dégradé avec données mockées");
         }
     }
 
     @Bean
+    @ConditionalOnProperty(name = "firebase.project-id")
     public FirebaseAuth firebaseAuth() {
         return FirebaseAuth.getInstance();
     }
 
     @Bean
+    @ConditionalOnProperty(name = "firebase.project-id")
     public Firestore firestore() {
         try {
             InputStream serviceAccount = new ClassPathResource(credentialsPath).getInputStream();

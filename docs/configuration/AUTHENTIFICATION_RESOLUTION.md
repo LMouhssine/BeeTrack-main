@@ -1,214 +1,388 @@
-# 🔓 Résolution du Problème d'Authentification BeeTrack
+# Résolution des problèmes d'authentification
 
-## 📋 **Problème Initial**
+## 🎯 Objectif
 
-Vous rencontriez un problème de connexion sur l'application web :
-- **Identifiants** : `jean.dupont@email.com` / `Azerty123`
-- **Mobile** : ✅ Fonctionnait correctement  
-- **Web** : ❌ Message "Les identifiants sont erronés"
+Corriger les erreurs d'authentification dans l'application Spring Boot BeeTrack avec Firebase Admin SDK.
 
-## 🔍 **Cause du Problème**
+## 🐛 Problèmes identifiés
 
-### **Différence d'Implémentation**
+### 1. Configuration Firebase Admin SDK
+- **Erreur** : Service account non configuré
+- **Impact** : Impossibilité d'authentifier les utilisateurs
 
-| Aspect | Application Mobile | Application Web (Avant) |
-|--------|-------------------|------------------------|
-| **Authentification** | Firebase Auth directement | ❌ Pas d'interface de login |
-| **Vérification** | `signInWithEmailAndPassword()` | ❌ Vérification Firestore seulement |
-| **Mot de passe** | Vérifié par Firebase | ❌ Jamais vérifié |
+### 2. Spring Security
+- **Erreur** : Configuration incorrecte pour Firebase JWT
+- **Impact** : Rejet des requêtes authentifiées
 
-### **Analyse Technique**
+### 3. Headers manquants
+- **Erreur** : Headers d'authentification non transmis
+- **Impact** : Erreurs 401 Unauthorized
 
-1. **Mobile (Flutter)** - Utilise Firebase Auth côté client :
-   ```dart
-   await authService.signInWithEmailAndPassword(email, password);
-   ```
+## ✅ Solution implémentée
 
-2. **Backend Spring Boot** - Ne vérifie que l'existence :
-   ```java
-   // Endpoint /auth/email - vérifiait seulement l'existence dans Firestore
-   public Apiculteur authenticateByEmail(String email) {
-       return getApiculteurByEmail(email); // Pas de vérification mot de passe
-   }
-   ```
-
-3. **Frontend Web (Avant)** - Pas d'interface d'authentification
-
-## ✅ **Solution Implémentée**
-
-### **1. Application Web avec Firebase Authentication**
-
-J'ai créé une interface web complète qui reproduit exactement la logique mobile :
-
-#### **Configuration Firebase**
-```typescript
-// src/firebase-config.ts
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-```
-
-#### **Interface de Connexion**
-- **Authentification** : `signInWithEmailAndPassword(auth, email, password)`
-- **Gestion d'État** : `onAuthStateChanged()` pour suivre l'état de connexion
-- **Récupération des Données** : Lecture directe depuis Firestore
-- **Messages d'Erreur** : Identiques à l'application mobile
-
-#### **Fonctionnalités**
-✅ **Connexion Firebase Auth**  
-✅ **Récupération des données Firestore**  
-✅ **Gestion des erreurs en français**  
-✅ **Interface moderne et responsive**  
-✅ **Déconnexion sécurisée**  
-
-### **2. Endpoint Backend Amélioré**
-
-J'ai aussi ajouté un endpoint de login complet côté backend :
+### Configuration Spring Security
 
 ```java
-@PostMapping("/auth/login")
-public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-    String email = request.get("email");
-    String password = request.get("password");
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
     
-    Map<String, Object> result = apiculteurService.authenticateWithPassword(email, password);
-    // Vérification avec Firebase Auth + Firestore
+    @Autowired
+    private FirebaseAuthFilter firebaseAuthFilter;
+    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/dev/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            
+        return http.build();
+    }
 }
 ```
 
-## 🚀 **Test de la Solution**
+### Filtre d'authentification Firebase
 
-### **1. Lancer l'Application Web**
-```bash
-# Terminal 1 - Backend (déjà en cours)
-cd ruche-connectee/web-app
-mvn spring-boot:run
-
-# Terminal 2 - Frontend Web
-cd BeeTrack-main
-npm run dev
-```
-
-### **2. Accéder aux Applications**
-- **Application Web** : http://localhost:5173
-- **Backend API** : http://localhost:8080
-- **Documentation API** : http://localhost:8080/swagger-ui.html
-
-### **3. Tester l'Authentification**
-1. Ouvrir http://localhost:5173
-2. Utiliser les identifiants :
-   - **Email** : `jean.dupont@email.com`
-   - **Mot de passe** : `Azerty123`
-3. ✅ **Connexion réussie !**
-
-## 🔗 **Cohérence entre Mobile et Web**
-
-### **Architecture Partagée**
-```
-┌─────────────────┐    ┌─────────────────┐
-│  App Mobile     │    │   App Web       │
-│  (Flutter)      │    │  (React/TS)     │
-└─────────┬───────┘    └─────────┬───────┘
-          │                      │
-          └──────┬─────────┬─────┘
-                 │         │
-         ┌───────▼─────┐   ▼
-         │ Firebase    │
-         │ Auth        │
-         └─────────────┘
-                 │
-         ┌───────▼─────┐
-         │ Firestore   │
-         │ Database    │
-         └─────────────┘
-```
-
-### **Flux d'Authentification Identique**
-1. **Saisie** : Email + Mot de passe
-2. **Vérification** : Firebase Authentication
-3. **Récupération** : Données utilisateur depuis Firestore
-4. **Session** : Gestion de l'état connecté
-5. **Déconnexion** : `signOut()` Firebase
-
-## 📱 **Comparaison des Fonctionnalités**
-
-| Fonctionnalité | Mobile | Web | Backend |
-|----------------|--------|-----|---------|
-| **Login Firebase** | ✅ | ✅ | ✅ |
-| **Gestion Session** | ✅ | ✅ | ➖ |
-| **Récupération Firestore** | ✅ | ✅ | ✅ |
-| **Messages d'Erreur FR** | ✅ | ✅ | ✅ |
-| **Déconnexion** | ✅ | ✅ | ➖ |
-| **Interface Moderne** | ✅ | ✅ | ➖ |
-
-## 🛡️ **Sécurité et Bonnes Pratiques**
-
-### **Authentification**
-- ✅ **Firebase Auth** : Authentification sécurisée
-- ✅ **Tokens JWT** : Gestion automatique par Firebase
-- ✅ **HTTPS** : Communications chiffrées
-- ✅ **Validation côté client et serveur**
-
-### **Données**
-- ✅ **Firestore Rules** : Contrôle d'accès aux données
-- ✅ **Validation** : Types TypeScript + Validation Java
-- ✅ **Consistance** : Même structure de données
-
-## 🔧 **Points Techniques Importants**
-
-### **Firebase Configuration**
-- ✅ **Project ID** : `ruche-connectee-93eab`
-- ✅ **Auth Domain** : `ruche-connectee-93eab.firebaseapp.com`
-- ✅ **API Keys** : Correctement configurées
-- ✅ **Service Account** : Backend configuré
-
-### **Gestion d'État**
-```typescript
-// Écoute des changements d'authentification
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // Récupérer les données utilisateur
-      const apiculteurDoc = await getDoc(doc(db, 'apiculteurs', user.uid));
-      setApiculteur(apiculteurDoc.data());
+```java
+@Component
+public class FirebaseAuthFilter extends OncePerRequestFilter {
+    
+    @Autowired
+    private FirebaseAuth firebaseAuth;
+    
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, 
+                                  HttpServletResponse response, 
+                                  FilterChain filterChain) throws ServletException, IOException {
+        
+        String token = extractToken(request);
+        
+        if (token != null) {
+            try {
+                FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
+                String uid = decodedToken.getUid();
+                
+                // Créer l'authentification Spring Security
+                UsernamePasswordAuthenticationToken auth = 
+                    new UsernamePasswordAuthenticationToken(uid, null, Collections.emptyList());
+                    
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                
+            } catch (FirebaseAuthException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token Firebase invalide");
+                return;
+            }
+        }
+        
+        filterChain.doFilter(request, response);
     }
-  });
-  return () => unsubscribe();
-}, []);
+    
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+}
 ```
 
-## 🎯 **Résultat Final**
+## 🔧 Configuration Firebase
 
-### **✅ Problème Résolu**
-- **Mobile** : ✅ Fonctionne (inchangé)
-- **Web** : ✅ Fonctionne parfaitement
-- **Backend** : ✅ Endpoints cohérents
+### Service Account
 
-### **✅ Avantages de la Solution**
-1. **Cohérence** : Même logique d'authentification
-2. **Sécurité** : Firebase Auth standard
-3. **Maintenabilité** : Code simple et clair
-4. **Évolutivité** : Base solide pour nouvelles fonctionnalités
-5. **UX Uniforme** : Expérience utilisateur similaire
+```properties
+# application.properties
+firebase.project-id=ruche-connectee-93eab
+firebase.service-account-key=firebase-service-account.json
+```
 
-### **🔄 Synchronisation Parfaite**
-Les identifiants `jean.dupont@email.com` / `Azerty123` fonctionnent maintenant sur :
-- ✅ **Application Mobile Flutter**
-- ✅ **Application Web React**
-- ✅ **Backend Spring Boot** (via API)
+### Bean Firebase Auth
 
-## 🚀 **Prochaines Étapes**
+```java
+@Configuration
+public class FirebaseConfig {
+    
+    @Value("${firebase.service-account-key}")
+    private String serviceAccountPath;
+    
+    @Bean
+    public FirebaseApp firebaseApp() throws IOException {
+        if (FirebaseApp.getApps().isEmpty()) {
+            ClassPathResource resource = new ClassPathResource(serviceAccountPath);
+            
+            FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
+                .build();
+                
+            return FirebaseApp.initializeApp(options);
+        }
+        return FirebaseApp.getInstance();
+    }
+    
+    @Bean
+    public FirebaseAuth firebaseAuth() {
+        return FirebaseAuth.getInstance();
+    }
+}
+```
 
-1. **Fonctionnalités Métier** : Gestion des ruches, ruchers, données capteurs
-2. **Interface Avancée** : Dashboard, graphiques, alertes
-3. **Notifications** : Push notifications web
-4. **Mode Hors-ligne** : PWA pour utilisation sans connexion
-5. **Tests** : Tests unitaires et d'intégration
+## 🌐 Côté Frontend Web
+
+### Thymeleaf avec Firebase Auth
+
+```html
+<!-- layout.html -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+
+<script>
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "[[${@environment.getProperty('firebase.api-key')}]]",
+    authDomain: "ruche-connectee-93eab.firebaseapp.com",
+    projectId: "ruche-connectee-93eab"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+// Gestion de l'authentification
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        // Récupérer le token JWT
+        user.getIdToken().then(function(token) {
+            // Stocker le token pour les requêtes AJAX
+            sessionStorage.setItem('firebaseToken', token);
+            
+            // Mettre à jour l'interface
+            updateUIForLoggedInUser(user);
+        });
+    } else {
+        // Rediriger vers la page de connexion
+        window.location.href = '/login';
+    }
+});
+
+// Fonction pour faire des requêtes authentifiées
+function authenticatedFetch(url, options = {}) {
+    const token = sessionStorage.getItem('firebaseToken');
+    
+    if (!options.headers) {
+        options.headers = {};
+    }
+    
+    if (token) {
+        options.headers['Authorization'] = 'Bearer ' + token;
+    }
+    
+    return fetch(url, options);
+}
+</script>
+```
+
+### Page de connexion
+
+```html
+<!-- login.html -->
+<div class="login-container">
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" required>
+        </div>
+        
+        <button type="submit">Se connecter</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+            // Connexion réussie
+            window.location.href = '/dashboard';
+        })
+        .catch(function(error) {
+            console.error('Erreur de connexion:', error);
+            alert('Erreur de connexion: ' + error.message);
+        });
+});
+</script>
+```
+
+## 🔒 Architecture d'authentification
+
+```mermaid
+graph TB
+    A[Navigateur Web] --> B[Firebase Auth SDK]
+    B --> C[Firebase Auth Service]
+    C --> D[JWT Token]
+    
+    A --> E[Requête avec JWT]
+    E --> F[Spring Boot Filter]
+    F --> G[Firebase Admin SDK]
+    G --> H[Validation JWT]
+    H --> I[Spring Security Context]
+    I --> J[Contrôleur protégé]
+```
+
+### Flux d'authentification
+
+1. **Connexion utilisateur** : Identifiants → Firebase Auth
+2. **Récupération JWT** : Firebase renvoie un token JWT
+3. **Stockage token** : Token stocké en session storage
+4. **Requêtes authentifiées** : Header `Authorization: Bearer <token>`
+5. **Validation côté serveur** : Firebase Admin SDK vérifie le token
+6. **Contexte Spring** : Utilisateur authentifié dans Spring Security
+
+## 🧪 Tests d'authentification
+
+### Contrôleur de test
+
+```java
+@RestController
+@RequestMapping("/api/test")
+public class AuthTestController {
+    
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, Object>> getProfile(Authentication auth) {
+        if (auth == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Non authentifié"));
+        }
+        
+        String uid = (String) auth.getPrincipal();
+        
+        return ResponseEntity.ok(Map.of(
+            "uid", uid,
+            "authenticated", true,
+            "timestamp", System.currentTimeMillis()
+        ));
+    }
+    
+    @GetMapping("/protected")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> protectedEndpoint() {
+        return ResponseEntity.ok("Accès autorisé");
+    }
+}
+```
+
+### Test côté frontend
+
+```javascript
+// Test de l'authentification
+function testAuth() {
+    authenticatedFetch('/api/test/profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.authenticated) {
+                console.log('✅ Authentification OK:', data);
+            } else {
+                console.log('❌ Authentification échouée:', data);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Erreur test auth:', error);
+        });
+}
+```
+
+## 🐛 Résolution des problèmes
+
+### Erreur 401 - Unauthorized
+
+#### Causes possibles :
+1. Token JWT expiré
+2. Token mal formaté
+3. Configuration Firebase incorrecte
+4. Service account manquant
+
+#### Solutions :
+```java
+// Vérifier la configuration
+@RestController
+public class DiagnosticController {
+    
+    @GetMapping("/diagnostic/auth")
+    public ResponseEntity<Map<String, Object>> diagnostic(HttpServletRequest request) {
+        Map<String, Object> diagnostic = new HashMap<>();
+        
+        // Vérifier les headers
+        String authHeader = request.getHeader("Authorization");
+        diagnostic.put("authHeader", authHeader != null ? "Présent" : "Absent");
+        
+        // Vérifier Firebase
+        try {
+            FirebaseApp app = FirebaseApp.getInstance();
+            diagnostic.put("firebaseApp", "Configuré");
+        } catch (Exception e) {
+            diagnostic.put("firebaseApp", "Erreur: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(diagnostic);
+    }
+}
+```
+
+### Erreur Token invalide
+
+#### Vérifications :
+1. **Expiration** : Les tokens Firebase expirent après 1h
+2. **Format** : Doit commencer par `Bearer `
+3. **Audience** : Doit correspondre au project ID
+
+#### Solution :
+```javascript
+// Renouvellement automatique du token
+setInterval(function() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        user.getIdToken(true).then(function(token) {
+            sessionStorage.setItem('firebaseToken', token);
+        });
+    }
+}, 50 * 60 * 1000); // Renouveler toutes les 50 minutes
+```
+
+## 📋 Checklist de déploiement
+
+- [ ] Service account Firebase configuré
+- [ ] Variables d'environnement définies
+- [ ] Règles Firestore configurées
+- [ ] Tests d'authentification passés
+- [ ] Logs d'erreur vérifiés
+- [ ] Performance testée
+
+## 📚 Ressources
+
+- **Firebase Admin SDK** : https://firebase.google.com/docs/admin/setup
+- **Spring Security JWT** : https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2
+- **Firebase Auth Web** : https://firebase.google.com/docs/auth/web/start
 
 ---
 
-**🎉 L'authentification est maintenant parfaitement alignée entre mobile et web !** 
+<div align="center">
+
+**Authentification BeeTrack**  
+*Spring Boot + Firebase Admin SDK*
+
+</div> 

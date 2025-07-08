@@ -2,6 +2,7 @@ package com.rucheconnectee.controller;
 
 import com.rucheconnectee.service.FirebaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,12 +10,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Contrôleur pour créer des données de test en développement.
- * Complètement indépendant et sans authentification.
+ * Contrôleur pour générer des données de développement.
+ * Désactivé en mode développement sans Firebase.
  */
 @RestController
-@RequestMapping("/dev")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/dev")
+@ConditionalOnProperty(name = "firebase.project-id")
 public class DevDataController {
 
     @Autowired

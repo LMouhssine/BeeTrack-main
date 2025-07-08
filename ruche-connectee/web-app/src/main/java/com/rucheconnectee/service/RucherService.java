@@ -3,6 +3,7 @@ package com.rucheconnectee.service;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.rucheconnectee.model.Rucher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,9 +15,10 @@ import java.util.stream.Collectors;
 
 /**
  * Service pour la gestion des ruchers.
- * Reproduit la logique de gestion des ruchers de l'application mobile.
+ * Désactivé en mode développement sans Firebase.
  */
 @Service
+@ConditionalOnProperty(name = "firebase.project-id")
 public class RucherService {
 
     @Autowired

@@ -6,6 +6,7 @@ import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.model.CreateRucheRequest;
 import com.rucheconnectee.model.RucheResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * Reproduit la logique de gestion des ruches de l'application mobile.
  */
 @Service
+@ConditionalOnProperty(name = "firebase.project-id")
 public class RucheService {
 
     @Autowired

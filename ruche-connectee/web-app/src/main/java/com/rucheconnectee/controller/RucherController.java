@@ -3,6 +3,7 @@ package com.rucheconnectee.controller;
 import com.rucheconnectee.model.Rucher;
 import com.rucheconnectee.service.RucherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,11 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Contrôleur REST pour la gestion des ruchers.
- * Reproduit les fonctionnalités de gestion des ruchers de l'application mobile.
+ * Désactivé en mode développement sans Firebase.
  */
 @RestController
 @RequestMapping("/api/ruchers")
+@ConditionalOnProperty(name = "firebase.project-id")
 @CrossOrigin(origins = "*")
 public class RucherController {
 

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Mes Ruches - BeeTrack</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="ruches-container">
+        <!-- Header avec actions -->
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 class="page-title">Mes Ruches</h1>
+                <p class="text-gray-600">Gérez et surveillez vos ruches connectées</p>
+            </div>
+            <div class="header-actions">
+                <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
+                    <i data-lucide="plus" class="me-2"></i>
+                    Nouvelle ruche
+                </a>
+                <button class="btn btn-secondary" data-refresh="ruches">
+                    <i data-lucide="refresh-cw" class="me-2"></i>
+                    Actualiser
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="stats-grid mb-4" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value" th:text="${#lists.size(ruches)}">0</h3>
+                        <p class="stat-label">Total ruches</p>
+                    </div>
+                    <div class="stat-icon bg-amber-500">
+                        <i data-lucide="hexagon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value text-green-600" th:text="${#lists.size(ruches.?[actif])}">0</h3>
+                        <p class="stat-label">Actives</p>
+                    </div>
+                    <div class="stat-icon bg-green-500">
+                        <i data-lucide="check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value text-yellow-600" th:text="${#lists.size(ruches.?[!actif])}">0</h3>
+                        <p class="stat-label">Inactives</p>
+                    </div>
+                    <div class="stat-icon bg-yellow-500">
+                        <i data-lucide="pause-circle"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value text-red-600">0</h3>
+                        <p class="stat-label">Alertes</p>
+                    </div>
+                    <div class="stat-icon bg-red-500">
+                        <i data-lucide="alert-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des ruches -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="hexagon" class="me-2"></i>
+                    Liste des ruches
+                </h2>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(ruches)}" class="text-center p-8">
+                <div class="empty-state">
+                    <div style="font-size: 4rem; margin: 0 auto 1rem; color: #9ca3af;">🐝</div>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Aucune ruche trouvée</h3>
+                    <p class="text-gray-500 mb-4">Commencez par ajouter votre première ruche connectée</p>
+                    <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
+                        <i data-lucide="plus" class="me-2"></i>
+                        Ajouter une ruche
+                    </a>
+                </div>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(ruches)}" class="ruches-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 1.5rem;">
+                <div th:each="ruche : ${ruches}" class="ruche-card" 
+                     style="border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; background: white; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px -3px rgba(0, 0, 0, 0.1)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px 0 rgba(0, 0, 0, 0.1)'"
+                     th:onclick="'window.location.href=\'/ruches/' + ${ruche.id} + '\''">
+                    
+                    <!-- En-tête de la carte -->
+                    <div class="ruche-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-900" th:text="${ruche.nom}">Ruche #1</h3>
+                            <p class="text-sm text-gray-600" th:text="${ruche.rucherNom ?: 'Rucher non défini'}">Rucher Principal</p>
+                        </div>
+                        <span th:if="${ruche.actif}" class="badge badge-success">Actif</span>
+                        <span th:unless="${ruche.actif}" class="badge badge-warning">Inactif</span>
+                    </div>
+
+                    <!-- Données des capteurs -->
+                    <div class="sensor-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="sensor-item">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <div style="color: #f59e0b; font-size: 1rem;">🌡️</div>
+                                <span class="text-sm font-medium">Température</span>
+                            </div>
+                            <span class="text-lg font-bold" th:text="${ruche.temperature != null ? ruche.temperature + '°C' : '--'}">--</span>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <div style="color: #3b82f6; font-size: 1rem;">💧</div>
+                                <span class="text-sm font-medium">Humidité</span>
+                            </div>
+                            <span class="text-lg font-bold" th:text="${ruche.humidite != null ? ruche.humidite + '%' : '--'}">--</span>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <div style="color: #10b981; font-size: 1rem;">🔋</div>
+                                <span class="text-sm font-medium">Batterie</span>
+                            </div>
+                            <span class="text-lg font-bold" th:text="${ruche.niveauBatterie != null ? ruche.niveauBatterie + '%' : '--'}">--</span>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <div style="color: #8b5cf6; font-size: 1rem;">📶</div>
+                                <span class="text-sm font-medium">Connexion</span>
+                            </div>
+                            <span class="text-sm font-bold text-green-600" th:if="${ruche.actif}">En ligne</span>
+                            <span class="text-sm font-bold text-gray-500" th:unless="${ruche.actif}">Hors ligne</span>
+                        </div>
+                    </div>
+
+                    <!-- Dernière mise à jour -->
+                    <div class="last-update mb-3">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #6b7280;">
+                            <span>🕒</span>
+                            <span>Dernière mise à jour : </span>
+                            <span th:text="${ruche.derniereMiseAJour != null ? #temporals.format(ruche.derniereMiseAJour, 'dd/MM/yyyy HH:mm') : 'Jamais'}">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="ruche-actions" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <a th:href="@{/ruches/{id}(id=${ruche.id})}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                            <i data-lucide="eye" style="width: 1rem; height: 1rem; margin-right: 0.25rem;"></i>
+                            Détails
+                        </a>
+                        <form th:action="@{/ruches/{id}/supprimer(id=${ruche.id})}" method="post" style="display: inline;" 
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette ruche ?')">
+                            <button type="submit" class="btn btn-danger" style="padding: 0.5rem;">
+                                <i data-lucide="trash-2" style="width: 1rem; height: 1rem;"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

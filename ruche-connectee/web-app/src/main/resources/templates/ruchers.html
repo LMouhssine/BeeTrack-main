@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Ruchers - BeeTrack</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="ruchers-container">
+        <!-- En-tête de la page -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i data-lucide="map-pin" class="me-2"></i>
+                    Mes Ruchers
+                </h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterRucherModal">
+                    <i data-lucide="plus" class="me-2"></i>
+                    Nouveau rucher
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value" th:text="${totalRuchers ?: 0}">0</h3>
+                        <p class="stat-label">Ruchers</p>
+                    </div>
+                    <div class="stat-icon bg-green-500">
+                        <i data-lucide="map-pin"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value" th:text="${totalRuchesRuchers ?: 0}">0</h3>
+                        <p class="stat-label">Ruches</p>
+                    </div>
+                    <div class="stat-icon bg-amber-500">
+                        <i data-lucide="hexagon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des ruchers -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="map-pin" class="me-2"></i>
+                    Liste des ruchers
+                </h2>
+                <div class="card-actions">
+                    <button class="btn btn-secondary" onclick="location.reload()">
+                        <i data-lucide="refresh-cw" class="me-2"></i>
+                        Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="filters mb-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchRucher" placeholder="Rechercher un rucher...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterStatut">
+                            <option value="">Tous les statuts</option>
+                            <option value="actif">Actifs</option>
+                            <option value="inactif">Inactifs</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ruchers-grid">
+                <!-- Message si aucun rucher -->
+                <div th:if="${#lists.isEmpty(ruchers)}" class="empty-state">
+                    <div class="empty-icon">
+                        <i data-lucide="map-pin" style="width: 4rem; height: 4rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h3 class="empty-title">Aucun rucher</h3>
+                    <p class="empty-description">Créez votre premier rucher pour commencer à organiser vos ruches.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterRucherModal">
+                        <i data-lucide="plus" class="me-2"></i>
+                        Créer un rucher
+                    </button>
+                </div>
+
+                <!-- Cartes des ruchers -->
+                <div th:each="rucher : ${ruchers}" class="rucher-card" th:data-rucher-id="${rucher.id}">
+                    <div class="rucher-header">
+                        <div class="rucher-info">
+                            <h3 class="rucher-name" th:text="${rucher.nom}">Nom du rucher</h3>
+                            <p class="rucher-location" th:text="${rucher.adresse}">Adresse du rucher</p>
+                        </div>
+                        <div class="rucher-actions">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i data-lucide="more-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/ruchers/{id}/editer(id=${rucher.id})}">
+                                            <i data-lucide="edit" class="me-2"></i>
+                                            Modifier
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" 
+                                                onclick="confirmerSuppression(this)"
+                                                th:data-rucher-id="${rucher.id}"
+                                                th:data-rucher-nom="${rucher.nom}">
+                                            <i data-lucide="trash-2" class="me-2"></i>
+                                            Supprimer
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rucher-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" th:text="${rucher.nombreRuches ?: 0}">0</span>
+                            <span class="stat-label">Ruches</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" th:text="${rucher.superficie ?: 'N/A'}">N/A</span>
+                            <span class="stat-label">Ha</span>
+                        </div>
+                    </div>
+
+                    <div class="rucher-status">
+                        <span th:if="${rucher.actif}" class="badge badge-success">
+                            <i data-lucide="check-circle" class="me-1"></i>
+                            Actif
+                        </span>
+                        <span th:unless="${rucher.actif}" class="badge badge-warning">
+                            <i data-lucide="pause-circle" class="me-1"></i>
+                            Inactif
+                        </span>
+                    </div>
+
+                    <div class="rucher-footer">
+                        <small class="text-muted">
+                            Créé le <span th:text="${#temporals.format(rucher.dateCreation, 'dd/MM/yyyy')}">01/01/2024</span>
+                        </small>
+                        <a th:href="@{/ruchers/{id}(id=${rucher.id})}" class="btn btn-sm btn-primary">
+                            <i data-lucide="eye" class="me-1"></i>
+                            Voir détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter un rucher -->
+    <div class="modal fade" id="ajouterRucherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/ruchers/nouveau}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i data-lucide="plus" class="me-2"></i>
+                            Nouveau rucher
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="nom" class="form-label">Nom du rucher *</label>
+                            <input type="text" class="form-control" name="nom" id="nom" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="adresse" class="form-label">Adresse</label>
+                            <textarea class="form-control" name="adresse" id="adresse" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="superficie" class="form-label">Superficie (Ha)</label>
+                                    <input type="number" class="form-control" name="superficie" id="superficie" step="0.1" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="actif" class="form-label">Statut</label>
+                                    <select class="form-control" name="actif" id="actif">
+                                        <option value="true">Actif</option>
+                                        <option value="false">Inactif</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="me-2"></i>
+                            Créer le rucher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="confirmerSuppressionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i data-lucide="alert-triangle" class="me-2"></i>
+                        Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer le rucher <strong id="rucherNomSuppression"></strong> ?</p>
+                    <div class="alert alert-warning">
+                        <i data-lucide="alert-triangle" class="me-2"></i>
+                        Cette action est irréversible. Toutes les ruches associées seront également supprimées.
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form id="formSuppression" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i data-lucide="trash-2" class="me-2"></i>
+                            Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles spécifiques aux ruchers -->
+    <th:block layout:fragment="styles">
+        <style>
+            .ruchers-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .rucher-card {
+                background: white;
+                border-radius: 0.75rem;
+                padding: 1.5rem;
+                box-shadow: var(--shadow-primary);
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+            }
+
+            .rucher-card:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-elevated);
+                border-color: var(--primary-amber-200);
+            }
+
+            .rucher-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+            }
+
+            .rucher-name {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: #1e293b;
+                margin: 0 0 0.5rem 0;
+            }
+
+            .rucher-location {
+                color: #64748b;
+                margin: 0;
+                font-size: 0.875rem;
+            }
+
+            .rucher-stats {
+                display: flex;
+                gap: 2rem;
+                margin: 1rem 0;
+                padding: 1rem 0;
+                border-top: 1px solid #e2e8f0;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .stat-item {
+                text-align: center;
+            }
+
+            .stat-number {
+                display: block;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--primary-amber-600);
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .rucher-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 1rem;
+            }
+
+            .empty-state {
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 3rem;
+                color: #64748b;
+            }
+
+            .empty-title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 1rem 0 0.5rem 0;
+                color: #1e293b;
+            }
+
+            .empty-description {
+                margin-bottom: 2rem;
+            }
+
+            .filters {
+                padding: 0 1.5rem;
+            }
+
+            .page-header {
+                margin-bottom: 2rem;
+            }
+
+            .header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            @media (max-width: 768px) {
+                .ruchers-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .header-content {
+                    flex-direction: column;
+                    gap: 1rem;
+                    align-items: stretch;
+                }
+                
+                .stats-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                }
+            }
+        </style>
+    </th:block>
+
+    <!-- Scripts spécifiques aux ruchers -->
+    <th:block layout:fragment="scripts">
+        <script>
+            function confirmerSuppression(button) {
+                const rucherId = button.getAttribute('data-rucher-id');
+                const rucherNom = button.getAttribute('data-rucher-nom');
+                
+                document.getElementById('rucherNomSuppression').textContent = rucherNom;
+                document.getElementById('formSuppression').action = `/ruchers/${rucherId}/supprimer`;
+                
+                const modal = new bootstrap.Modal(document.getElementById('confirmerSuppressionModal'));
+                modal.show();
+            }
+
+            // Fonction de recherche
+            document.getElementById('searchRucher').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rucherCards = document.querySelectorAll('.rucher-card');
+                
+                rucherCards.forEach(card => {
+                    const nom = card.querySelector('.rucher-name').textContent.toLowerCase();
+                    const adresse = card.querySelector('.rucher-location').textContent.toLowerCase();
+                    
+                    if (nom.includes(searchTerm) || adresse.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Fonction de filtrage par statut
+            document.getElementById('filterStatut').addEventListener('change', function(e) {
+                const filterValue = e.target.value;
+                const rucherCards = document.querySelectorAll('.rucher-card');
+                
+                rucherCards.forEach(card => {
+                    if (filterValue === '') {
+                        card.style.display = 'block';
+                    } else {
+                        const badge = card.querySelector('.badge');
+                        const isActif = badge.classList.contains('badge-success');
+                        
+                        if ((filterValue === 'actif' && isActif) || (filterValue === 'inactif' && !isActif)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

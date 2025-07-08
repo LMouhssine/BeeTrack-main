@@ -1,204 +1,371 @@
-# BeeTrack - API Web Backend
+# 🚀 BeeTrack Web Application
 
-API REST Spring Boot pour le système de ruches connectées BeeTrack. Cette API reproduit et étend les fonctionnalités de l'application mobile Flutter en fournissant un backend web complet.
+Application web Spring Boot pour la gestion et surveillance de ruches connectées.
 
-## 🚀 Fonctionnalités
+## 📋 Vue d'ensemble
 
-### 🔐 Gestion des Apiculteurs
-- Création et gestion des comptes apiculteurs
-- Authentification avec Firebase Auth
-- Profils utilisateur complets
-- Connexion par email ou identifiant
+Cette application web utilise Spring Boot + Thymeleaf pour offrir une interface complète de gestion des ruches connectées avec rendu côté serveur optimisé.
 
-### 📦 Gestion des Ruches
-- CRUD complet des ruches
-- Données de capteurs IoT en temps réel
-- Historique des mesures
-- Système d'alertes automatiques
-- Seuils personnalisables
+## 🏗️ Architecture technique
 
-### 📍 Gestion des Ruchers
-- Organisation des ruches par emplacement
-- Géolocalisation des ruchers
-- Comptage automatique des ruches
+- **Backend** : Spring Boot 3.x avec Spring MVC
+- **Frontend** : Thymeleaf + Bootstrap 5 + JavaScript vanilla
+- **Base de données** : Firebase Firestore via Firebase Admin SDK
+- **Authentification** : Firebase Auth (intégration serveur)
+- **Graphiques** : Chart.js
+- **Icons** : Lucide Icons
 
-### 📊 Données IoT
-- Réception des données ESP32
-- Température et humidité
-- État d'ouverture du couvercle
-- Niveau de batterie
-- Stockage historique
+## 🚀 Démarrage rapide
 
-## 🛠️ Technologies
-
-- **Spring Boot 3.1.3** - Framework principal
-- **Firebase Admin SDK** - Authentification et Firestore
-- **Google Cloud Firestore** - Base de données NoSQL
-- **Lombok** - Réduction du code boilerplate
-- **SpringDoc OpenAPI** - Documentation API automatique
-- **Maven** - Gestion des dépendances
-
-## 📋 Prérequis
-
+### Prérequis
 - Java 17 ou supérieur
-- Maven 3.6+
-- Compte Firebase avec projet configuré
-- Fichier de credentials Firebase
+- Maven 3.8+
+- Fichier `firebase-service-account.json` dans `src/main/resources/`
 
-## ⚙️ Installation
+### Installation et lancement
 
-### 1. Cloner le projet
 ```bash
-git clone https://github.com/LMouhssine/BeeTrack-main.git
+# Cloner le projet (si pas déjà fait)
+git clone https://github.com/votre-repo/BeeTrack-main.git
 cd BeeTrack-main/ruche-connectee/web-app
-```
 
-### 2. Configuration Firebase
+# Lancer l'application
+mvn spring-boot:run
 
-1. Créer un projet Firebase sur [Firebase Console](https://console.firebase.google.com)
-2. Activer Firestore Database
-3. Activer Firebase Authentication (Email/Password)
-4. Générer une clé privée de compte de service :
-   - Aller dans Paramètres du projet > Comptes de service
-   - Cliquer sur "Générer une nouvelle clé privée"
-   - Télécharger le fichier JSON
-
-5. Placer le fichier JSON dans `src/main/resources/` et le renommer `firebase-service-account.json`
-
-### 3. Configuration de l'application
-
-Modifier `src/main/resources/application.properties` :
-```properties
-firebase.project-id=VOTRE_PROJECT_ID
-firebase.credentials-path=firebase-service-account.json
-```
-
-### 4. Compilation et lancement
-```bash
-mvn clean install
+# Ou sur Windows PowerShell
 mvn spring-boot:run
 ```
 
-L'API sera accessible sur `http://localhost:8080`
+L'application sera disponible sur : **http://localhost:8080**
 
-## 📚 Documentation API
-
-Une fois l'application lancée, la documentation Swagger est disponible sur :
-- **Swagger UI** : http://localhost:8080/swagger-ui.html
-- **OpenAPI JSON** : http://localhost:8080/api-docs
-
-## 🔗 Endpoints Principaux
-
-### Apiculteurs
-```
-GET    /api/apiculteurs              - Liste tous les apiculteurs
-GET    /api/apiculteurs/{id}         - Récupère un apiculteur
-POST   /api/apiculteurs              - Crée un apiculteur
-PUT    /api/apiculteurs/{id}         - Met à jour un apiculteur
-DELETE /api/apiculteurs/{id}         - Désactive un apiculteur
-
-POST   /api/apiculteurs/auth/email   - Authentification par email
-POST   /api/apiculteurs/auth/identifiant - Récupère email par identifiant
-```
-
-### Ruchers
-```
-GET    /api/ruchers/apiculteur/{id}  - Ruchers d'un apiculteur
-GET    /api/ruchers/{id}             - Récupère un rucher
-POST   /api/ruchers                  - Crée un rucher
-PUT    /api/ruchers/{id}             - Met à jour un rucher
-DELETE /api/ruchers/{id}             - Désactive un rucher
-```
-
-### Ruches
-```
-GET    /api/ruches/apiculteur/{id}   - Ruches d'un apiculteur
-GET    /api/ruches/rucher/{id}       - Ruches d'un rucher
-GET    /api/ruches/{id}              - Récupère une ruche
-POST   /api/ruches                   - Crée une ruche
-PUT    /api/ruches/{id}              - Met à jour une ruche
-DELETE /api/ruches/{id}              - Désactive une ruche
-
-POST   /api/ruches/{id}/donnees      - Données capteurs (ESP32)
-GET    /api/ruches/{id}/historique   - Historique des données
-GET    /api/ruches/{id}/alertes      - Vérification des alertes
-```
-
-## 📱 Intégration ESP32
-
-L'ESP32 peut envoyer les données directement à l'API :
-
-```cpp
-// Exemple de payload JSON pour ESP32
-{
-  "temperature": 25.5,
-  "humidity": 65.0,
-  "couvercle_ouvert": false,
-  "batterie": 85,
-  "signal_qualite": 90
-}
-```
-
-Endpoint : `POST /api/ruches/{rucheId}/donnees`
-
-## 🔄 Synchronisation avec l'App Mobile
-
-L'API partage la même base de données Firestore que l'application mobile Flutter, garantissant une synchronisation en temps réel des données.
-
-## 🚨 Système d'Alertes
-
-Le système vérifie automatiquement :
-- Température hors seuils (défaut : 15-35°C)
-- Humidité hors seuils (défaut : 40-70%)
-- Batterie faible (< 20%)
-- Ouverture prolongée du couvercle
-
-## 🧪 Tests
+### Build de production
 
 ```bash
-# Tests unitaires
+# Créer le JAR exécutable
+mvn clean package
+
+# Lancer le JAR
+java -jar target/web-app-*.jar
+```
+
+## 📁 Structure du projet
+
+```
+src/
+├── main/
+│   ├── java/com/rucheconnectee/
+│   │   ├── BeeTrackApplication.java          # Point d'entrée
+│   │   ├── config/
+│   │   │   ├── FirebaseConfig.java           # Configuration Firebase
+│   │   │   ├── SecurityConfig.java           # Configuration sécurité
+│   │   │   └── DevelopmentConfig.java        # Config développement
+│   │   ├── controller/
+│   │   │   ├── WebController.java            # Pages principales
+│   │   │   ├── RucheController.java          # API Ruches
+│   │   │   ├── RucherController.java         # API Ruchers
+│   │   │   └── TestController.java           # Tests et diagnostic
+│   │   ├── service/
+│   │   │   ├── FirebaseService.java          # Service Firebase
+│   │   │   ├── RucheService.java            # Logique ruches
+│   │   │   ├── RucherService.java           # Logique ruchers
+│   │   │   └── MockDataService.java         # Données de test
+│   │   └── model/
+│   │       ├── Ruche.java                   # Modèle ruche
+│   │       ├── Rucher.java                  # Modèle rucher
+│   │       └── DonneesCapteur.java          # Modèle données capteurs
+│   └── resources/
+│       ├── application.properties           # Configuration app
+│       ├── firebase-service-account.json    # Clés Firebase (privé)
+│       ├── templates/                       # Templates Thymeleaf
+│       │   ├── layout.html                  # Template de base
+│       │   ├── dashboard.html               # Page d'accueil
+│       │   ├── ruchers.html                 # Gestion ruchers
+│       │   ├── ruches-list.html             # Liste ruches
+│       │   ├── ruche-details.html           # Détails ruche
+│       │   └── statistiques.html            # Statistiques
+│       └── static/                          # Ressources statiques
+│           ├── css/app.css                  # Styles principaux
+│           ├── js/app.js                    # JavaScript principal
+│           └── logo.svg                     # Logo
+└── test/
+    └── java/com/rucheconnectee/            # Tests unitaires
+```
+
+## 🔧 Configuration
+
+### application.properties
+
+```properties
+# Configuration serveur
+server.port=8080
+server.servlet.context-path=/
+
+# Configuration Thymeleaf
+spring.thymeleaf.cache=false
+spring.thymeleaf.encoding=UTF-8
+
+# Configuration Firebase
+firebase.project-id=votre-projet-id
+firebase.service-account=firebase-service-account.json
+
+# Configuration logging
+logging.level.com.rucheconnectee=INFO
+logging.level.com.google.firebase=WARN
+```
+
+### Variables d'environnement (optionnel)
+
+```bash
+export FIREBASE_PROJECT_ID=votre-projet-id
+export FIREBASE_SERVICE_ACCOUNT=/path/to/firebase-service-account.json
+export SERVER_PORT=8080
+```
+
+## 🌐 Pages et fonctionnalités
+
+### Dashboard (`/dashboard`)
+- Vue d'ensemble avec métriques clés
+- Graphiques de température et humidité
+- Feed d'activité récente
+- Actions rapides
+
+### Ruchers (`/ruchers`)
+- Liste complète des ruchers
+- Recherche et filtres
+- Ajout/modification/suppression
+- Statistiques par rucher
+
+### Ruches (`/ruches`)
+- Vue grille et liste
+- Filtres avancés (rucher, statut)
+- Indicateurs de santé
+- Données temps réel
+
+### Détails ruche (`/ruche/{id}`)
+- Métriques détaillées
+- Graphiques historiques
+- Gestion des alertes
+- Actions de maintenance
+
+### Statistiques (`/statistiques`)
+- Analyses de production
+- Performance par rucher
+- Recommandations
+- Comparaisons
+
+## 🔍 Endpoints API
+
+### Pages web
+- `GET /` → Redirection vers `/dashboard`
+- `GET /dashboard` → Dashboard principal
+- `GET /ruchers` → Gestion des ruchers
+- `GET /ruches` → Liste des ruches
+- `GET /ruche/{id}` → Détails d'une ruche
+- `GET /statistiques` → Page de statistiques
+
+### API REST
+- `GET /api/ruchers` → Liste des ruchers (JSON)
+- `POST /api/ruchers` → Créer un rucher
+- `PUT /api/ruchers/{id}` → Modifier un rucher
+- `DELETE /api/ruchers/{id}` → Supprimer un rucher
+- `GET /api/ruches` → Liste des ruches (JSON)
+- `GET /api/ruches/{id}` → Détails d'une ruche
+- `GET /api/ruches/{id}/mesures` → Mesures d'une ruche
+
+### Diagnostic
+- `GET /test` → Test de connexion Firebase
+- `GET /api/health` → Statut de l'application
+- `POST /dev/mock-data` → Générer des données de test
+
+## 🧪 Tests et développement
+
+### Profils d'environnement
+
+```bash
+# Développement avec live reload
+mvn spring-boot:run -Dspring.profiles.active=dev
+
+# Production
+mvn spring-boot:run -Dspring.profiles.active=prod
+
+# Tests
+mvn spring-boot:run -Dspring.profiles.active=test
+```
+
+### Génération de données de test
+
+```bash
+# Via endpoint (mode dev uniquement)
+curl -X POST http://localhost:8080/dev/mock-data
+
+# Via MockDataService programmatiquement
+@Autowired MockDataService mockDataService;
+mockDataService.generateTestData();
+```
+
+### Tests unitaires
+
+```bash
+# Lancer tous les tests
 mvn test
 
-# Tests d'intégration
-mvn verify
+# Tests spécifiques
+mvn test -Dtest=FirebaseServiceTest
+mvn test -Dtest=RucheControllerTest
 ```
 
-## 📦 Déploiement
+### Débogage
 
-### Docker
 ```bash
-# Construction de l'image
-docker build -t ruche-connectee-api .
+# Mode debug avec port 5005
+mvn spring-boot:run -Dagentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
-# Lancement du conteneur
-docker run -p 8080:8080 ruche-connectee-api
+# Logs détaillés
+mvn spring-boot:run -Dlogging.level.com.rucheconnectee=DEBUG
 ```
 
-### Production
-1. Configurer les variables d'environnement
-2. Utiliser un profil de production
-3. Configurer HTTPS
-4. Mettre en place la surveillance
+## 📊 Monitoring
+
+### Spring Boot Actuator
+
+```bash
+# Santé de l'application
+curl http://localhost:8080/actuator/health
+
+# Métriques
+curl http://localhost:8080/actuator/metrics
+
+# Informations
+curl http://localhost:8080/actuator/info
+```
+
+### Logs
+
+```bash
+# Logs en temps réel
+tail -f logs/spring.log
+
+# Logs Firebase
+tail -f logs/spring.log | grep Firebase
+```
+
+## 🐳 Docker
+
+### Dockerfile
+
+```dockerfile
+FROM openjdk:17-jre-slim
+
+# Variables d'environnement
+ENV SPRING_PROFILES_ACTIVE=prod
+ENV SERVER_PORT=8080
+
+# Copier le JAR
+COPY target/web-app-*.jar app.jar
+
+# Exposer le port
+EXPOSE 8080
+
+# Point d'entrée
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+### Build et déploiement
+
+```bash
+# Build du JAR
+mvn clean package
+
+# Build de l'image Docker
+docker build -t beetrck-web .
+
+# Lancer le conteneur
+docker run -p 8080:8080 \
+  -e FIREBASE_PROJECT_ID=votre-projet \
+  -v /path/to/firebase-service-account.json:/app/firebase-service-account.json \
+  beetrck-web
+```
+
+## 🔧 Dépannage
+
+### Problèmes courants
+
+#### Application ne démarre pas
+```bash
+# Vérifier Java
+java -version
+
+# Vérifier Maven
+mvn -version
+
+# Nettoyer et rebuilder
+mvn clean install
+```
+
+#### Erreurs Firebase
+```bash
+# Vérifier le fichier service account
+ls -la src/main/resources/firebase-service-account.json
+
+# Tester la connexion
+curl http://localhost:8080/test
+```
+
+#### Templates Thymeleaf non trouvés
+```properties
+# Dans application.properties
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+```
+
+#### Ressources statiques non servies
+```properties
+# Dans application.properties
+spring.web.resources.static-locations=classpath:/static/
+```
+
+### Logs utiles
+
+```bash
+# Erreurs de démarrage
+mvn spring-boot:run | grep ERROR
+
+# Problèmes Thymeleaf
+mvn spring-boot:run | grep "TemplateInputException"
+
+# Erreurs Firebase
+mvn spring-boot:run | grep "FirebaseException"
+```
+
+## 📚 Documentation supplémentaire
+
+- **Documentation Spring Boot** : https://spring.io/projects/spring-boot
+- **Guide Thymeleaf** : https://www.thymeleaf.org/documentation.html
+- **Firebase Admin SDK** : https://firebase.google.com/docs/admin/setup
+- **Bootstrap 5** : https://getbootstrap.com/docs/5.3/
 
 ## 🤝 Contribution
 
 1. Fork le projet
 2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Commit les changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
-4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -am 'Ajouter nouvelle fonctionnalité'`)
+4. Push sur la branche (`git push origin feature/nouvelle-fonctionnalite`)
 5. Créer une Pull Request
 
-## 📄 Licence
+### Standards de code
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## 📞 Support
-
-Pour toute question ou problème :
-- Ouvrir une issue sur GitHub
-- Consulter la documentation Swagger
-- Vérifier les logs de l'application
+- **Java** : Style Google Java
+- **Thymeleaf** : Indentation 2 espaces
+- **JavaScript** : ES6+ avec commentaires JSDoc
+- **CSS** : BEM methodology
 
 ---
 
-**Note** : Cette API est conçue pour fonctionner en parfaite harmonie avec l'application mobile Flutter existante, partageant la même base de données et la même logique métier.
+<div align="center">
+
+**BeeTrack Web Application**  
+*Version Spring Boot + Thymeleaf*
+
+Développé avec ❤️ pour les apiculteurs connectés
+
+</div>

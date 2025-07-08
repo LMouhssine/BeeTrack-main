@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Tableau de bord - BeeTrack</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="dashboard-container">
+        <!-- Statistiques principales -->
+        <div class="stats-grid">
+            <!-- Total des ruches -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value" th:text="${totalRuches ?: 0}">0</h3>
+                        <p class="stat-label">Ruches totales</p>
+                    </div>
+                    <div class="stat-icon bg-amber-500">
+                        <i data-lucide="hexagon"></i>
+                    </div>
+                </div>
+                <div class="stat-footer text-sm text-gray-600">
+                    <span th:text="${ruchesEnService ?: 0}">0</span> en service
+                </div>
+            </div>
+
+            <!-- Total des ruchers -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value" th:text="${totalRuchers ?: 0}">0</h3>
+                        <p class="stat-label">Ruchers</p>
+                    </div>
+                    <div class="stat-icon bg-green-500">
+                        <i data-lucide="map-pin"></i>
+                    </div>
+                </div>
+                <div class="stat-footer text-sm text-gray-600">
+                    Emplacements actifs
+                </div>
+            </div>
+
+            <!-- Alertes actives -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value text-red-600" th:text="${alertesActives ?: 0}">0</h3>
+                        <p class="stat-label">Alertes</p>
+                    </div>
+                    <div class="stat-icon bg-red-500">
+                        <i data-lucide="alert-triangle"></i>
+                    </div>
+                </div>
+                <div class="stat-footer text-sm text-gray-600">
+                    Alertes nécessitant attention
+                </div>
+            </div>
+
+            <!-- Efficacité -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <h3 class="stat-value text-green-600">98%</h3>
+                        <p class="stat-label">Efficacité</p>
+                    </div>
+                    <div class="stat-icon bg-blue-500">
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                </div>
+                <div class="stat-footer text-sm text-gray-600">
+                    Performance globale
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="zap" class="me-2"></i>
+                    Actions rapides
+                </h2>
+            </div>
+            <div class="quick-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
+                    <i data-lucide="plus" class="me-2"></i>
+                    Ajouter une ruche
+                </a>
+                <a href="/ruchers" th:href="@{/ruchers}" class="btn btn-secondary">
+                    <i data-lucide="map-pin" class="me-2"></i>
+                    Gérer les ruchers
+                </a>
+                <a href="/statistiques" th:href="@{/statistiques}" class="btn btn-secondary">
+                    <i data-lucide="bar-chart-3" class="me-2"></i>
+                    Voir statistiques
+                </a>
+                <button class="btn btn-secondary" data-refresh="stats">
+                    <i data-lucide="refresh-cw" class="me-2"></i>
+                    Actualiser
+                </button>
+            </div>
+        </div>
+
+        <!-- Graphiques et informations -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem;">
+            <!-- Colonne gauche - Graphiques -->
+            <div>
+                <!-- Graphique de température -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="thermometer" class="me-2"></i>
+                            Température
+                        </h2>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="tempChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graphique d'humidité -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="droplets" class="me-2"></i>
+                            Humidité
+                        </h2>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="humidityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite - Informations -->
+            <div>
+                <!-- Ruches récentes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="hexagon" class="me-2"></i>
+                            Ruches récentes
+                        </h2>
+                        <a href="/ruches" th:href="@{/ruches}" class="btn btn-secondary text-sm">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div class="ruches-list">
+                        <div th:if="${#lists.isEmpty(ruches)}" class="text-center text-gray-500 p-4">
+                            Aucune ruche disponible
+                        </div>
+                        <div th:each="ruche : ${ruches}" class="ruche-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <div class="ruche-info">
+                                <h4 class="font-semibold" th:text="${ruche.nom}">Ruche #1</h4>
+                                <p class="text-sm text-gray-600" th:text="${ruche.rucherNom ?: 'Rucher non défini'}">Rucher Principal</p>
+                            </div>
+                            <div class="ruche-status">
+                                <span th:if="${ruche.actif}" class="badge badge-success">
+                                    Actif
+                                </span>
+                                <span th:unless="${ruche.actif}" class="badge badge-warning">
+                                    Inactif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activité récente -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="activity" class="me-2"></i>
+                            Activité récente
+                        </h2>
+                    </div>
+                    <div class="activity-feed">
+                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <div class="activity-icon bg-green-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+                                📊
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">Données synchronisées</p>
+                                <span class="activity-time text-sm text-gray-500">Il y a 2 minutes</span>
+                            </div>
+                        </div>
+                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
+                            <div class="activity-icon bg-blue-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+                                🌡️
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">Température normale</p>
+                                <span class="activity-time text-sm text-gray-500">Il y a 1 heure</span>
+                            </div>
+                        </div>
+                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0;">
+                            <div class="activity-icon bg-amber-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+                                ⚠️
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">Maintenance programmée</p>
+                                <span class="activity-time text-sm text-gray-500">Demain à 10:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts spécifiques au dashboard -->
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Créer les graphiques
+                if (typeof Chart !== 'undefined') {
+                    createDashboardCharts();
+                }
+            });
+            
+            function createDashboardCharts() {
+                // Graphique de température
+                const tempChart = document.getElementById('tempChart');
+                if (tempChart) {
+                    createTemperatureChart(tempChart);
+                }
+                
+                // Graphique d'humidité
+                const humidityChart = document.getElementById('humidityChart');
+                if (humidityChart) {
+                    createHumidityChart(humidityChart);
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>
