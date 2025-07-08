@@ -80,7 +80,7 @@ class BeeLogoPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final wingPaint = Paint()
-      ..color = beeColor.withValues(alpha: 0.7 * 255)
+      ..color = beeColor.withAlpha((0.7 * 255).round())
       ..style = PaintingStyle.fill;
 
     // Corps principal de l'abeille (ellipse verticale)
