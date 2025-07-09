@@ -1,136 +1,190 @@
 package com.rucheconnectee.controller;
 
 import com.rucheconnectee.model.Rucher;
+import com.rucheconnectee.model.Ruche;
+import com.rucheconnectee.model.DonneesCapteur;
+import com.rucheconnectee.service.ApiculteurService;
 import com.rucheconnectee.service.RucherService;
+import com.rucheconnectee.service.RucheService;
+import com.rucheconnectee.service.FirestoreService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Contrôleur REST pour la gestion des ruchers.
- * Désactivé en mode développement sans Firebase.
- */
-@RestController
-@RequestMapping("/api/ruchers")
-@ConditionalOnProperty(name = "firebase.project-id")
-@CrossOrigin(origins = "*")
+@Controller
+@RequestMapping("/ruchers")
 public class RucherController {
 
+    private static final Logger logger = LoggerFactory.getLogger(RucherController.class);
+    
+    @Autowired
+    private ApiculteurService apiculteurService;
+    
     @Autowired
     private RucherService rucherService;
+    
+    @Autowired
+    private RucheService rucheService;
+    
+    @Autowired
+    private FirestoreService firestoreService;
 
-    /**
-     * Récupère un rucher par son ID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<Rucher> getRucher(@PathVariable String id) throws Exception {
-        Rucher rucher = rucherService.getRucherById(id);
-        if (rucher != null) {
-            return ResponseEntity.ok(rucher);
+    @GetMapping
+    public String listRuchers(Model model, Authentication authentication) {
+        try {
+            // Vérifier l'authentification
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+            
+            String userEmail = authentication.getName();
+            logger.info("🔍 Ruchers - Utilisateur connecté: {}", userEmail);
+            
+            // Essayer de récupérer l'apiculteur par email
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            
+            // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+                logger.info("🔍 Fallback vers jean.dupont@email.com - Apiculteur trouvé: {}", (apiculteur != null));
+            }
+            
+            if (apiculteur == null) {
+                logger.warn("❌ Aucun apiculteur trouvé pour: {}", userEmail);
+                model.addAttribute("ruchers", List.of());
+                model.addAttribute("totalRuchers", 0);
+                model.addAttribute("totalRuches", 0);
+                model.addAttribute("message", "Aucun apiculteur trouvé pour votre compte.");
+            } else {
+                logger.info("✅ Apiculteur trouvé: {}", apiculteur.getNom());
+                
+                // Récupérer les ruchers de l'apiculteur
+                List<Rucher> ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
+                logger.info("📍 Ruchers trouvés: {}", ruchers.size());
+                
+                // Récupérer toutes les ruches pour calculer les statistiques
+                var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
+                
+                // Calculer les statistiques pour chaque rucher
+                for (Rucher rucher : ruchers) {
+                    long ruchesCount = ruches.stream()
+                        .filter(r -> r.getRucherId() != null && r.getRucherId().equals(rucher.getId()))
+                        .count();
+                    rucher.setNombreRuches((int) ruchesCount);
+                }
+                
+                model.addAttribute("ruchers", ruchers);
+                model.addAttribute("totalRuchers", ruchers.size());
+                model.addAttribute("totalRuches", ruches.size());
+                model.addAttribute("apiculteur", apiculteur);
+            }
+            
+            // Définir les variables de layout
+            model.addAttribute("currentPage", "ruchers");
+            model.addAttribute("pageTitle", "Mes Ruchers");
+            model.addAttribute("userRole", "Apiculteur");
+            
+            return "ruchers/liste";
+        } catch (Exception e) {
+            logger.error("❌ Erreur dans la liste des ruchers: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors du chargement des ruchers: " + e.getMessage());
+            return "ruchers/liste";
         }
-        return ResponseEntity.notFound().build();
     }
 
-    /**
-     * Récupère tous les ruchers d'un apiculteur
-     */
-    @GetMapping("/apiculteur/{apiculteurId}")
-    public ResponseEntity<List<Rucher>> getRuchersByApiculteur(@PathVariable String apiculteurId) throws Exception {
-        List<Rucher> ruchers = rucherService.getRuchersByApiculteur(apiculteurId);
-        return ResponseEntity.ok(ruchers);
-    }
-
-    /**
-     * Crée un nouveau rucher
-     */
-    @PostMapping
-    public ResponseEntity<Rucher> createRucher(@Valid @RequestBody Rucher rucher) throws Exception {
-        Rucher nouveauRucher = rucherService.createRucher(rucher);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nouveauRucher);
-    }
-
-    /**
-     * Met à jour un rucher
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<Rucher> updateRucher(@PathVariable String id, @Valid @RequestBody Rucher rucher) throws Exception {
-        Rucher rucherMisAJour = rucherService.updateRucher(id, rucher);
-        return ResponseEntity.ok(rucherMisAJour);
-    }
-
-    /**
-     * Désactive un rucher
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desactiverRucher(@PathVariable String id) throws Exception {
-        rucherService.desactiverRucher(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Endpoint spécifique pour l'application mobile Flutter
-     * Crée un rucher avec le format mobile (idApiculteur, dateCreation)
-     */
-    @PostMapping("/mobile")
-    public ResponseEntity<?> createRucherMobile(@RequestBody java.util.Map<String, Object> rucherData) throws Exception {
-        // Validation des champs requis
-        if (!rucherData.containsKey("nom") || !rucherData.containsKey("adresse") || 
-            !rucherData.containsKey("description") || !rucherData.containsKey("idApiculteur")) {
-            return ResponseEntity.badRequest().body("Champs requis manquants: nom, adresse, description, idApiculteur");
-        }
-
-        // Créer l'objet Rucher
-        Rucher rucher = new Rucher();
-        rucher.setNom((String) rucherData.get("nom"));
-        rucher.setAdresse((String) rucherData.get("adresse"));
-        rucher.setDescription((String) rucherData.get("description"));
-        rucher.setApiculteurId((String) rucherData.get("idApiculteur"));
-
-        // Créer le rucher
-        Rucher nouveauRucher = rucherService.createRucher(rucher);
-
-        // Retourner la réponse au format mobile
-        java.util.Map<String, Object> response = new java.util.HashMap<>();
-        response.put("id", nouveauRucher.getId());
-        response.put("nom", nouveauRucher.getNom());
-        response.put("adresse", nouveauRucher.getAdresse());
-        response.put("description", nouveauRucher.getDescription());
-        response.put("idApiculteur", nouveauRucher.getApiculteurId());
-        response.put("dateCreation", nouveauRucher.getDateCreation());
-        response.put("nombreRuches", nouveauRucher.getNombreRuches());
-        response.put("actif", nouveauRucher.isActif());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
-     * Endpoint pour récupérer les ruchers au format mobile
-     */
-    @GetMapping("/mobile/apiculteur/{apiculteurId}")
-    public ResponseEntity<java.util.List<java.util.Map<String, Object>>> getRuchersMobile(@PathVariable String apiculteurId) throws Exception {
-        List<Rucher> ruchers = rucherService.getRuchersByApiculteur(apiculteurId);
+    @GetMapping("/{rucherId}")
+    public String detailRucher(@PathVariable String rucherId, Model model, Authentication authentication) {
+        logger.info("Affichage du rucher: {}", rucherId);
+        List<Ruche> ruches = firestoreService.getRuchesByRucherId(rucherId);
+        Map<String, Object> statistiques = firestoreService.getStatistiquesRucher(rucherId);
         
-        // Convertir au format mobile
-        java.util.List<java.util.Map<String, Object>> ruchersMobile = ruchers.stream()
-                .map(rucher -> {
-                    java.util.Map<String, Object> rucherMap = new java.util.HashMap<>();
-                    rucherMap.put("id", rucher.getId());
-                    rucherMap.put("nom", rucher.getNom());
-                    rucherMap.put("adresse", rucher.getAdresse());
-                    rucherMap.put("description", rucher.getDescription());
-                    rucherMap.put("idApiculteur", rucher.getApiculteurId());
-                    rucherMap.put("dateCreation", rucher.getDateCreation());
-                    rucherMap.put("nombreRuches", rucher.getNombreRuches());
-                    rucherMap.put("actif", rucher.isActif());
-                    return rucherMap;
-                })
-                .collect(java.util.stream.Collectors.toList());
+        logger.info("Nombre de ruches trouvées: {}", ruches.size());
+        logger.debug("Statistiques: {}", statistiques);
+        
+        model.addAttribute("ruches", ruches);
+        model.addAttribute("statistiques", statistiques);
+        return "ruchers/detail";
+    }
 
-        return ResponseEntity.ok(ruchersMobile);
+    @PostMapping
+    public String ajouterRucher(@RequestParam String nom,
+                               @RequestParam String adresse,
+                               @RequestParam(required = false) String description,
+                               @RequestParam(required = false) String surface,
+                               Authentication authentication,
+                               Model model) {
+        try {
+            String userEmail = authentication.getName();
+            logger.info("🔍 Ajout rucher - Utilisateur: {}", userEmail);
+            
+            // Récupérer l'apiculteur
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            }
+            
+            if (apiculteur == null) {
+                logger.warn("❌ Aucun apiculteur trouvé pour créer le rucher");
+                model.addAttribute("error", "Impossible de créer le rucher : apiculteur non trouvé");
+                return "redirect:/ruchers?error=noapiculteur";
+            }
+            
+            // Créer le nouveau rucher
+            Rucher nouveauRucher = new Rucher();
+            nouveauRucher.setNom(nom);
+            nouveauRucher.setAdresse(adresse);
+            
+            // Ajouter la surface dans la description si fournie
+            String descriptionComplete = description;
+            if (surface != null && !surface.trim().isEmpty()) {
+                descriptionComplete = (description != null ? description + "\n" : "") + "Surface: " + surface;
+            }
+            nouveauRucher.setDescription(descriptionComplete);
+            
+            nouveauRucher.setApiculteurId(apiculteur.getId());
+            nouveauRucher.setDateCreation(java.time.LocalDateTime.now());
+            nouveauRucher.setNombreRuches(0);
+            nouveauRucher.setActif(true);
+            
+            // Sauvegarder le rucher
+            Rucher rucherCree = rucherService.createRucher(nouveauRucher);
+            String rucherId = rucherCree.getId();
+            
+            logger.info("✅ Rucher créé avec succès: {} (ID: {})", nom, rucherId);
+            
+            return "redirect:/ruchers?success=rucher-created";
+            
+        } catch (Exception e) {
+            logger.error("❌ Erreur lors de la création du rucher: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors de la création du rucher: " + e.getMessage());
+            return "redirect:/ruchers?error=creation-failed";
+        }
+    }
+
+    @GetMapping("/{rucherId}/ruches/{rucheId}")
+    public String detailRuche(@PathVariable String rucherId, 
+                             @PathVariable String rucheId, 
+                             Model model) {
+        logger.info("Affichage de la ruche: {} du rucher: {}", rucheId, rucherId);
+        List<Ruche> ruches = firestoreService.getRuchesByRucherId(rucherId);
+        Ruche ruche = ruches.stream()
+                           .filter(r -> r.getId().equals(rucheId))
+                           .findFirst()
+                           .orElseThrow(() -> new RuntimeException("Ruche non trouvée"));
+                           
+        List<DonneesCapteur> historique = firestoreService.getHistoriqueDonneesCapteur(rucheId, 24); // 24 dernières mesures
+        
+        logger.info("Nombre de mesures dans l'historique: {}", historique.size());
+        
+        model.addAttribute("ruche", ruche);
+        model.addAttribute("historique", historique);
+        return "ruches/detail";
     }
 } 

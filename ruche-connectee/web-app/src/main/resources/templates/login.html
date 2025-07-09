@@ -4,153 +4,1080 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - BeeTrack</title>
+    <meta name="description" content="Connectez-vous à votre système de gestion de ruches connectées BeeTrack">
     
     <!-- CSS -->
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    
+    <!-- Preload des ressources critiques -->
+    <link rel="preload" th:href="@{/css/app.css}" as="style">
+    <link rel="preload" href="https://unpkg.com/lucide@latest/dist/umd/lucide.js" as="script">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" th:href="@{/logo.svg}">
+    
+    <style>
+        /* Styles spécifiques à la page de connexion */
+        .login-body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 300% 300%;
+            animation: gradientShift 8s ease infinite;
+            font-family: var(--font-family-sans);
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .login-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            display: block;
+            pointer-events: none;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 6s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 2s; animation-duration: 8s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 4s; animation-duration: 7s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 6s; animation-duration: 9s; }
+        .particle:nth-child(5) { left: 60%; animation-delay: 1s; animation-duration: 5s; }
+        .particle:nth-child(6) { left: 80%; animation-delay: 3s; animation-duration: 8s; }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(0vh) scale(0);
+            }
+        }
+        
+        .login-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-2xl);
+        }
+        
+        .login-branding {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-backdrop);
+            -webkit-backdrop-filter: var(--glass-backdrop);
+            border-right: var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-branding::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(245, 158, 11, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .branding-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-8);
+            gap: var(--space-4);
+        }
+        
+        .brand-logo .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-2xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: var(--shadow-xl);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .brand-logo .logo-text {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .branding-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-6);
+            line-height: var(--leading-tight);
+        }
+        
+        .branding-description {
+            font-size: var(--text-lg);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-8);
+            line-height: var(--leading-relaxed);
+        }
+        
+        .branding-features {
+            margin-bottom: var(--space-8);
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            text-align: left;
+            margin-bottom: var(--space-6);
+            padding: var(--space-4);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition-smooth);
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--space-4);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-content h4 {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+        
+        .feature-content p {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .branding-footer {
+            margin-top: var(--space-8);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: var(--space-4);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--color-primary-500);
+            margin-bottom: var(--space-1);
+        }
+        
+        .stat-label {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .login-form-panel {
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            position: relative;
+        }
+        
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-backdrop);
+            -webkit-backdrop-filter: var(--glass-backdrop);
+            border: var(--glass-border);
+            border-radius: var(--radius-3xl);
+            box-shadow: var(--shadow-2xl);
+            padding: var(--space-8);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: cardEntrance 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+        }
+        
+        @keyframes cardEntrance {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+        
+        .mobile-logo {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+        }
+        
+        .mobile-logo .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .mobile-logo .logo-text {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .login-title {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .login-subtitle {
+            font-size: var(--text-lg);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-6);
+        }
+        
+        .alerts-container {
+            margin-bottom: var(--space-6);
+        }
+        
+        .alert {
+            display: flex;
+            align-items: center;
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-4);
+            border: 1px solid;
+            transform: translateY(-10px);
+            opacity: 0;
+            animation: alertSlideIn 0.5s ease-out 0.2s forwards;
+        }
+        
+        @keyframes alertSlideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .alert-danger {
+            background: var(--color-danger-light);
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+        
+        .alert-info {
+            background: var(--color-info-light);
+            border-color: var(--color-info);
+            color: var(--color-info);
+        }
+        
+        .alert-icon {
+            margin-right: var(--space-3);
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: var(--space-1);
+            border-radius: var(--radius-sm);
+            transition: var(--transition-all);
+        }
+        
+        .alert-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-form {
+            margin-bottom: var(--space-6);
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-6);
+        }
+        
+        .form-label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-sm);
+        }
+        
+        .label-icon {
+            margin-right: var(--space-2);
+            width: 16px;
+            height: 16px;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: var(--space-4);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--text-base);
+            transition: var(--transition-all);
+            outline: none;
+        }
+        
+        .form-control:focus {
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-control.error {
+            border-color: var(--color-danger);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .form-control.success {
+            border-color: var(--color-success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: var(--space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            transition: var(--transition-all);
+        }
+        
+        .password-toggle:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+        
+        .input-feedback {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: var(--transition-all);
+        }
+        
+        .feedback-icon.success {
+            color: var(--color-success);
+        }
+        
+        .feedback-icon.error {
+            color: var(--color-danger);
+        }
+        
+        .input-feedback.show {
+            opacity: 1;
+        }
+        
+        .form-error {
+            color: var(--color-danger);
+            font-size: var(--text-sm);
+            margin-top: var(--space-2);
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: var(--transition-all);
+        }
+        
+        .form-error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .custom-checkbox {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            margin-right: var(--space-3);
+            cursor: pointer;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .forgot-password {
+            color: var(--color-primary-600);
+            text-decoration: none;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            transition: var(--transition-all);
+        }
+        
+        .forgot-password:hover {
+            color: var(--color-primary-700);
+            text-decoration: underline;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: var(--space-4);
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-all);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .login-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-button.loading {
+            pointer-events: none;
+        }
+        
+        .login-button .spinner {
+            display: none;
+            margin-right: var(--space-2);
+            animation: spin 1s linear infinite;
+        }
+        
+        .login-button.loading .spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .demo-credentials {
+            margin-top: var(--space-6);
+            padding: var(--space-4);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .demo-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+        }
+        
+        .demo-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .demo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-2) 0;
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .demo-item button {
+            background: var(--color-primary-500);
+            color: white;
+            border: none;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-xs);
+            cursor: pointer;
+            transition: var(--transition-all);
+        }
+        
+        .demo-item button:hover {
+            background: var(--color-primary-600);
+            transform: scale(1.05);
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: var(--space-8);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: var(--text-sm);
+            transition: var(--transition-all);
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .copyright {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+        
+        /* Responsive design amélioré */
+        @media (max-width: 1024px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .login-branding {
+                display: none;
+            }
+            
+            .mobile-logo {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .login-form-panel {
+                padding: var(--space-4);
+            }
+            
+            .login-card {
+                padding: var(--space-6);
+            }
+            
+            .branding-title {
+                font-size: var(--text-2xl);
+            }
+            
+            .login-title {
+                font-size: var(--text-2xl);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-2);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-form-panel {
+                padding: var(--space-2);
+            }
+            
+            .login-card {
+                padding: var(--space-4);
+                border-radius: var(--radius-2xl);
+            }
+            
+            .form-control {
+                padding: var(--space-3);
+            }
+            
+            .login-button {
+                padding: var(--space-3);
+                font-size: var(--text-base);
+            }
+        }
+    </style>
 </head>
 <body class="login-body">
+    <!-- Particles de fond animées -->
+    <div class="login-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <!-- Conteneur principal -->
     <div class="login-container">
-        <div class="login-card fade-in">
-            <!-- Header avec logo -->
-            <div class="login-header">
-                <div class="logo mb-4">
+        <!-- Panneau gauche - Branding amélioré -->
+        <div class="login-branding">
+            <div class="branding-content">
+                <div class="brand-logo float">
                     <div class="logo-icon">🐝</div>
                     <span class="logo-text">BeeTrack</span>
                 </div>
-                <h1 class="login-title">Connexion</h1>
-                <p class="login-subtitle">Accédez à votre système de gestion de ruches</p>
-            </div>
-            
-            <!-- Messages d'erreur -->
-            <div th:if="${error}" class="alert alert-danger mb-4">
-                <i data-lucide="alert-circle" class="me-2"></i>
-                <span th:text="${error}">Erreur de connexion</span>
-            </div>
-            
-            <div th:if="${message}" class="alert alert-info mb-4">
-                <i data-lucide="info" class="me-2"></i>
-                <span th:text="${message}">Message</span>
-            </div>
-            
-            <!-- Formulaire de connexion -->
-            <form th:action="@{/login}" method="post" class="login-form">
-                <div class="form-group">
-                    <label for="email" class="form-label">
-                        <i data-lucide="mail" class="me-2"></i>
-                        Adresse email
-                    </label>
-                    <input type="email" 
-                           id="email" 
-                           name="username" 
-                           class="form-control" 
-                           placeholder="votre.email@exemple.com"
-                           required
-                           autofocus>
-                </div>
                 
-                <div class="form-group">
-                    <label for="password" class="form-label">
-                        <i data-lucide="lock" class="me-2"></i>
-                        Mot de passe
-                    </label>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           class="form-control" 
-                           placeholder="Votre mot de passe"
-                           required>
-                </div>
+                <h1 class="branding-title">
+                    Gérez vos ruches connectées avec intelligence
+                </h1>
                 
-                <div class="form-group">
-                    <div class="form-check">
-                        <input type="checkbox" 
-                               id="remember-me" 
-                               name="remember-me" 
-                               class="form-check-input">
-                        <label for="remember-me" class="form-check-label">
-                            Se souvenir de moi
-                        </label>
+                <p class="branding-description">
+                    Surveillez en temps réel la santé de vos ruches, analysez les données de vos capteurs 
+                    et optimisez votre production de miel grâce à notre plateforme innovante.
+                </p>
+                
+                <div class="branding-features">
+                    <div class="feature-item slide-in" style="animation-delay: 0.2s;">
+                        <div class="feature-icon">
+                            <i data-lucide="activity"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Surveillance temps réel</h4>
+                            <p>Monitoring continu de vos ruches 24h/24</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item slide-in" style="animation-delay: 0.4s;">
+                        <div class="feature-icon">
+                            <i data-lucide="bar-chart-3"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Analyses avancées</h4>
+                            <p>Insights et tendances détaillées</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item slide-in" style="animation-delay: 0.6s;">
+                        <div class="feature-icon">
+                            <i data-lucide="bell"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Alertes intelligentes</h4>
+                            <p>Notifications en cas d'anomalie</p>
+                        </div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-full">
-                    <i data-lucide="log-in" class="me-2"></i>
-                    Se connecter
-                </button>
-            </form>
-            
-            <!-- Liens supplémentaires -->
-            <div class="login-footer mt-4 text-center">
-                <a href="#" class="text-amber-600">Mot de passe oublié ?</a>
+                <div class="branding-footer">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number">1000+</span>
+                            <span class="stat-label">Ruches surveillées</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">98%</span>
+                            <span class="stat-label">Disponibilité</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Informations de démonstration -->
-            <div class="demo-info mt-4 p-3" style="background: #f8fafc; border-radius: 0.5rem; border-left: 4px solid var(--primary-amber-600);">
-                <h6 class="font-semibold text-amber-700 mb-2">
-                    <i data-lucide="info" class="me-2"></i>
-                    Compte de démonstration
-                </h6>
-                <p class="text-sm text-gray-600 mb-1">
-                    <strong>Email :</strong> demo@beetrack.com
-                </p>
-                <p class="text-sm text-gray-600 mb-0">
-                    <strong>Mot de passe :</strong> demo123
-                </p>
+        </div>
+        
+        <!-- Panneau droit - Formulaire de connexion amélioré -->
+        <div class="login-form-panel">
+            <div class="login-card scale-in">
+                <!-- Header avec logo mobile -->
+                <div class="login-header">
+                    <div class="mobile-logo">
+                        <div class="logo-icon">🐝</div>
+                        <span class="logo-text">BeeTrack</span>
+                    </div>
+                    <h1 class="login-title">Connexion</h1>
+                    <p class="login-subtitle">Accédez à votre tableau de bord</p>
+                </div>
+                
+                <!-- Messages d'alerte avec animations -->
+                <div class="alerts-container">
+                    <div th:if="${error}" class="alert alert-danger fade-in">
+                        <div class="alert-icon">
+                            <i data-lucide="alert-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <span th:text="${error}">Erreur de connexion</span>
+                        </div>
+                        <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    
+                    <div th:if="${message}" class="alert alert-info fade-in">
+                        <div class="alert-icon">
+                            <i data-lucide="info"></i>
+                        </div>
+                        <div class="alert-content">
+                            <span th:text="${message}">Message d'information</span>
+                        </div>
+                        <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Formulaire de connexion modernisé -->
+                <form th:action="@{/login}" method="post" class="login-form" novalidate id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i data-lucide="mail" class="label-icon"></i>
+                            Adresse email
+                        </label>
+                        <div class="input-group">
+                            <input type="email" 
+                                   id="email" 
+                                   name="username" 
+                                   class="form-control" 
+                                   placeholder="votre.email@exemple.com"
+                                   required
+                                   autofocus
+                                   autocomplete="email">
+                            <div class="input-feedback" id="email-feedback">
+                                <i data-lucide="check-circle" class="feedback-icon success"></i>
+                                <i data-lucide="alert-circle" class="feedback-icon error"></i>
+                            </div>
+                        </div>
+                        <div class="form-error" id="email-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i data-lucide="lock" class="label-icon"></i>
+                            Mot de passe
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   class="form-control" 
+                                   placeholder="••••••••"
+                                   required
+                                   autocomplete="current-password">
+                            <button type="button" class="password-toggle" id="passwordToggle" tabindex="-1">
+                                <i data-lucide="eye" class="toggle-icon"></i>
+                            </button>
+                            <div class="input-feedback" id="password-feedback">
+                                <i data-lucide="check-circle" class="feedback-icon success"></i>
+                                <i data-lucide="alert-circle" class="feedback-icon error"></i>
+                            </div>
+                        </div>
+                        <div class="form-error" id="password-error"></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <div class="checkbox-group">
+                            <input type="checkbox" 
+                                   id="remember-me" 
+                                   name="remember-me" 
+                                   class="custom-checkbox">
+                            <label for="remember-me" class="checkbox-label">
+                                <span class="checkbox-text">Se souvenir de moi</span>
+                            </label>
+                        </div>
+                        <a href="/forgot-password" class="forgot-password">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+                    
+                    <button type="submit" class="login-button" id="loginButton">
+                        <i data-lucide="loader-2" class="spinner"></i>
+                        <span class="button-text">Se connecter</span>
+                    </button>
+                </form>
+                
+                <!-- Informations de démonstration -->
+                <div class="demo-credentials">
+                    <div class="demo-title">
+                        <i data-lucide="info" class="me-2"></i>
+                        Comptes de démonstration
+                    </div>
+                    <ul class="demo-list">
+                        <li class="demo-item">
+                            <span>admin@beetrackdemo.com / admin123</span>
+                            <button onclick="fillDemoCredentials('admin@beetrackdemo.com', 'admin123')">
+                                Utiliser
+                            </button>
+                        </li>
+                        <li class="demo-item">
+                            <span>apiculteur@beetrackdemo.com / demo123</span>
+                            <button onclick="fillDemoCredentials('apiculteur@beetrackdemo.com', 'demo123')">
+                                Utiliser
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Footer de connexion -->
+                <div class="login-footer">
+                    <div class="footer-links">
+                        <a href="/register" class="footer-link">Créer un compte</a>
+                        <a href="/help" class="footer-link">Aide</a>
+                        <a href="/contact" class="footer-link">Contact</a>
+                    </div>
+                    <div class="copyright">
+                        © 2024 BeeTrack. Tous droits réservés.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- JavaScript -->
-    <script th:src="@{/webjars/jquery/3.7.0/jquery.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
-    
-    <!-- Initialiser les icônes -->
+    <!-- JavaScript amélioré -->
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
+            // Initialiser les icônes Lucide
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
             
-            // Animation d'entrée
-            const loginCard = document.querySelector('.login-card');
-            if (loginCard) {
+            // Validation en temps réel
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginButton = document.getElementById('loginButton');
+            const passwordToggle = document.getElementById('passwordToggle');
+            
+            // Gestion de l'affichage du mot de passe
+            passwordToggle.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                icon.setAttribute('data-lucide', type === 'password' ? 'eye' : 'eye-off');
+                lucide.createIcons();
+            });
+            
+            // Validation email
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            // Validation mot de passe
+            function validatePassword(password) {
+                return password.length >= 6;
+            }
+            
+            // Mise à jour du feedback visuel
+            function updateFieldFeedback(input, isValid) {
+                const feedback = document.getElementById(input.id + '-feedback');
+                const error = document.getElementById(input.id + '-error');
+                
+                input.classList.remove('error', 'success');
+                feedback.classList.remove('show');
+                error.classList.remove('show');
+                
+                if (input.value.length > 0) {
+                    if (isValid) {
+                        input.classList.add('success');
+                        feedback.classList.add('show');
+                        feedback.querySelector('.success').style.display = 'block';
+                        feedback.querySelector('.error').style.display = 'none';
+                    } else {
+                        input.classList.add('error');
+                        feedback.classList.add('show');
+                        feedback.querySelector('.success').style.display = 'none';
+                        feedback.querySelector('.error').style.display = 'block';
+                        
+                        if (input.id === 'email') {
+                            error.textContent = 'Veuillez saisir une adresse email valide';
+                        } else if (input.id === 'password') {
+                            error.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+                        }
+                        error.classList.add('show');
+                    }
+                }
+            }
+            
+            // Validation en temps réel
+            emailInput.addEventListener('input', function() {
+                updateFieldFeedback(this, validateEmail(this.value));
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                updateFieldFeedback(this, validatePassword(this.value));
+            });
+            
+            // Gestion de soumission du formulaire
+            form.addEventListener('submit', function(e) {
+                const emailValid = validateEmail(emailInput.value);
+                const passwordValid = validatePassword(passwordInput.value);
+                
+                if (!emailValid || !passwordValid) {
+                    e.preventDefault();
+                    updateFieldFeedback(emailInput, emailValid);
+                    updateFieldFeedback(passwordInput, passwordValid);
+                    return;
+                }
+                
+                // Animation de chargement
+                loginButton.classList.add('loading');
+                loginButton.disabled = true;
+                loginButton.querySelector('.button-text').textContent = 'Connexion en cours...';
+            });
+            
+            // Animation d'entrée progressive
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 100);
+        });
+        
+        // Fonction pour remplir les identifiants de démonstration
+        function fillDemoCredentials(email, password) {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            emailInput.value = email;
+            passwordInput.value = password;
+            
+            // Déclencher la validation
+            emailInput.dispatchEvent(new Event('input'));
+            passwordInput.dispatchEvent(new Event('input'));
+            
+            // Animation de mise en surbrillance
+            [emailInput, passwordInput].forEach(input => {
+                input.style.background = 'rgba(245, 158, 11, 0.1)';
                 setTimeout(() => {
-                    loginCard.style.opacity = '1';
-                    loginCard.style.transform = 'translateY(0)';
-                }, 100);
+                    input.style.background = '';
+                }, 1000);
+            });
+        }
+        
+        // Gestion des raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter pour soumettre le formulaire
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('loginForm').requestSubmit();
             }
         });
     </script>
-    
-    <style>
-        .login-body {
-            background: linear-gradient(135deg, var(--primary-amber-600) 0%, var(--primary-amber-800) 100%);
-        }
-        
-        .login-card {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease;
-        }
-        
-        .demo-info {
-            font-size: 0.875rem;
-        }
-        
-        .form-check-input:checked {
-            background-color: var(--primary-amber-600);
-            border-color: var(--primary-amber-600);
-        }
-        
-        .form-check-input:focus {
-            border-color: var(--primary-amber-600);
-            box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
-        }
-    </style>
 </body>
 </html>

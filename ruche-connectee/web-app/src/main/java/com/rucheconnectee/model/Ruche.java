@@ -80,6 +80,8 @@ public class Ruche {
     @JsonProperty("seuil_humidite_max")
     private Double seuilHumiditeMax = 70.0;
 
+    private DonneesCapteur dernieresDonnees;
+
     // Constructors
     public Ruche() {}
 
@@ -266,5 +268,13 @@ public class Ruche {
 
     public void setDerniereSync(LocalDateTime derniereSync) {
         this.derniereSync = derniereSync;
+    }
+
+    public DonneesCapteur getDernieresDonnees() {
+        return dernieresDonnees;
+    }
+
+    public void setDernieresDonnees(DonneesCapteur dernieresDonnees) {
+        this.dernieresDonnees = dernieresDonnees;
     }
 } 

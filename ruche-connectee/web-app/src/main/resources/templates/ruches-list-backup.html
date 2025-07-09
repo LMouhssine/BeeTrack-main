@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Mes Ruches - BeeTrack</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="dashboard-container">
+            <h1>Test de la page ruches</h1>
+            <p>Si vous voyez ce message, le problème est dans le template complexe.</p>
+            
+            <div class="simple-stats">
+                <p>Total ruches: <span th:text="${totalRuches ?: 0}">0</span></p>
+                <p>Ruches actives: <span th:text="${ruchesActives ?: 0}">0</span></p>
+            </div>
+            
+            <div th:if="${ruches != null}">
+                <h3>Liste simple des ruches:</h3>
+                <ul>
+                    <li th:each="ruche : ${ruches}" th:text="${ruche.nom ?: 'Ruche sans nom'}">Ruche</li>
+                </ul>
+            </div>
+            
+            <div th:if="${ruches == null or #lists.isEmpty(ruches)}">
+                <p>Aucune ruche trouvée ou données nulles.</p>
+            </div>
+            
+            <div th:if="${error}">
+                <div class="alert alert-danger">
+                    <p th:text="${error}">Erreur</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

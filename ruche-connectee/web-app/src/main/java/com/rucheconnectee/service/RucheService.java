@@ -154,7 +154,7 @@ public abstract class RucheService {
     /**
      * Convertit un document Firestore en objet Ruche
      */
-    private Ruche documentToRuche(String id, Map<String, Object> data) {
+    protected Ruche documentToRuche(String id, Map<String, Object> data) {
         if (data == null) return null;
 
         Ruche ruche = new Ruche();
@@ -220,7 +220,7 @@ public abstract class RucheService {
     /**
      * Convertit un document Firestore en objet DonneesCapteur
      */
-    private DonneesCapteur documentToDonnees(String id, Map<String, Object> data) {
+    protected DonneesCapteur documentToDonnees(String id, Map<String, Object> data) {
         if (data == null) return null;
 
         DonneesCapteur donnees = new DonneesCapteur();

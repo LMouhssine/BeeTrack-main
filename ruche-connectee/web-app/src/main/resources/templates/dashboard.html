@@ -6,204 +6,593 @@
 
 <head>
     <title>Tableau de bord - BeeTrack</title>
+    <meta name="description" content="Tableau de bord moderne de votre système de gestion de ruches connectées">
 </head>
 
 <body>
     <div layout:fragment="content" class="dashboard-container">
-        <!-- Statistiques principales -->
-        <div class="stats-grid">
+        <!-- Header du dashboard avec animations améliorées -->
+        <div class="dashboard-header mb-8 fade-in animate-in" style="animation-delay: 0.1s;">
+            <div class="welcome-section">
+                <div class="greeting-container">
+                    <h1 class="dashboard-title">
+                        <span class="greeting-text">Bonjour</span>
+                        <span class="user-name" th:text="${#authentication.name ?: 'Apiculteur'}">Apiculteur</span> 
+                        <span class="wave-emoji">👋</span>
+                    </h1>
+                    <div class="title-decoration"></div>
+                </div>
+                <p class="dashboard-subtitle">
+                    <span class="subtitle-main">Voici un aperçu de vos ruches connectées</span>
+                    <span class="last-update" th:text="${'• Dernière mise à jour : ' + #dates.format(#dates.createNow(), 'HH:mm')}">• Dernière mise à jour : 14:30</span>
+                </p>
+            </div>
+            <div class="dashboard-actions">
+                <button class="btn btn-secondary" data-refresh="dashboard" title="Actualiser les données (F5)">
+                    <i data-lucide="refresh-cw" class="me-2"></i>
+                    <span>Actualiser</span>
+                </button>
+                <button class="btn btn-primary" onclick="location.href='/ruches/nouvelle'" title="Ajouter une nouvelle ruche (Ctrl+N)">
+                    <i data-lucide="plus" class="me-2"></i>
+                    <span>Nouvelle ruche</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques principales avec animations décalées et améliorées -->
+        <div class="stats-grid mb-8">
             <!-- Total des ruches -->
-            <div class="stat-card">
+            <div class="stat-card scale-in" style="animation-delay: 0.2s;">
                 <div class="stat-header">
-                    <div>
-                        <h3 class="stat-value" th:text="${totalRuches ?: 0}">0</h3>
-                        <p class="stat-label">Ruches totales</p>
+                    <div class="stat-content">
+                        <h3 class="stat-value" th:text="${totalRuches ?: 0}" data-stat="totalRuches">0</h3>
+                        <p class="stat-label">
+                            <i data-lucide="hexagon" class="stat-label-icon"></i>
+                            <span>Ruches totales</span>
+                        </p>
                     </div>
                     <div class="stat-icon bg-amber-500">
                         <i data-lucide="hexagon"></i>
                     </div>
                 </div>
-                <div class="stat-footer text-sm text-gray-600">
-                    <span th:text="${ruchesEnService ?: 0}">0</span> en service
+                <div class="stat-footer">
+                    <div class="stat-detail">
+                        <span class="stat-detail-value" th:text="${ruchesEnService ?: 0}">0</span>
+                        <span class="stat-detail-label">en service</span>
+                    </div>
+                    <div class="stat-trend positive">
+                        <i data-lucide="trending-up"></i>
+                        <span>+2.3%</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Total des ruchers -->
-            <div class="stat-card">
+            <div class="stat-card scale-in" style="animation-delay: 0.3s;">
                 <div class="stat-header">
-                    <div>
-                        <h3 class="stat-value" th:text="${totalRuchers ?: 0}">0</h3>
-                        <p class="stat-label">Ruchers</p>
+                    <div class="stat-content">
+                        <h3 class="stat-value" th:text="${totalRuchers ?: 0}" data-stat="totalRuchers">0</h3>
+                        <p class="stat-label">
+                            <i data-lucide="map-pin" class="stat-label-icon"></i>
+                            <span>Ruchers actifs</span>
+                        </p>
                     </div>
                     <div class="stat-icon bg-green-500">
                         <i data-lucide="map-pin"></i>
                     </div>
                 </div>
-                <div class="stat-footer text-sm text-gray-600">
-                    Emplacements actifs
+                <div class="stat-footer">
+                    <div class="stat-detail">
+                        <span class="stat-detail-value">98%</span>
+                        <span class="stat-detail-label">disponibilité</span>
+                    </div>
+                    <div class="stat-trend positive">
+                        <i data-lucide="trending-up"></i>
+                        <span>+1.2%</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Alertes actives -->
-            <div class="stat-card">
+            <div class="stat-card scale-in" style="animation-delay: 0.4s;">
                 <div class="stat-header">
-                    <div>
-                        <h3 class="stat-value text-red-600" th:text="${alertesActives ?: 0}">0</h3>
-                        <p class="stat-label">Alertes</p>
+                    <div class="stat-content">
+                        <h3 class="stat-value text-red-600" th:text="${alertesActives ?: 0}" data-stat="alertesActives">0</h3>
+                        <p class="stat-label">
+                            <i data-lucide="alert-triangle" class="stat-label-icon"></i>
+                            <span>Alertes actives</span>
+                        </p>
                     </div>
                     <div class="stat-icon bg-red-500">
                         <i data-lucide="alert-triangle"></i>
                     </div>
                 </div>
-                <div class="stat-footer text-sm text-gray-600">
-                    Alertes nécessitant attention
+                <div class="stat-footer">
+                    <div class="stat-detail">
+                        <span class="stat-detail-value">2</span>
+                        <span class="stat-detail-label">critiques</span>
+                    </div>
+                    <div class="stat-trend negative">
+                        <i data-lucide="trending-down"></i>
+                        <span>-15%</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Efficacité -->
-            <div class="stat-card">
+            <!-- Performance globale -->
+            <div class="stat-card scale-in" style="animation-delay: 0.5s;">
                 <div class="stat-header">
-                    <div>
-                        <h3 class="stat-value text-green-600">98%</h3>
-                        <p class="stat-label">Efficacité</p>
+                    <div class="stat-content">
+                        <h3 class="stat-value text-blue-600">98.5%</h3>
+                        <p class="stat-label">
+                            <i data-lucide="activity" class="stat-label-icon"></i>
+                            <span>Performance</span>
+                        </p>
                     </div>
                     <div class="stat-icon bg-blue-500">
                         <i data-lucide="trending-up"></i>
                     </div>
                 </div>
-                <div class="stat-footer text-sm text-gray-600">
-                    Performance globale
+                <div class="stat-footer">
+                    <div class="stat-detail">
+                        <span class="stat-detail-value">24.2°C</span>
+                        <span class="stat-detail-label">temp. moy.</span>
+                    </div>
+                    <div class="stat-trend positive">
+                        <i data-lucide="thermometer"></i>
+                        <span>Optimal</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Actions rapides -->
-        <div class="card">
+        <!-- Actions rapides modernisées avec design amélioré -->
+        <div class="card fade-in animate-in" style="animation-delay: 0.6s;">
             <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="zap" class="me-2"></i>
-                    Actions rapides
-                </h2>
+                <div class="card-header-content">
+                    <h2 class="card-title">
+                        <i data-lucide="zap" class="me-2"></i>
+                        <span>Actions rapides</span>
+                    </h2>
+                    <div class="card-subtitle">
+                        Raccourcis vers les tâches les plus courantes
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="BeeTrack.refreshActions()" title="Actualiser les actions">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                </div>
             </div>
-            <div class="quick-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
-                    <i data-lucide="plus" class="me-2"></i>
-                    Ajouter une ruche
-                </a>
-                <a href="/ruchers" th:href="@{/ruchers}" class="btn btn-secondary">
-                    <i data-lucide="map-pin" class="me-2"></i>
-                    Gérer les ruchers
-                </a>
-                <a href="/statistiques" th:href="@{/statistiques}" class="btn btn-secondary">
-                    <i data-lucide="bar-chart-3" class="me-2"></i>
-                    Voir statistiques
-                </a>
-                <button class="btn btn-secondary" data-refresh="stats">
-                    <i data-lucide="refresh-cw" class="me-2"></i>
-                    Actualiser
-                </button>
+            <div class="card-body">
+                <div class="quick-actions-grid">
+                    <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="quick-action-card primary">
+                        <div class="quick-action-background"></div>
+                        <div class="quick-action-icon">
+                            <i data-lucide="plus"></i>
+                        </div>
+                        <div class="quick-action-content">
+                            <h4>Ajouter une ruche</h4>
+                            <p>Enregistrer une nouvelle ruche dans le système</p>
+                        </div>
+                        <div class="quick-action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+                    
+                    <a href="/ruchers" th:href="@{/ruchers}" class="quick-action-card secondary">
+                        <div class="quick-action-background"></div>
+                        <div class="quick-action-icon">
+                            <i data-lucide="map-pin"></i>
+                        </div>
+                        <div class="quick-action-content">
+                            <h4>Gérer les ruchers</h4>
+                            <p>Organiser et configurer vos emplacements</p>
+                        </div>
+                        <div class="quick-action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+                    
+                    <a href="/statistiques" th:href="@{/statistiques}" class="quick-action-card tertiary">
+                        <div class="quick-action-background"></div>
+                        <div class="quick-action-icon">
+                            <i data-lucide="bar-chart-3"></i>
+                        </div>
+                        <div class="quick-action-content">
+                            <h4>Voir statistiques</h4>
+                            <p>Analyser les données et tendances</p>
+                        </div>
+                        <div class="quick-action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+                    
+                    <button class="quick-action-card quaternary" onclick="BeeTrack.showNotification({type: 'info', message: 'Synchronisation en cours...', icon: 'sync'})">
+                        <div class="quick-action-background"></div>
+                        <div class="quick-action-icon">
+                            <i data-lucide="sync"></i>
+                        </div>
+                        <div class="quick-action-content">
+                            <h4>Synchroniser</h4>
+                            <p>Mettre à jour toutes les données</p>
+                        </div>
+                        <div class="quick-action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Graphiques et informations -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem;">
-            <!-- Colonne gauche - Graphiques -->
-            <div>
-                <!-- Graphique de température -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="thermometer" class="me-2"></i>
-                            Température
-                        </h2>
-                    </div>
-                    <div class="chart-container" style="position: relative; height: 300px;">
-                        <canvas id="tempChart"></canvas>
+        <!-- Section Liste complète des ruches -->
+        <div class="card fade-in animate-in" style="animation-delay: 0.65s;" th:if="${ruches != null && !#lists.isEmpty(ruches)}">
+            <div class="card-header">
+                <div class="card-header-content">
+                    <h2 class="card-title">
+                        <i data-lucide="hexagon" class="me-2"></i>
+                        <span>Mes Ruches</span>
+                        <span class="badge badge-primary" th:text="${#lists.size(ruches)}">3</span>
+                    </h2>
+                    <div class="card-subtitle">
+                        Liste complète de toutes vos ruches avec leurs données en temps réel
                     </div>
                 </div>
-
-                <!-- Graphique d'humidité -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="droplets" class="me-2"></i>
-                            Humidité
-                        </h2>
-                    </div>
-                    <div class="chart-container" style="position: relative; height: 300px;">
-                        <canvas id="humidityChart"></canvas>
-                    </div>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="location.reload()" title="Actualiser les données">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                    <a href="/ruches" th:href="@{/ruches}" class="btn btn-sm btn-primary" title="Voir toutes les ruches">
+                        <i data-lucide="external-link" class="me-1"></i>
+                        <span>Voir tout</span>
+                    </a>
                 </div>
             </div>
-
-            <!-- Colonne droite - Informations -->
-            <div>
-                <!-- Ruches récentes -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="hexagon" class="me-2"></i>
-                            Ruches récentes
-                        </h2>
-                        <a href="/ruches" th:href="@{/ruches}" class="btn btn-secondary text-sm">
-                            Voir tout
-                        </a>
-                    </div>
-                    <div class="ruches-list">
-                        <div th:if="${#lists.isEmpty(ruches)}" class="text-center text-gray-500 p-4">
-                            Aucune ruche disponible
-                        </div>
-                        <div th:each="ruche : ${ruches}" class="ruche-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <div class="ruche-info">
-                                <h4 class="font-semibold" th:text="${ruche.nom}">Ruche #1</h4>
-                                <p class="text-sm text-gray-600" th:text="${ruche.rucherNom ?: 'Rucher non défini'}">Rucher Principal</p>
+            <div class="card-body">
+                <div class="ruches-grid">
+                    <!-- Carte pour chaque ruche -->
+                    <div class="ruche-card" th:each="ruche : ${ruches}">
+                        <div class="ruche-card-header">
+                            <div class="ruche-avatar" th:style="'background: linear-gradient(135deg, ' + ${ruche.couleur ?: '#f59e0b'} + ' 0%, ' + ${ruche.couleurSecondaire ?: '#d97706'} + ' 100%);'">
+                                <span th:text="${ruche.initiales ?: (#strings.substring(ruche.nom ?: 'R', 0, 2))}">R1</span>
+                            </div>
+                            <div class="ruche-header-info">
+                                <h4 class="ruche-title" th:text="${ruche.nom}">Ruche Alpha</h4>
+                                <p class="ruche-location">
+                                    <i data-lucide="map-pin" class="location-icon"></i>
+                                    <span th:text="${ruche.rucher?.nom ?: 'Rucher non défini'}">Rucher Principal</span>
+                                </p>
                             </div>
                             <div class="ruche-status">
-                                <span th:if="${ruche.actif}" class="badge badge-success">
-                                    Actif
-                                </span>
-                                <span th:unless="${ruche.actif}" class="badge badge-warning">
-                                    Inactif
-                                </span>
+                                <div class="status-badge" th:classappend="${ruche.actif ? 'status-success' : 'status-inactive'}">
+                                    <i th:attr="data-lucide=${ruche.actif ? 'check-circle' : 'pause-circle'}"></i>
+                                    <span th:text="${ruche.actif ? 'Active' : 'Inactive'}">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ruche-card-body">
+                            <div class="ruche-metrics-grid">
+                                <!-- Température -->
+                                <div class="metric-item temperature">
+                                    <div class="metric-icon">
+                                        <i data-lucide="thermometer"></i>
+                                    </div>
+                                    <div class="metric-data">
+                                        <span class="metric-value" th:text="${ruche.temperature != null ? ruche.temperature + '°C' : 'N/A'}">24°C</span>
+                                        <span class="metric-label">Température</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Humidité -->
+                                <div class="metric-item humidity">
+                                    <div class="metric-icon">
+                                        <i data-lucide="droplets"></i>
+                                    </div>
+                                    <div class="metric-data">
+                                        <span class="metric-value" th:text="${ruche.humidite != null ? ruche.humidite + '%' : 'N/A'}">65%</span>
+                                        <span class="metric-label">Humidité</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Poids -->
+                                <div class="metric-item weight">
+                                    <div class="metric-icon">
+                                        <i data-lucide="scale"></i>
+                                    </div>
+                                    <div class="metric-data">
+                                        <span class="metric-value" th:text="${ruche.poids != null ? ruche.poids + 'kg' : 'N/A'}">45kg</span>
+                                        <span class="metric-label">Poids</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dernière mise à jour -->
+                                <div class="metric-item update">
+                                    <div class="metric-icon">
+                                        <i data-lucide="clock"></i>
+                                    </div>
+                                    <div class="metric-data">
+                                        <span class="metric-value" th:text="${ruche.dateDerniereMesure != null ? #dates.format(ruche.dateDerniereMesure, 'HH:mm') : 'N/A'}">14:30</span>
+                                        <span class="metric-label">Dernière mesure</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations supplémentaires -->
+                            <div class="ruche-extra-info">
+                                <div class="info-item" th:if="${ruche.type}">
+                                    <i data-lucide="info"></i>
+                                    <span>Type: </span>
+                                    <span th:text="${ruche.type}">Langstroth</span>
+                                </div>
+                                <div class="info-item" th:if="${ruche.dateInstallation}">
+                                    <i data-lucide="calendar"></i>
+                                    <span>Installée le: </span>
+                                    <span th:text="${#dates.format(ruche.dateInstallation, 'dd/MM/yyyy')}">15/03/2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ruche-card-footer">
+                            <a th:href="@{/ruches/{id}(id=${ruche.id})}" class="btn btn-sm btn-primary">
+                                <i data-lucide="eye" class="me-1"></i>
+                                <span>Voir détails</span>
+                            </a>
+                            <button class="btn btn-sm btn-secondary" th:onclick="'BeeTrack.refreshRuche(\'' + ${ruche.id} + '\')'">
+                                <i data-lucide="refresh-cw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Message si aucune ruche -->
+                <div class="empty-state" th:if="${#lists.isEmpty(ruches)}">
+                    <div class="empty-state-icon">
+                        <i data-lucide="hexagon"></i>
+                    </div>
+                    <h3>Aucune ruche configurée</h3>
+                    <p>Commencez par ajouter votre première ruche pour voir les données ici.</p>
+                    <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
+                        <i data-lucide="plus" class="me-2"></i>
+                        <span>Ajouter une ruche</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille principale dashboard améliorée -->
+        <div class="dashboard-main-grid">
+            <!-- Section graphiques -->
+            <div class="dashboard-charts">
+                <!-- Graphique principal -->
+                <div class="card chart-card fade-in animate-in" style="animation-delay: 0.7s;">
+                    <div class="card-header">
+                        <div class="card-header-content">
+                            <h3 class="card-title">
+                                <i data-lucide="trending-up" class="me-2"></i>
+                                <span>Évolution des ruches</span>
+                            </h3>
+                            <div class="chart-status">
+                                <div class="status-indicator good"></div>
+                                <span class="status-text">Données en temps réel</span>
+                            </div>
+                        </div>
+                        <div class="chart-controls">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-secondary active" data-period="7d">7J</button>
+                                <button type="button" class="btn btn-sm btn-secondary" data-period="30d">30J</button>
+                                <button type="button" class="btn btn-sm btn-secondary" data-period="90d">3M</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="mainChart" style="height: 300px;"></canvas>
+                        </div>
+                        <div class="chart-summary">
+                            <div class="chart-stat">
+                                <span class="chart-stat-value">+5.2%</span>
+                                <span class="chart-stat-label">Cette semaine</span>
+                            </div>
+                            <div class="chart-stat">
+                                <span class="chart-stat-value">24.2°C</span>
+                                <span class="chart-stat-label">Temp. moyenne</span>
+                            </div>
+                            <div class="chart-stat">
+                                <span class="chart-stat-value">98.5%</span>
+                                <span class="chart-stat-label">Uptime</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Activité récente -->
-                <div class="card">
+                <!-- Graphique secondaire -->
+                <div class="card chart-card fade-in animate-in" style="animation-delay: 0.8s;">
                     <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="activity" class="me-2"></i>
-                            Activité récente
-                        </h2>
+                        <h3 class="card-title">
+                            <i data-lucide="thermometer" class="me-2"></i>
+                            <span>Conditions environnementales</span>
+                        </h3>
                     </div>
-                    <div class="activity-feed">
-                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <div class="activity-icon bg-green-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
-                                📊
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="environmentChart" style="height: 200px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar dashboard -->
+            <div class="dashboard-sidebar">
+                <!-- Liste des ruches récentes -->
+                <div class="card fade-in animate-in" style="animation-delay: 0.9s;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="hexagon" class="me-2"></i>
+                            <span>Ruches récentes</span>
+                        </h3>
+                        <a href="/ruches" th:href="@{/ruches}" class="btn btn-sm btn-secondary">
+                            <i data-lucide="external-link"></i>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="ruches-list">
+                            <!-- Exemple de ruche avec données Thymeleaf -->
+                            <div class="ruche-item" th:each="ruche, iterStat : ${ruchesRecentes}" th:if="${iterStat.index < 5}">
+                                <div class="ruche-avatar" th:style="'background: linear-gradient(135deg, ' + ${ruche.couleur ?: '#f59e0b'} + ' 0%, ' + ${ruche.couleurSecondaire ?: '#d97706'} + ' 100%);'">
+                                    <span th:text="${ruche.initiales ?: 'R' + ruche.id}">R1</span>
+                                </div>
+                                <div class="ruche-info">
+                                    <div class="ruche-name" th:text="${ruche.nom}">Ruche Alpha</div>
+                                    <div class="ruche-location" th:text="${ruche.rucher?.nom}">Rucher Principal</div>
+                                </div>
+                                <div class="ruche-metrics">
+                                    <div class="metric">
+                                        <i data-lucide="thermometer"></i>
+                                        <span th:text="${ruche.temperature ?: '24°C'}">24°C</span>
+                                    </div>
+                                    <div class="metric">
+                                        <i data-lucide="droplets"></i>
+                                        <span th:text="${ruche.humidite ?: '65%'}">65%</span>
+                                    </div>
+                                </div>
+                                <div class="status-badge status-success">
+                                    <i data-lucide="check-circle"></i>
+                                </div>
                             </div>
-                            <div class="activity-content">
-                                <p class="activity-text">Données synchronisées</p>
-                                <span class="activity-time text-sm text-gray-500">Il y a 2 minutes</span>
+                            
+                            <!-- Ruches par défaut si pas de données -->
+                            <div class="ruche-item" th:if="${#lists.isEmpty(ruchesRecentes)}">
+                                <div class="ruche-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                    <span>R1</span>
+                                </div>
+                                <div class="ruche-info">
+                                    <div class="ruche-name">Ruche Alpha</div>
+                                    <div class="ruche-location">Rucher Principal</div>
+                                </div>
+                                <div class="ruche-metrics">
+                                    <div class="metric">
+                                        <i data-lucide="thermometer"></i>
+                                        <span>24°C</span>
+                                    </div>
+                                    <div class="metric">
+                                        <i data-lucide="droplets"></i>
+                                        <span>65%</span>
+                                    </div>
+                                </div>
+                                <div class="status-badge status-success">
+                                    <i data-lucide="check-circle"></i>
+                                </div>
                             </div>
                         </div>
-                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #e2e8f0;">
-                            <div class="activity-icon bg-blue-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
-                                🌡️
+                    </div>
+                </div>
+
+                <!-- Flux d'activité -->
+                <div class="card fade-in animate-in" style="animation-delay: 1.0s;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="activity" class="me-2"></i>
+                            <span>Activité récente</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-feed">
+                            <div class="activity-item">
+                                <div class="activity-avatar success">
+                                    <i data-lucide="plus"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Nouvelle ruche ajoutée</div>
+                                    <div class="activity-description">Ruche Gamma dans le Rucher Sud</div>
+                                    <div class="activity-time">Il y a 2 heures</div>
+                                </div>
                             </div>
-                            <div class="activity-content">
-                                <p class="activity-text">Température normale</p>
-                                <span class="activity-time text-sm text-gray-500">Il y a 1 heure</span>
+                            
+                            <div class="activity-item">
+                                <div class="activity-avatar warning">
+                                    <i data-lucide="alert-triangle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Alerte température</div>
+                                    <div class="activity-description">Ruche Beta - Température élevée</div>
+                                    <div class="activity-time">Il y a 4 heures</div>
+                                </div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-avatar info">
+                                    <i data-lucide="sync"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Synchronisation complète</div>
+                                    <div class="activity-description">Toutes les données mises à jour</div>
+                                    <div class="activity-time">Il y a 6 heures</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="activity-item" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0;">
-                            <div class="activity-icon bg-amber-500" style="width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
-                                ⚠️
+                        <div class="activity-footer">
+                            <a href="/historique" class="btn btn-sm btn-secondary w-full">
+                                <i data-lucide="clock" class="me-2"></i>
+                                <span>Voir l'historique</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget météo -->
+                <div class="card weather-card fade-in animate-in" style="animation-delay: 1.1s;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="cloud" class="me-2"></i>
+                            <span>Météo</span>
+                        </h3>
+                        <div class="weather-location">
+                            <i data-lucide="map-pin"></i>
+                            <span>Rucher Principal</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="weather-current">
+                            <div class="weather-temp">
+                                <span class="temp-value">22°C</span>
+                                <div class="weather-icon">
+                                    <i data-lucide="sun"></i>
+                                </div>
                             </div>
-                            <div class="activity-content">
-                                <p class="activity-text">Maintenance programmée</p>
-                                <span class="activity-time text-sm text-gray-500">Demain à 10:00</span>
+                            <div class="weather-condition">Ensoleillé</div>
+                        </div>
+                        
+                        <div class="weather-details">
+                            <div class="weather-detail">
+                                <i data-lucide="droplets"></i>
+                                <span>Humidité: 68%</span>
+                            </div>
+                            <div class="weather-detail">
+                                <i data-lucide="wind"></i>
+                                <span>Vent: 12 km/h</span>
+                            </div>
+                            <div class="weather-detail">
+                                <i data-lucide="eye"></i>
+                                <span>Visibilité: 10 km</span>
+                            </div>
+                        </div>
+                        
+                        <div class="weather-forecast">
+                            <div class="forecast-item">
+                                <span class="forecast-day">Dem</span>
+                                <i data-lucide="cloud" class="forecast-icon"></i>
+                                <span class="forecast-temp">19°C</span>
+                            </div>
+                            <div class="forecast-item">
+                                <span class="forecast-day">Mer</span>
+                                <i data-lucide="cloud-rain" class="forecast-icon"></i>
+                                <span class="forecast-temp">16°C</span>
+                            </div>
+                            <div class="forecast-item">
+                                <span class="forecast-day">Jeu</span>
+                                <i data-lucide="sun" class="forecast-icon"></i>
+                                <span class="forecast-temp">23°C</span>
                             </div>
                         </div>
                     </div>
@@ -215,26 +604,61 @@
     <!-- Scripts spécifiques au dashboard -->
     <th:block layout:fragment="scripts">
         <script>
+            // Initialisation des graphiques du dashboard
             document.addEventListener('DOMContentLoaded', function() {
-                // Créer les graphiques
                 if (typeof Chart !== 'undefined') {
-                    createDashboardCharts();
+                    // Configuration du graphique principal
+                    const mainChart = new Chart(document.getElementById('mainChart'), {
+                        type: 'line',
+                        data: {
+                            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                            datasets: [{
+                                label: 'Ruches actives',
+                                data: [12, 15, 13, 17, 16, 18, 20],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: BeeTrack.config.chartOptions
+                    });
+
+                    // Configuration du graphique environnemental
+                    const environmentChart = new Chart(document.getElementById('environmentChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Température', 'Humidité', 'Poids'],
+                            datasets: [{
+                                data: [30, 45, 25],
+                                backgroundColor: ['#f59e0b', '#10b981', '#3b82f6'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            ...BeeTrack.config.chartOptions,
+                            plugins: {
+                                ...BeeTrack.config.chartOptions.plugins,
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+
+                    // Stocker les graphiques pour les mises à jour de thème
+                    BeeTrack.state.charts.set('mainChart', mainChart);
+                    BeeTrack.state.charts.set('environmentChart', environmentChart);
                 }
-            });
-            
-            function createDashboardCharts() {
-                // Graphique de température
-                const tempChart = document.getElementById('tempChart');
-                if (tempChart) {
-                    createTemperatureChart(tempChart);
-                }
+
+                // Animation progressive des éléments
+                BeeTrack.startProgressiveAnimations();
                 
-                // Graphique d'humidité
-                const humidityChart = document.getElementById('humidityChart');
-                if (humidityChart) {
-                    createHumidityChart(humidityChart);
-                }
-            }
+                // Mise à jour automatique des données
+                setInterval(() => {
+                    BeeTrack.updateDashboardData();
+                }, BeeTrack.config.refreshInterval);
+            });
         </script>
     </th:block>
 </body>

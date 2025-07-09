@@ -26,3 +26,39 @@ dist-ssr
 
 # Firebase service account keys
 config/*firebase-adminsdk*.json
+config/firebase/*.json
+
+# Java/Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+.classpath
+.project
+.settings/
+
+# Gradle
+.gradle/
+build/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE
+*.iml
+*.ipr
+*.iws

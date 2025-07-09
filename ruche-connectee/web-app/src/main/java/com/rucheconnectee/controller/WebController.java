@@ -58,15 +58,34 @@ public class WebController {
     @GetMapping("/login")
     public String login(@RequestParam(value = "error", required = false) String error,
                        @RequestParam(value = "logout", required = false) String logout,
-                       Model model) {
+                       Model model,
+                       Authentication authentication) {
+        
+        // Si déjà connecté, rediriger vers le dashboard
+        if (authentication != null && authentication.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
         
         if (error != null) {
-            model.addAttribute("error", "Les identifiants sont erronés.");
+            switch (error) {
+                case "notauthenticated":
+                    model.addAttribute("error", "Veuillez vous connecter pour accéder à cette page.");
+                    break;
+                case "dashboard":
+                    model.addAttribute("error", "Erreur lors du chargement du tableau de bord. Veuillez vous reconnecter.");
+                    break;
+                default:
+                    model.addAttribute("error", "Les identifiants sont erronés. Utilisez admin@beetrackdemo.com / admin123 ou apiculteur@beetrackdemo.com / demo123");
+                    break;
+            }
         }
         
         if (logout != null) {
             model.addAttribute("message", "Vous avez été déconnecté avec succès.");
         }
+        
+        // Ajouter des informations pour le débogage
+        model.addAttribute("debugInfo", "Utilisez les identifiants de démonstration ci-dessous pour vous connecter.");
         
         return "login";
     }
@@ -77,78 +96,86 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         try {
-            if (authentication == null) {
-                return "redirect:/login";
+            // Vérifier l'authentification
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
             }
             
-            // Récupérer l'utilisateur actuel
-            var apiculteur = apiculteurService.getApiculteurByEmail(authentication.getName());
+            String userEmail = authentication.getName();
+            System.out.println("🔍 Dashboard - Utilisateur connecté: " + userEmail);
             
-            if (apiculteur != null) {
+            // Essayer de récupérer l'apiculteur par email
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            
+            // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+                System.out.println("🔍 Fallback vers jean.dupont@email.com - Apiculteur trouvé: " + (apiculteur != null));
+            }
+            
+            if (apiculteur == null) {
+                System.out.println("❌ Aucun apiculteur trouvé pour: " + userEmail);
+                // Si aucun apiculteur trouvé, créer des données de test
+                model.addAttribute("totalRuches", 0);
+                model.addAttribute("totalRuchers", 0);
+                model.addAttribute("ruchesEnService", 0);
+                model.addAttribute("alertesActives", 0);
+                model.addAttribute("ruches", List.of());
+                model.addAttribute("ruchesRecentes", List.of());
+                model.addAttribute("message", "Bienvenue! Aucune ruche n'est encore configurée pour votre compte.");
+            } else {
+                System.out.println("✅ Apiculteur trouvé: " + apiculteur.getNom());
                 var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
                 var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
+                
+                System.out.println("📊 Ruches trouvées: " + ruches.size());
+                System.out.println("📍 Ruchers trouvés: " + ruchers.size());
                 
                 // Calculer les statistiques pour le dashboard
                 model.addAttribute("totalRuches", ruches.size());
                 model.addAttribute("totalRuchers", ruchers.size());
                 model.addAttribute("ruchesEnService", ruches.stream().mapToInt(r -> r.isActif() ? 1 : 0).sum());
                 model.addAttribute("alertesActives", 0); // À implémenter
-                model.addAttribute("ruches", ruches.stream().limit(5).toList()); // Limiter à 5 pour le dashboard
-                model.addAttribute("apiculteur", apiculteur);
-                
-                // Définir les variables de layout
-                model.addAttribute("currentPage", "dashboard");
-                model.addAttribute("pageTitle", "Tableau de bord");
-                model.addAttribute("userRole", "Apiculteur");
-                
-                return "dashboard";
-            } else {
-                model.addAttribute("error", "Utilisateur non trouvé. Veuillez vous reconnecter.");
-                return "redirect:/login";
+                model.addAttribute("ruches", ruches); // Toutes les ruches pour le dashboard
+                model.addAttribute("ruchesRecentes", ruches.stream().limit(5).toList()); // Limiter à 5 pour la sidebar
             }
+            
+            model.addAttribute("apiculteur", apiculteur);
+            
+            // Définir les variables de layout
+            model.addAttribute("currentPage", "dashboard");
+            model.addAttribute("pageTitle", "Tableau de bord");
+            model.addAttribute("userRole", "Apiculteur");
+            
+            return "dashboard";
         } catch (Exception e) {
+            System.err.println("❌ Erreur dans le dashboard: " + e.getMessage());
+            e.printStackTrace();
             model.addAttribute("error", "Erreur lors du chargement du dashboard: " + e.getMessage());
-            return "redirect:/login";
+            return "redirect:/login?error=dashboard";
         }
-    }
-
-    /**
-     * Page des ruchers
-     */
-    @GetMapping("/ruchers")
-    public String ruchers(Model model) {
-        try {
-            // Utiliser l'utilisateur existant dans Firebase
-            var apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
-            
-            if (apiculteur != null) {
-                var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
-                var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
-                
-                model.addAttribute("ruchers", ruchers);
-                model.addAttribute("totalRuchers", ruchers.size());
-                model.addAttribute("totalRuchesRuchers", ruches.size());
-                model.addAttribute("apiculteur", apiculteur);
-            }
-            
-            model.addAttribute("currentPage", "ruchers");
-            model.addAttribute("pageTitle", "Mes Ruchers");
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "Erreur lors du chargement des ruchers: " + e.getMessage());
-        }
-        
-        return "ruchers";
     }
 
     /**
      * Page des ruches
      */
     @GetMapping("/ruches")
-    public String ruches(Model model) {
+    public String ruches(Model model, Authentication authentication) {
         try {
-            // Utiliser l'utilisateur existant dans Firebase
-            var apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            // Vérifier l'authentification
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+            
+            String userEmail = authentication.getName();
+            
+            // Essayer de récupérer l'apiculteur par email
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            
+            // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            }
             
             if (apiculteur != null) {
                 List<Ruche> ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
@@ -167,6 +194,15 @@ public class WebController {
                 model.addAttribute("ruchesSaines", ruchesSaines);
                 model.addAttribute("alertesRuches", alertesRuches);
                 model.addAttribute("apiculteur", apiculteur);
+            } else {
+                // Données par défaut si aucun apiculteur trouvé
+                model.addAttribute("ruches", List.of());
+                model.addAttribute("ruchers", List.of());
+                model.addAttribute("totalRuches", 0);
+                model.addAttribute("ruchesActives", 0);
+                model.addAttribute("ruchesSaines", 0);
+                model.addAttribute("alertesRuches", 0);
+                model.addAttribute("message", "Aucune ruche configurée pour votre compte.");
             }
             
             model.addAttribute("currentPage", "ruches");
