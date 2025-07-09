@@ -75,12 +75,6 @@ class RucheConnecteeApp extends StatelessWidget {
             ),
           ),
         ),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: const Color(0xFFFFB300),
-          scaffoldBackgroundColor: const Color(0xFF121212),
-          fontFamily: 'Poppins',
-        ),
         themeMode: ThemeMode.light,
         debugShowCheckedModeBanner: false,
       ),
