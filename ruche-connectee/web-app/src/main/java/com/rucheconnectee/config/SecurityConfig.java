@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/webjars/**", "/logo.svg").permitAll()
                 .requestMatchers("/test/**").permitAll()  // Permet l'accès aux endpoints de test Firebase
                 .requestMatchers("/fix/**").permitAll()   // Permet l'accès aux endpoints de correction
+                .requestMatchers("/debug", "/safe-login", "/force-logout", "/simple-dashboard").permitAll()  // Endpoints de débogage
                 .anyRequest().authenticated()
             )
             .authenticationManager(authenticationManager(http))
@@ -42,6 +44,11 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
             )
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers

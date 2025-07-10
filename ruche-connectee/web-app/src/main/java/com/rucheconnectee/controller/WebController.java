@@ -104,43 +104,56 @@ public class WebController {
             String userEmail = authentication.getName();
             System.out.println("🔍 Dashboard - Utilisateur connecté: " + userEmail);
             
-            // Essayer de récupérer l'apiculteur par email
-            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            // Initialiser avec des valeurs par défaut
+            model.addAttribute("totalRuches", 0);
+            model.addAttribute("totalRuchers", 0);
+            model.addAttribute("ruchesEnService", 0);
+            model.addAttribute("alertesActives", 0);
+            model.addAttribute("ruches", List.of());
+            model.addAttribute("ruchesRecentes", List.of());
+            model.addAttribute("apiculteur", null);
             
-            // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
-            if (apiculteur == null) {
-                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
-                System.out.println("🔍 Fallback vers jean.dupont@email.com - Apiculteur trouvé: " + (apiculteur != null));
-            }
-            
-            if (apiculteur == null) {
-                System.out.println("❌ Aucun apiculteur trouvé pour: " + userEmail);
-                // Si aucun apiculteur trouvé, créer des données de test
-                model.addAttribute("totalRuches", 0);
-                model.addAttribute("totalRuchers", 0);
-                model.addAttribute("ruchesEnService", 0);
-                model.addAttribute("alertesActives", 0);
-                model.addAttribute("ruches", List.of());
-                model.addAttribute("ruchesRecentes", List.of());
-                model.addAttribute("message", "Bienvenue! Aucune ruche n'est encore configurée pour votre compte.");
-            } else {
-                System.out.println("✅ Apiculteur trouvé: " + apiculteur.getNom());
-                var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
-                var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
+            try {
+                // Essayer de récupérer l'apiculteur par email
+                var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
                 
-                System.out.println("📊 Ruches trouvées: " + ruches.size());
-                System.out.println("📍 Ruchers trouvés: " + ruchers.size());
+                // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
+                if (apiculteur == null) {
+                    apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+                    System.out.println("🔍 Fallback vers jean.dupont@email.com - Apiculteur trouvé: " + (apiculteur != null));
+                }
                 
-                // Calculer les statistiques pour le dashboard
-                model.addAttribute("totalRuches", ruches.size());
-                model.addAttribute("totalRuchers", ruchers.size());
-                model.addAttribute("ruchesEnService", ruches.stream().mapToInt(r -> r.isActif() ? 1 : 0).sum());
-                model.addAttribute("alertesActives", 0); // À implémenter
-                model.addAttribute("ruches", ruches); // Toutes les ruches pour le dashboard
-                model.addAttribute("ruchesRecentes", ruches.stream().limit(5).toList()); // Limiter à 5 pour la sidebar
+                if (apiculteur == null) {
+                    System.out.println("❌ Aucun apiculteur trouvé pour: " + userEmail);
+                    model.addAttribute("message", "Bienvenue! Aucune ruche n'est encore configurée pour votre compte.");
+                } else {
+                    System.out.println("✅ Apiculteur trouvé: " + apiculteur.getNom());
+                    
+                    try {
+                        var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
+                        var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
+                        
+                        System.out.println("📊 Ruches trouvées: " + ruches.size());
+                        System.out.println("📍 Ruchers trouvés: " + ruchers.size());
+                        
+                        // Calculer les statistiques pour le dashboard
+                        model.addAttribute("totalRuches", ruches.size());
+                        model.addAttribute("totalRuchers", ruchers.size());
+                        model.addAttribute("ruchesEnService", ruches.stream().mapToInt(r -> r.isActif() ? 1 : 0).sum());
+                        model.addAttribute("alertesActives", 0); // À implémenter
+                        model.addAttribute("ruches", ruches); // Toutes les ruches pour le dashboard
+                        model.addAttribute("ruchesRecentes", ruches.stream().limit(5).toList()); // Limiter à 5 pour la sidebar
+                        model.addAttribute("apiculteur", apiculteur);
+                    } catch (Exception dataException) {
+                        System.err.println("⚠️ Erreur de récupération des données: " + dataException.getMessage());
+                        model.addAttribute("message", "Données en cours de chargement... (Erreur Firebase)");
+                        model.addAttribute("apiculteur", apiculteur);
+                    }
+                }
+            } catch (Exception serviceException) {
+                System.err.println("⚠️ Erreur de service Firebase: " + serviceException.getMessage());
+                model.addAttribute("message", "Mode déconnecté - Services temporairement indisponibles");
             }
-            
-            model.addAttribute("apiculteur", apiculteur);
             
             // Définir les variables de layout
             model.addAttribute("currentPage", "dashboard");
@@ -149,10 +162,23 @@ public class WebController {
             
             return "dashboard";
         } catch (Exception e) {
-            System.err.println("❌ Erreur dans le dashboard: " + e.getMessage());
+            System.err.println("❌ Erreur critique dans le dashboard: " + e.getMessage());
             e.printStackTrace();
-            model.addAttribute("error", "Erreur lors du chargement du dashboard: " + e.getMessage());
-            return "redirect:/login?error=dashboard";
+            
+            // Au lieu de rediriger vers login, afficher le dashboard avec un message d'erreur
+            model.addAttribute("totalRuches", 0);
+            model.addAttribute("totalRuchers", 0);
+            model.addAttribute("ruchesEnService", 0);
+            model.addAttribute("alertesActives", 0);
+            model.addAttribute("ruches", List.of());
+            model.addAttribute("ruchesRecentes", List.of());
+            model.addAttribute("apiculteur", null);
+            model.addAttribute("currentPage", "dashboard");
+            model.addAttribute("pageTitle", "Tableau de bord");
+            model.addAttribute("userRole", "Apiculteur");
+            model.addAttribute("error", "Erreur temporaire du système. Veuillez actualiser la page.");
+            
+            return "dashboard";
         }
     }
 

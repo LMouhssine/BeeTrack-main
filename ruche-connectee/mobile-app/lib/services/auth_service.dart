@@ -19,32 +19,52 @@ class AuthService {
     try {
       LoggerService.info('Connexion: $email');
 
-      final querySnapshot = await _firebaseService.firestore
-          .collection('apiculteurs')
-          .where('email', isEqualTo: email)
-          .get();
+      // D'abord essayer de s'authentifier avec Firebase Auth
+      final userCredential =
+          await _firebaseService.auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (querySnapshot.docs.isNotEmpty) {
-        final userCredential =
-            await _firebaseService.auth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+      if (userCredential.user != null) {
+        LoggerService.info(
+            'Connexion réussie pour: ${userCredential.user!.email}');
+        
+        // Maintenant que l'utilisateur est authentifié, vérifier s'il existe dans Firestore
+        try {
+          final querySnapshot = await _firebaseService.firestore
+              .collection('apiculteurs')
+              .where('email', isEqualTo: email)
+              .get();
 
-        if (userCredential.user != null) {
-          LoggerService.info(
-              'Connexion réussie pour: ${userCredential.user!.email}');
-          return userCredential.user;
-        } else {
-          LoggerService.error('Connexion échouée: user est null');
-          return null;
+          if (querySnapshot.docs.isEmpty) {
+            LoggerService.warning('Utilisateur authentifié mais pas trouvé dans Firestore');
+            // L'utilisateur est authentifié mais pas dans Firestore, on peut le créer
+            await _firebaseService.firestore
+                .collection('apiculteurs')
+                .doc(userCredential.user!.uid)
+                .set({
+              'email': email,
+              'name': userCredential.user!.displayName ?? 'Utilisateur',
+              'createdAt': FieldValue.serverTimestamp(),
+              'role': 'apiculteur',
+            });
+            LoggerService.info('Document utilisateur créé dans Firestore');
+          }
+        } catch (firestoreError) {
+          LoggerService.warning('Erreur lors de la vérification Firestore: $firestoreError');
+          // Continuer même si la vérification Firestore échoue
         }
+        
+        return userCredential.user;
+      } else {
+        LoggerService.error('Connexion échouée: user est null');
+        return null;
       }
     } catch (e) {
       LoggerService.error('Erreur lors de la connexion', e);
       rethrow;
     }
-    return null;
   }
 
   // Inscription avec email et mot de passe
@@ -139,22 +159,8 @@ class AuthService {
       LoggerService.info(
           'Tentative de création d\'un utilisateur avec email: $email');
 
-      // Vérifier d'abord si l'utilisateur existe dans Firestore
-      final querySnapshot = await _firebaseService.firestore
-          .collection('apiculteurs')
-          .where('email', isEqualTo: email)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        LoggerService.error(
-            'Aucun utilisateur trouvé dans Firestore avec cet email');
-        return null;
-      }
-
-      final userData = querySnapshot.docs.first.data();
-
       try {
-        // Essayer de créer l'utilisateur
+        // Essayer de créer l'utilisateur directement
         final userCredential =
             await _firebaseService.auth.createUserWithEmailAndPassword(
           email: email,
@@ -162,8 +168,17 @@ class AuthService {
         );
 
         if (userCredential.user != null) {
-          // Mettre à jour le profil utilisateur
-          await userCredential.user!.updateDisplayName(userData['nom'] ?? '');
+          // Maintenant que l'utilisateur est authentifié, créer le document Firestore
+          await _firebaseService.firestore
+              .collection('apiculteurs')
+              .doc(userCredential.user!.uid)
+              .set({
+            'email': email,
+            'name': userCredential.user!.displayName ?? 'Utilisateur',
+            'createdAt': FieldValue.serverTimestamp(),
+            'role': 'apiculteur',
+          });
+          
           LoggerService.info(
               'Compte créé avec succès pour l\'utilisateur: ${userCredential.user!.uid}');
           return userCredential.user!;
@@ -180,6 +195,31 @@ class AuthService {
             email: email,
             password: password,
           );
+          
+          // Vérifier si le document Firestore existe
+          try {
+            final docSnapshot = await _firebaseService.firestore
+                .collection('apiculteurs')
+                .doc(signInCredential.user!.uid)
+                .get();
+                
+            if (!docSnapshot.exists) {
+              // Créer le document s'il n'existe pas
+              await _firebaseService.firestore
+                  .collection('apiculteurs')
+                  .doc(signInCredential.user!.uid)
+                  .set({
+                'email': email,
+                'name': signInCredential.user!.displayName ?? 'Utilisateur',
+                'createdAt': FieldValue.serverTimestamp(),
+                'role': 'apiculteur',
+              });
+              LoggerService.info('Document utilisateur créé dans Firestore');
+            }
+          } catch (firestoreError) {
+            LoggerService.warning('Erreur lors de la vérification Firestore: $firestoreError');
+          }
+          
           return signInCredential.user;
         }
         rethrow;
