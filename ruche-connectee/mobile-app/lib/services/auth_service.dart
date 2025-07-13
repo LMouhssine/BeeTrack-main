@@ -29,7 +29,7 @@ class AuthService {
       if (userCredential.user != null) {
         LoggerService.info(
             'Connexion réussie pour: ${userCredential.user!.email}');
-        
+
         // Maintenant que l'utilisateur est authentifié, vérifier s'il existe dans Firestore
         try {
           final querySnapshot = await _firebaseService.firestore
@@ -38,7 +38,8 @@ class AuthService {
               .get();
 
           if (querySnapshot.docs.isEmpty) {
-            LoggerService.warning('Utilisateur authentifié mais pas trouvé dans Firestore');
+            LoggerService.warning(
+                'Utilisateur authentifié mais pas trouvé dans Firestore');
             // L'utilisateur est authentifié mais pas dans Firestore, on peut le créer
             await _firebaseService.firestore
                 .collection('apiculteurs')
@@ -52,10 +53,11 @@ class AuthService {
             LoggerService.info('Document utilisateur créé dans Firestore');
           }
         } catch (firestoreError) {
-          LoggerService.warning('Erreur lors de la vérification Firestore: $firestoreError');
+          LoggerService.warning(
+              'Erreur lors de la vérification Firestore: $firestoreError');
           // Continuer même si la vérification Firestore échoue
         }
-        
+
         return userCredential.user;
       } else {
         LoggerService.error('Connexion échouée: user est null');
@@ -178,7 +180,7 @@ class AuthService {
             'createdAt': FieldValue.serverTimestamp(),
             'role': 'apiculteur',
           });
-          
+
           LoggerService.info(
               'Compte créé avec succès pour l\'utilisateur: ${userCredential.user!.uid}');
           return userCredential.user!;
@@ -195,14 +197,14 @@ class AuthService {
             email: email,
             password: password,
           );
-          
+
           // Vérifier si le document Firestore existe
           try {
             final docSnapshot = await _firebaseService.firestore
                 .collection('apiculteurs')
                 .doc(signInCredential.user!.uid)
                 .get();
-                
+
             if (!docSnapshot.exists) {
               // Créer le document s'il n'existe pas
               await _firebaseService.firestore
@@ -217,9 +219,10 @@ class AuthService {
               LoggerService.info('Document utilisateur créé dans Firestore');
             }
           } catch (firestoreError) {
-            LoggerService.warning('Erreur lors de la vérification Firestore: $firestoreError');
+            LoggerService.warning(
+                'Erreur lors de la vérification Firestore: $firestoreError');
           }
-          
+
           return signInCredential.user;
         }
         rethrow;
