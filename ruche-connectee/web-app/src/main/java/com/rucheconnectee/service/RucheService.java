@@ -1,6 +1,6 @@
 package com.rucheconnectee.service;
 
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+import java.util.Map;
 import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.model.CreateRucheRequest;
@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -44,18 +45,18 @@ public abstract class RucheService {
     /**
      * Récupère toutes les ruches d'un rucher
      */
-    public List<Ruche> getRuchesByRucher(String rucherId) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_RUCHES, "rucher_id", rucherId);
+    public List<Ruche> getRuchesByRucher(String rucherId) throws ExecutionException, InterruptedException, TimeoutException {
+        List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_RUCHES, "rucher_id", rucherId);
         return documents.stream()
-                .filter(doc -> (Boolean) doc.getData().getOrDefault("actif", true))
-                .map(doc -> documentToRuche(doc.getId(), doc.getData()))
+                .filter(doc -> (Boolean) doc.getOrDefault("actif", true))
+                .map(doc -> documentToRuche((String) doc.get("id"), doc))
                 .collect(Collectors.toList());
     }
 
     /**
      * Met à jour les données de capteurs d'une ruche (appelé par l'ESP32)
      */
-    public void updateDonneesCapteurs(String rucheId, DonneesCapteur donnees) throws ExecutionException, InterruptedException {
+    public void updateDonneesCapteurs(String rucheId, DonneesCapteur donnees) throws ExecutionException, InterruptedException, TimeoutException {
         // Sauvegarder les données historiques
         Map<String, Object> donneesData = donneesToMap(donnees);
         firebaseService.addDocument(COLLECTION_DONNEES, donneesData);
@@ -66,7 +67,7 @@ public abstract class RucheService {
         updates.put("humidite", donnees.getHumidity());
         updates.put("couvercle_ouvert", donnees.getCouvercleOuvert());
         updates.put("niveau_batterie", donnees.getBatterie());
-        updates.put("derniere_mise_a_jour", com.google.cloud.Timestamp.now());
+        updates.put("derniere_mise_a_jour", System.currentTimeMillis());
 
         firebaseService.updateDocument(COLLECTION_RUCHES, rucheId, updates);
     }
@@ -76,30 +77,29 @@ public abstract class RucheService {
      * @param rucheId ID de la ruche
      * @return Liste des mesures triées par date croissante
      */
-    public List<DonneesCapteur> getMesures7DerniersJours(String rucheId) throws ExecutionException, InterruptedException {
+    public List<DonneesCapteur> getMesures7DerniersJours(String rucheId) throws ExecutionException, InterruptedException, TimeoutException {
         // Calculer la date limite (maintenant - 7 jours)
-        LocalDateTime dateLimite = LocalDateTime.now().minusDays(7);
+        long dateLimite = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L);
         
-        // Convertir en Timestamp Firebase pour la comparaison
-        com.google.cloud.Timestamp timestampLimite = com.google.cloud.Timestamp.of(
-            java.util.Date.from(dateLimite.atZone(java.time.ZoneId.systemDefault()).toInstant())
-        );
+        // Récupérer toutes les données de la ruche et filtrer côté client
+        List<Map<String, Object>> documents = firebaseService.getDocuments("donneesCapteurs", "rucheId", rucheId);
         
-        // Utiliser le FirebaseService pour exécuter la requête complexe
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithDateFilter(
-            "donneesCapteurs",    // collection (utilisation de la convention camelCase)
-            "rucheId",            // filterField (utilisation de la convention camelCase)
-            rucheId,              // filterValue
-            "timestamp",          // dateField
-            timestampLimite,      // dateLimit
-            "timestamp",          // orderByField
-            true                  // ascending = true pour tri croissant
-        );
-        
-        // Convertir les résultats en objets DonneesCapteur
+        // Filtrer et trier côté client
         return documents.stream()
-                .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
-                .collect(Collectors.toList());
+            .filter(doc -> {
+                Object timestamp = doc.get("timestamp");
+                return timestamp instanceof Long && (Long) timestamp > dateLimite;
+            })
+            .sorted((a, b) -> {
+                Object aTime = a.get("timestamp");
+                Object bTime = b.get("timestamp");
+                if (aTime instanceof Long && bTime instanceof Long) {
+                    return Long.compare((Long) aTime, (Long) bTime);
+                }
+                return 0;
+            })
+                        .map(doc -> documentToDonnees((String) doc.get("id"), doc))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -107,20 +107,23 @@ public abstract class RucheService {
      * @param rucheId ID de la ruche
      * @return La dernière mesure ou null si aucune mesure trouvée
      */
-    public DonneesCapteur getDerniereMesure(String rucheId) throws ExecutionException, InterruptedException {
-        // Utiliser le FirebaseService pour récupérer la dernière mesure
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithFilter(
-            "donneesCapteurs",    // collection
-            "rucheId",            // filterField
-            rucheId,              // filterValue
-            "timestamp",          // orderByField
-            false,                // ascending = false pour tri décroissant (plus récent en premier)
-            1                     // limit = 1 pour récupérer seulement la dernière mesure
-        );
+    public DonneesCapteur getDerniereMesure(String rucheId) throws ExecutionException, InterruptedException, TimeoutException {
+        // Récupérer toutes les données de la ruche
+        List<Map<String, Object>> documents = firebaseService.getDocuments("donneesCapteurs", "rucheId", rucheId);
         
-        // Retourner la première (et unique) mesure si elle existe
         if (!documents.isEmpty()) {
-            return documentToDonnees(documents.get(0).getId(), documents.get(0).getData());
+            // Trier par timestamp décroissant et prendre le premier
+            documents.sort((a, b) -> {
+                Object aTime = a.get("timestamp");
+                Object bTime = b.get("timestamp");
+                if (aTime instanceof Long && bTime instanceof Long) {
+                    return Long.compare((Long) bTime, (Long) aTime); // Décroissant
+                }
+                return 0;
+            });
+            
+            Map<String, Object> doc = documents.get(0);
+            return documentToDonnees((String) doc.get("id"), doc);
         }
         
         return null; // Aucune mesure trouvée
@@ -300,7 +303,7 @@ public abstract class RucheService {
      * @return Liste des ruches du rucher triées par nom croissant
      */
     public List<RucheResponse> obtenirRuchesParRucher(String rucherId, String apiculteurId) 
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, TimeoutException {
         List<Ruche> ruches = getRuchesByRucher(rucherId);
         
         // Filtrer par apiculteur pour sécurité et trier par nom croissant
@@ -322,7 +325,7 @@ public abstract class RucheService {
      * @param apiculteurId ID de l'apiculteur (pour validation)
      */
     public void supprimerRuche(String rucheId, String apiculteurId) 
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, TimeoutException {
         // Récupérer la ruche pour validation
         Ruche ruche = getRucheById(rucheId);
         if (ruche == null) {
@@ -355,7 +358,7 @@ public abstract class RucheService {
      * @return Nombre de mesures créées
      */
     public int creerDonneesTest(String rucheId, int nombreJours, int mesuresParJour) 
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, TimeoutException {
         int totalMesures = 0;
         LocalDateTime maintenant = LocalDateTime.now();
         

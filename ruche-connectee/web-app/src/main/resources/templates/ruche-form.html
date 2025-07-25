@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Nouvelle Ruche - BeeTrack</title>
+    <meta name="description" content="Ajouter une nouvelle ruche à votre système de surveillance">
+</head>
+
+<body>
+    <div layout:fragment="content" class="ruche-form-container">
+        <!-- Header de la page -->
+        <div class="page-header mb-4 fade-in" style="animation-delay: 0.1s;">
+            <div class="header-content">
+                <div class="page-info">
+                    <h1 class="page-title">
+                        <i data-lucide="plus-circle" class="me-2"></i>
+                        Nouvelle ruche
+                    </h1>
+                    <p class="page-subtitle">
+                        Ajoutez une nouvelle ruche à votre système de surveillance
+                    </p>
+                </div>
+                <div class="header-actions">
+                    <a href="/ruches" th:href="@{/ruches}" class="btn btn-secondary">
+                        <i data-lucide="arrow-left" class="me-2"></i>
+                        <span>Retour</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire principal -->
+        <div class="card fade-in" style="animation-delay: 0.2s;">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="hexagon" class="me-2"></i>
+                    <span>Informations de la ruche</span>
+                </h2>
+                <div class="card-subtitle">
+                    Remplissez les informations ci-dessous pour enregistrer votre nouvelle ruche
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <form th:action="@{/ruches/nouvelle}" th:object="${ruche}" method="post" id="rucheForm" novalidate>
+                    <div class="form-sections">
+                        <!-- Section Informations générales -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i data-lucide="info" class="me-2"></i>
+                                    Informations générales
+                                </h3>
+                                <div class="section-divider"></div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="nom" class="form-label required">Nom de la ruche</label>
+                                        <input type="text" 
+                                               id="nom" 
+                                               th:field="*{nom}"
+                                               class="form-control" 
+                                               placeholder="Ex: Ruche Alpha, Ruche 001..."
+                                               required
+                                               maxlength="50">
+                                        <div class="form-help">
+                                            Donnez un nom unique et facilement reconnaissable à votre ruche
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir un nom pour la ruche (minimum 2 caractères)
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="rucher" class="form-label">Rucher d'appartenance</label>
+                                        <select id="rucher" 
+                                                name="rucherId"
+                                                class="form-control">
+                                            <option value="">Sélectionner un rucher</option>
+                                            <option th:each="rucher : ${ruchers}" 
+                                                    th:value="${rucher.id}" 
+                                                    th:text="${rucher.nom}">Rucher Principal</option>
+                                        </select>
+                                        <div class="form-help">
+                                            Choisissez le rucher où sera placée cette ruche
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea id="description" 
+                                          th:field="*{description}"
+                                          class="form-control" 
+                                          rows="3"
+                                          placeholder="Description optionnelle de la ruche, observations particulières..."
+                                          maxlength="500"></textarea>
+                                <div class="form-help">
+                                    Description optionnelle pour des notes ou observations particulières
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Configuration technique -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i data-lucide="settings" class="me-2"></i>
+                                    Configuration technique
+                                </h3>
+                                <div class="section-divider"></div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="idCapteur" class="form-label">ID du capteur</label>
+                                        <input type="text" 
+                                               id="idCapteur" 
+                                               th:field="*{idCapteur}"
+                                               class="form-control" 
+                                               placeholder="Ex: ESP32_001"
+                                               maxlength="50">
+                                        <div class="form-help">
+                                            Identifiant unique du capteur IoT
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="frequenceMesure" class="form-label">Fréquence de mesure</label>
+                                        <select id="frequenceMesure" 
+                                                th:field="*{frequenceMesure}"
+                                                class="form-control">
+                                            <option value="1">Chaque minute</option>
+                                            <option value="5" selected>Toutes les 5 minutes</option>
+                                            <option value="10">Toutes les 10 minutes</option>
+                                            <option value="15">Toutes les 15 minutes</option>
+                                            <option value="30">Toutes les 30 minutes</option>
+                                            <option value="60">Chaque heure</option>
+                                        </select>
+                                        <div class="form-help">
+                                            Intervalle entre les mesures des capteurs
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="form-check-wrapper">
+                                            <label class="form-check-label">
+                                                <input type="checkbox" 
+                                                       id="actif" 
+                                                       th:field="*{actif}"
+                                                       class="form-check-input"
+                                                       checked>
+                                                <span class="checkmark"></span>
+                                                Ruche active
+                                            </label>
+                                            <div class="form-help">
+                                                La ruche commence à collecter des données immédiatement
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Seuils d'alerte -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i data-lucide="alert-triangle" class="me-2"></i>
+                                    Seuils d'alerte
+                                </h3>
+                                <div class="section-divider"></div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i data-lucide="info" class="me-2"></i>
+                                Configurez les seuils pour recevoir des alertes automatiques
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Température (°C)</label>
+                                        <div class="range-inputs">
+                                            <div class="range-input">
+                                                <label for="tempMin" class="range-label">Minimum</label>
+                                                <input type="number" 
+                                                       id="tempMin" 
+                                                       name="temperatureMin"
+                                                       class="form-control" 
+                                                       value="15"
+                                                       min="0" 
+                                                       max="50"
+                                                       step="0.1">
+                                            </div>
+                                            <div class="range-separator">-</div>
+                                            <div class="range-input">
+                                                <label for="tempMax" class="range-label">Maximum</label>
+                                                <input type="number" 
+                                                       id="tempMax" 
+                                                       name="temperatureMax"
+                                                       class="form-control" 
+                                                       value="40"
+                                                       min="0" 
+                                                       max="50"
+                                                       step="0.1">
+                                            </div>
+                                        </div>
+                                        <div class="form-help">Plage de température normale pour la ruche</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Humidité (%)</label>
+                                        <div class="range-inputs">
+                                            <div class="range-input">
+                                                <label for="humMin" class="range-label">Minimum</label>
+                                                <input type="number" 
+                                                       id="humMin" 
+                                                       name="humiditeMin"
+                                                       class="form-control" 
+                                                       value="40"
+                                                       min="0" 
+                                                       max="100">
+                                            </div>
+                                            <div class="range-separator">-</div>
+                                            <div class="range-input">
+                                                <label for="humMax" class="range-label">Maximum</label>
+                                                <input type="number" 
+                                                       id="humMax" 
+                                                       name="humiditeMax"
+                                                       class="form-control" 
+                                                       value="80"
+                                                       min="0" 
+                                                       max="100">
+                                            </div>
+                                        </div>
+                                        <div class="form-help">Plage d'humidité normale pour la ruche</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="batterieSeuil" class="form-label">Seuil batterie faible (%)</label>
+                                        <input type="number" 
+                                               id="batterieSeuil" 
+                                               name="batterieSeuil"
+                                               class="form-control" 
+                                               value="20"
+                                               min="5" 
+                                               max="50">
+                                        <div class="form-help">Déclencher une alerte quand la batterie descend sous ce niveau</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions du formulaire -->
+                    <div class="form-actions">
+                        <div class="actions-left">
+                            <a href="/ruches" th:href="@{/ruches}" class="btn btn-secondary">
+                                <i data-lucide="x" class="me-2"></i>
+                                Annuler
+                            </a>
+                        </div>
+                        
+                        <div class="actions-right">
+                            <button type="button" class="btn btn-outline-primary" id="previewBtn">
+                                <i data-lucide="eye" class="me-2"></i>
+                                Aperçu
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <div class="loading-spinner"></div>
+                                <i data-lucide="save" class="me-2"></i>
+                                <span>Créer la ruche</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'aperçu -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i data-lucide="eye" class="me-2"></i>
+                        Aperçu de la ruche
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="preview-content">
+                        <div class="ruche-card-preview">
+                            <div class="ruche-header-preview">
+                                <div class="ruche-status-indicator status-active">
+                                    <i data-lucide="circle"></i>
+                                </div>
+                                <div class="ruche-actions-preview">
+                                    <i data-lucide="more-vertical"></i>
+                                </div>
+                            </div>
+
+                            <div class="ruche-content-preview">
+                                <div class="ruche-avatar-preview">
+                                    <i data-lucide="hexagon"></i>
+                                </div>
+                                
+                                <div class="ruche-info-preview">
+                                    <h3 class="ruche-name-preview" id="previewNom">Nom de la ruche</h3>
+                                    <p class="ruche-location-preview" id="previewRucher">Rucher non défini</p>
+                                    <div class="ruche-id-preview">
+                                        <small class="text-muted">ID: <span id="previewId">AUTO</span></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ruche-description-preview" id="previewDescription" style="display: none;">
+                                <p class="description-text"></p>
+                            </div>
+
+                            <div class="ruche-config-preview">
+                                <div class="config-item">
+                                    <span class="config-label">Capteur:</span>
+                                    <span class="config-value" id="previewCapteur">Non défini</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Fréquence:</span>
+                                    <span class="config-value" id="previewFrequence">5 min</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Statut:</span>
+                                    <span class="config-value" id="previewStatut">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('submitBtn').click(); bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();">
+                        <i data-lucide="save" class="me-2"></i>
+                        Créer la ruche
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles spécifiques -->
+    <th:block layout:fragment="styles">
+        <style>
+            .form-sections {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .form-section {
+                background: var(--bg-secondary);
+                border-radius: var(--radius-xl);
+                padding: 1.5rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .section-header {
+                margin-bottom: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                margin: 0 0 0.5rem 0;
+            }
+
+            .section-divider {
+                height: 2px;
+                background: var(--gradient-primary);
+                border-radius: 1px;
+                opacity: 0.3;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-label {
+                display: flex;
+                align-items: center;
+                font-weight: 500;
+                color: var(--text-primary);
+                margin-bottom: 0.5rem;
+                font-size: 0.875rem;
+            }
+
+            .form-label.required::after {
+                content: " *";
+                color: var(--color-danger);
+                font-weight: bold;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.875rem;
+                border: 2px solid var(--border-color);
+                border-radius: var(--radius-lg);
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                transition: var(--transition-all);
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--color-primary-500);
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+            }
+
+            .form-control.is-invalid {
+                border-color: var(--color-danger);
+            }
+
+            .form-help {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-top: 0.25rem;
+                font-style: italic;
+            }
+
+            .invalid-feedback {
+                display: none;
+                font-size: 0.75rem;
+                color: var(--color-danger);
+                margin-top: 0.25rem;
+            }
+
+            .form-control.is-invalid + .invalid-feedback {
+                display: block;
+            }
+
+            .range-inputs {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .range-input {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .range-label {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-bottom: 0.25rem;
+            }
+
+            .range-separator {
+                font-weight: bold;
+                color: var(--text-muted);
+                margin-top: 1rem;
+            }
+
+            .form-check-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .form-check-label {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                font-weight: 500;
+                gap: 0.5rem;
+            }
+
+            .form-check-input {
+                margin: 0;
+            }
+
+            .form-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .actions-right {
+                display: flex;
+                gap: 0.75rem;
+            }
+
+            .loading-spinner {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top: 2px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 0.5rem;
+            }
+
+            .btn.loading .loading-spinner {
+                display: inline-block;
+            }
+
+            .btn.loading span {
+                opacity: 0.7;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Styles pour l'aperçu */
+            .ruche-card-preview {
+                background: var(--bg-primary);
+                border-radius: var(--radius-2xl);
+                padding: 1.5rem;
+                box-shadow: var(--shadow-primary);
+                border: 2px solid var(--color-primary-200);
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .ruche-header-preview {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+            }
+
+            .ruche-content-preview {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .ruche-avatar-preview {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 48px;
+                height: 48px;
+                background: var(--gradient-primary);
+                border-radius: var(--radius-xl);
+                color: white;
+                flex-shrink: 0;
+            }
+
+            .ruche-name-preview {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin: 0 0 0.25rem 0;
+            }
+
+            .ruche-location-preview {
+                color: var(--text-muted);
+                margin: 0 0 0.5rem 0;
+                font-size: 0.875rem;
+            }
+
+            .ruche-description-preview {
+                background: var(--bg-secondary);
+                padding: 1rem;
+                border-radius: var(--radius-lg);
+                margin-bottom: 1rem;
+                border-left: 4px solid var(--color-primary-500);
+            }
+
+            .ruche-config-preview {
+                display: grid;
+                gap: 0.5rem;
+                padding: 1rem 0;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .config-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .config-label {
+                font-size: 0.875rem;
+                color: var(--text-muted);
+            }
+
+            .config-value {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: var(--text-primary);
+            }
+
+            @media (max-width: 768px) {
+                .form-actions {
+                    flex-direction: column;
+                    gap: 1rem;
+                    align-items: stretch;
+                }
+                
+                .actions-right {
+                    justify-content: stretch;
+                }
+                
+                .actions-right > * {
+                    flex: 1;
+                }
+                
+                .range-inputs {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                
+                .range-separator {
+                    display: none;
+                }
+            }
+        </style>
+    </th:block>
+
+    <!-- Scripts spécifiques -->
+    <th:block layout:fragment="scripts">
+        <script>
+            // Variables globales
+            let formValidated = false;
+
+            // Initialisation
+            document.addEventListener('DOMContentLoaded', function() {
+                initFormValidation();
+                initPreview();
+                initFormSubmission();
+            });
+
+            // Validation du formulaire
+            function initFormValidation() {
+                const form = document.getElementById('rucheForm');
+                const nomInput = document.getElementById('nom');
+
+                // Validation en temps réel du nom
+                nomInput.addEventListener('input', function() {
+                    validateNom(this);
+                });
+
+                // Validation des seuils de température
+                const tempMin = document.getElementById('tempMin');
+                const tempMax = document.getElementById('tempMax');
+                
+                tempMin.addEventListener('change', () => validateTemperatureRange());
+                tempMax.addEventListener('change', () => validateTemperatureRange());
+
+                // Validation des seuils d'humidité  
+                const humMin = document.getElementById('humMin');
+                const humMax = document.getElementById('humMax');
+                
+                humMin.addEventListener('change', () => validateHumidityRange());
+                humMax.addEventListener('change', () => validateHumidityRange());
+            }
+
+            function validateNom(input) {
+                const value = input.value.trim();
+                const isValid = value.length >= 2;
+                
+                if (isValid) {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                }
+                
+                return isValid;
+            }
+
+            function validateTemperatureRange() {
+                const tempMin = document.getElementById('tempMin');
+                const tempMax = document.getElementById('tempMax');
+                const minVal = parseFloat(tempMin.value);
+                const maxVal = parseFloat(tempMax.value);
+                
+                if (minVal >= maxVal) {
+                    tempMax.value = minVal + 5;
+                    BeeTrack.showNotification({
+                        type: 'warning',
+                        message: 'La température maximum a été ajustée automatiquement',
+                        icon: 'thermometer'
+                    });
+                }
+            }
+
+            function validateHumidityRange() {
+                const humMin = document.getElementById('humMin');
+                const humMax = document.getElementById('humMax');
+                const minVal = parseFloat(humMin.value);
+                const maxVal = parseFloat(humMax.value);
+                
+                if (minVal >= maxVal) {
+                    humMax.value = Math.min(100, minVal + 10);
+                    BeeTrack.showNotification({
+                        type: 'warning',
+                        message: 'L\'humidité maximum a été ajustée automatiquement',
+                        icon: 'droplets'
+                    });
+                }
+            }
+
+            function validateForm() {
+                const nomInput = document.getElementById('nom');
+                let isValid = true;
+                
+                // Valider le nom
+                if (!validateNom(nomInput)) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+
+            // Aperçu de la ruche
+            function initPreview() {
+                const previewBtn = document.getElementById('previewBtn');
+                previewBtn.addEventListener('click', showPreview);
+            }
+
+            function showPreview() {
+                // Récupérer les valeurs du formulaire
+                const nom = document.getElementById('nom').value || 'Ruche sans nom';
+                const rucherSelect = document.getElementById('rucher');
+                const rucher = rucherSelect.options[rucherSelect.selectedIndex].text || 'Rucher non défini';
+                const description = document.getElementById('description').value;
+                const idCapteur = document.getElementById('idCapteur').value || 'Non défini';
+                const frequenceSelect = document.getElementById('frequenceMesure');
+                const frequence = frequenceSelect.options[frequenceSelect.selectedIndex].text;
+                const actif = document.getElementById('actif').checked;
+
+                // Mettre à jour l'aperçu
+                document.getElementById('previewNom').textContent = nom;
+                document.getElementById('previewRucher').textContent = rucher;
+                document.getElementById('previewCapteur').textContent = idCapteur;
+                document.getElementById('previewFrequence').textContent = frequence;
+                document.getElementById('previewStatut').textContent = actif ? 'Active' : 'Inactive';
+
+                // Afficher/masquer la description
+                const descriptionDiv = document.getElementById('previewDescription');
+                if (description.trim()) {
+                    descriptionDiv.style.display = 'block';
+                    descriptionDiv.querySelector('.description-text').textContent = description;
+                } else {
+                    descriptionDiv.style.display = 'none';
+                }
+
+                // Afficher le modal
+                const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                modal.show();
+            }
+
+            // Soumission du formulaire
+            function initFormSubmission() {
+                const form = document.getElementById('rucheForm');
+                const submitBtn = document.getElementById('submitBtn');
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!validateForm()) {
+                        BeeTrack.showNotification({
+                            type: 'danger',
+                            message: 'Veuillez corriger les erreurs dans le formulaire',
+                            icon: 'alert-circle'
+                        });
+                        return;
+                    }
+
+                    // Afficher l'état de chargement
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+
+                    // Simuler un délai pour l'UX puis soumettre
+                    setTimeout(() => {
+                        BeeTrack.showNotification({
+                            type: 'success',
+                            message: 'Création de la ruche en cours...',
+                            icon: 'check-circle'
+                        });
+                        
+                        // Soumettre le formulaire
+                        form.submit();
+                    }, 1000);
+                });
+            }
+
+            // Auto-complétion et suggestions
+            document.getElementById('nom').addEventListener('input', function() {
+                // Mettre à jour l'aperçu en temps réel si le modal est ouvert
+                if (document.getElementById('previewModal').classList.contains('show')) {
+                    document.getElementById('previewNom').textContent = this.value || 'Ruche sans nom';
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -20,7 +20,6 @@
         <java.version>17</java.version>
         <firebase-admin.version>9.2.0</firebase-admin.version>
         <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
-        <google-cloud-firestore.version>3.14.0</google-cloud-firestore.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -83,18 +82,11 @@
             <artifactId>webjars-locator-core</artifactId>
         </dependency>
         
-        <!-- Firebase -->
+        <!-- Firebase Admin SDK -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
             <version>${firebase-admin.version}</version>
-        </dependency>
-        
-        <!-- Google Cloud Firestore -->
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-firestore</artifactId>
-            <version>${google-cloud-firestore.version}</version>
         </dependency>
         
         <!-- Documentation API -->

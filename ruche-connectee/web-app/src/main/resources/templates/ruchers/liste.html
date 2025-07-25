@@ -8,384 +8,172 @@
 </head>
 <body>
     <div layout:fragment="content">
-        <div class="dashboard-container">
+        <div class="dashboard-wrapper">
             <!-- En-tête de page moderne -->
-            <div class="page-header fade-in animate-in" style="animation-delay: 0.1s;">
-                <div class="header-content">
-                    <div class="header-text">
-                        <h1 class="page-title">
-                            <i data-lucide="map-pin" class="me-3"></i>
-                            <span>Mes Ruchers</span>
-                            <span class="badge badge-primary" th:text="${totalRuchers ?: 0}">0</span>
+            <div class="dashboard-hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Mes Ruchers
                         </h1>
-                        <p class="page-subtitle">
-                            <span class="subtitle-main">Gérez et organisez vos emplacements de ruches</span>
-                            <span class="last-update" th:text="${'• Dernière mise à jour : ' + #dates.format(#dates.createNow(), 'HH:mm')}">• Dernière mise à jour : 14:30</span>
+                        <p class="hero-subtitle">
+                            Gérez et organisez vos emplacements de ruches
                         </p>
                     </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-light" onclick="location.reload()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,4 23,10 17,10"/>
+                                <polyline points="1,20 1,14 7,14"/>
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                            Actualiser
+                        </button>
+                        <a href="/ruchers/nouveau" th:href="@{/ruchers/nouveau}" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Nouveau rucher
+                        </a>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="location.reload()" title="Actualiser les données (F5)">
-                        <i data-lucide="refresh-cw" class="me-2"></i>
-                        <span>Actualiser</span>
-                    </button>
-                    <button class="btn btn-primary" onclick="BeeTrack.showAddRucherModal()" title="Ajouter un nouveau rucher">
-                        <i data-lucide="plus" class="me-2"></i>
-                        <span>Nouveau rucher</span>
-                    </button>
                 </div>
             </div>
 
             <!-- Statistiques principales -->
-            <div class="stats-grid mb-8 fade-in animate-in" style="animation-delay: 0.2s;">
+            <div class="stats-section">
+                <div class="stats-grid">
                 <!-- Total des ruchers -->
-                <div class="stat-card scale-in" style="animation-delay: 0.3s;">
-                    <div class="stat-header">
+                    <div class="stat-card stat-primary">
                         <div class="stat-content">
-                            <h3 class="stat-value" th:text="${totalRuchers ?: 0}" data-stat="totalRuchers">0</h3>
-                            <p class="stat-label">
-                                <i data-lucide="map-pin" class="stat-label-icon"></i>
-                                <span>Ruchers actifs</span>
-                            </p>
-                        </div>
-                        <div class="stat-icon bg-green-500">
-                            <i data-lucide="map-pin"></i>
+                            <div class="stat-main">
+                                <div class="stat-number" th:text="${totalRuchers ?: 0}">0</div>
+                                <div class="stat-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    Ruchers actifs
                         </div>
                     </div>
-                    <div class="stat-footer">
-                        <div class="stat-detail">
-                            <span class="stat-detail-value">100%</span>
-                            <span class="stat-detail-label">disponibilité</span>
-                        </div>
-                        <div class="stat-trend positive">
-                            <i data-lucide="trending-up"></i>
-                            <span>+2.1%</span>
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
                         </div>
                     </div>
                 </div>
 
                 <!-- Total des ruches -->
-                <div class="stat-card scale-in" style="animation-delay: 0.4s;">
-                    <div class="stat-header">
+                    <div class="stat-card stat-success">
                         <div class="stat-content">
-                            <h3 class="stat-value" th:text="${totalRuches ?: 0}" data-stat="totalRuches">0</h3>
-                            <p class="stat-label">
-                                <i data-lucide="hexagon" class="stat-label-icon"></i>
-                                <span>Ruches totales</span>
-                            </p>
-                        </div>
-                        <div class="stat-icon bg-amber-500">
-                            <i data-lucide="hexagon"></i>
+                            <div class="stat-main">
+                                <div class="stat-number" th:text="${totalRuches ?: 0}">0</div>
+                                <div class="stat-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                                        <polyline points="2,17 12,22 22,17"/>
+                                        <polyline points="2,12 12,17 22,12"/>
+                                    </svg>
+                                    Ruches totales
                         </div>
                     </div>
-                    <div class="stat-footer">
-                        <div class="stat-detail">
-                            <span class="stat-detail-value" th:text="${totalRuches > 0 ? (totalRuches / (totalRuchers > 0 ? totalRuchers : 1)) : 0}">0</span>
-                            <span class="stat-detail-label">par rucher</span>
-                        </div>
-                        <div class="stat-trend positive">
-                            <i data-lucide="trending-up"></i>
-                            <span>+1.8%</span>
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                                    <polyline points="2,17 12,22 22,17"/>
+                                    <polyline points="2,12 12,17 22,12"/>
+                                </svg>
                         </div>
                     </div>
                 </div>
 
                 <!-- Emplacements géographiques -->
-                <div class="stat-card scale-in" style="animation-delay: 0.5s;">
-                    <div class="stat-header">
+                    <div class="stat-card stat-info">
                         <div class="stat-content">
-                            <h3 class="stat-value text-blue-600">2</h3>
-                            <p class="stat-label">
-                                <i data-lucide="globe" class="stat-label-icon"></i>
-                                <span>Régions couvertes</span>
-                            </p>
-                        </div>
-                        <div class="stat-icon bg-blue-500">
-                            <i data-lucide="globe"></i>
-                        </div>
-                    </div>
-                    <div class="stat-footer">
-                        <div class="stat-detail">
-                            <span class="stat-detail-value">24.2°C</span>
-                            <span class="stat-detail-label">temp. moy.</span>
-                        </div>
-                        <div class="stat-trend positive">
-                            <i data-lucide="thermometer"></i>
-                            <span>Optimal</span>
+                            <div class="stat-main">
+                                <div class="stat-number">2</div>
+                                <div class="stat-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M2 12h20"/>
+                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                    </svg>
+                                    Régions couvertes
                         </div>
                     </div>
-                </div>
-
-                <!-- Performance globale -->
-                <div class="stat-card scale-in" style="animation-delay: 0.6s;">
-                    <div class="stat-header">
-                        <div class="stat-content">
-                            <h3 class="stat-value text-green-600">98.5%</h3>
-                            <p class="stat-label">
-                                <i data-lucide="activity" class="stat-label-icon"></i>
-                                <span>Performance</span>
-                            </p>
+                            <div class="stat-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M2 12h20"/>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                </svg>
                         </div>
-                        <div class="stat-icon bg-green-500">
-                            <i data-lucide="trending-up"></i>
-                        </div>
-                    </div>
-                    <div class="stat-footer">
-                        <div class="stat-detail">
-                            <span class="stat-detail-value">65%</span>
-                            <span class="stat-detail-label">humidité moy.</span>
-                        </div>
-                        <div class="stat-trend positive">
-                            <i data-lucide="droplets"></i>
-                            <span>Optimal</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section Liste complète des ruchers -->
-            <div class="card fade-in animate-in" style="animation-delay: 0.7s;" th:if="${ruchers != null && !#lists.isEmpty(ruchers)}">
-                <div class="card-header">
-                    <div class="card-header-content">
-                        <h2 class="card-title">
-                            <i data-lucide="map-pin" class="me-2"></i>
-                            <span>Liste des Ruchers</span>
-                            <span class="badge badge-primary" th:text="${#lists.size(ruchers)}">0</span>
+            <!-- Liste des ruchers -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Liste des ruchers
                         </h2>
-                        <div class="card-subtitle">
-                            Vue d'ensemble de tous vos emplacements de ruches avec leurs statistiques
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-sm btn-secondary" onclick="location.reload()" title="Actualiser les données">
-                            <i data-lucide="refresh-cw"></i>
-                        </button>
-                        <button class="btn btn-sm btn-primary" onclick="BeeTrack.showAddRucherModal()" title="Ajouter un rucher">
-                            <i data-lucide="plus" class="me-1"></i>
-                            <span>Ajouter</span>
-                        </button>
-                    </div>
+                    <p class="section-description">Gérez vos emplacements de ruches</p>
                 </div>
-                <div class="card-body">
-                    <div class="ruchers-grid">
-                        <!-- Carte pour chaque rucher -->
-                        <div class="rucher-card" th:each="rucher : ${ruchers}">
-                            <div class="rucher-card-header">
+                
+                <div class="content-grid">
+                    <div th:if="${ruchers != null && !#lists.isEmpty(ruchers)}" class="ruchers-list">
+                        <div th:each="rucher : ${ruchers}" class="rucher-item">
+                            <div class="rucher-info">
                                 <div class="rucher-avatar">
-                                    <span th:text="${#strings.substring(rucher.nom ?: 'R', 0, 2)}">RU</span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
                                 </div>
-                                <div class="rucher-header-info">
-                                    <h4 class="rucher-title" th:text="${rucher.nom}">Rucher Principal</h4>
-                                    <p class="rucher-location">
-                                        <i data-lucide="map-pin" class="location-icon"></i>
-                                        <span th:text="${rucher.adresse ?: 'Adresse non définie'}">123 Route de la Campagne</span>
-                                    </p>
-                                </div>
-                                <div class="rucher-status">
-                                    <div class="status-badge status-success">
-                                        <i data-lucide="check-circle"></i>
-                                        <span>Actif</span>
-                                    </div>
+                                <div class="rucher-details">
+                                    <div class="rucher-name" th:text="${rucher.nom}">Rucher Principal</div>
+                                    <div class="rucher-location" th:text="${rucher.adresse ?: 'Adresse non définie'}">123 Rue des Abeilles</div>
                                 </div>
                             </div>
-                            
-                            <div class="rucher-card-body">
-                                <div class="rucher-description" th:if="${rucher.description}">
-                                    <p th:text="${rucher.description}">Description du rucher</p>
-                                </div>
-                                
-                                <div class="rucher-metrics-grid">
-                                    <!-- Nombre de ruches -->
-                                    <div class="metric-item ruches">
-                                        <div class="metric-icon">
-                                            <i data-lucide="hexagon"></i>
-                                        </div>
-                                        <div class="metric-data">
-                                            <span class="metric-value" th:text="${rucher.nombreRuches ?: 0}">0</span>
-                                            <span class="metric-label">Ruches</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Date de création -->
-                                    <div class="metric-item date">
-                                        <div class="metric-icon">
-                                            <i data-lucide="calendar"></i>
-                                        </div>
-                                        <div class="metric-data">
-                                            <span class="metric-value" th:text="${rucher.dateCreation != null ? #dates.format(rucher.dateCreation, 'dd/MM') : 'N/A'}">15/03</span>
-                                            <span class="metric-label">Créé le</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Surface -->
-                                    <div class="metric-item surface">
-                                        <div class="metric-icon">
-                                            <i data-lucide="maximize"></i>
-                                        </div>
-                                        <div class="metric-data">
-                                            <span class="metric-value" th:text="${rucher.surface ?: '500m²'}">500m²</span>
-                                            <span class="metric-label">Surface</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Statut -->
-                                    <div class="metric-item status">
-                                        <div class="metric-icon">
-                                            <i data-lucide="activity"></i>
-                                        </div>
-                                        <div class="metric-data">
-                                            <span class="metric-value">98%</span>
-                                            <span class="metric-label">Activité</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Informations supplémentaires -->
-                                <div class="rucher-extra-info">
-                                    <div class="info-item" th:if="${rucher.dateCreation}">
-                                        <i data-lucide="calendar"></i>
-                                        <span>Créé le: </span>
-                                        <span th:text="${#dates.format(rucher.dateCreation, 'dd/MM/yyyy')}">15/03/2024</span>
-                                    </div>
-                                    <div class="info-item" th:if="${rucher.nombreRuches != null && rucher.nombreRuches > 0}">
-                                        <i data-lucide="hexagon"></i>
-                                        <span th:text="${rucher.nombreRuches} + ' ruche' + (rucher.nombreRuches > 1 ? 's' : '') + ' active' + (rucher.nombreRuches > 1 ? 's' : '')">3 ruches actives</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="rucher-card-footer">
-                                <a th:href="@{/ruchers/{id}(id=${rucher.id})}" class="btn btn-sm btn-primary">
-                                    <i data-lucide="eye" class="me-1"></i>
-                                    <span>Voir détails</span>
-                                </a>
-                                <button class="btn btn-sm btn-secondary" th:onclick="'BeeTrack.showEditRucherModal(\'' + ${rucher.id} + '\')'">
-                                    <i data-lucide="edit-2"></i>
-                                </button>
-                                <button class="btn btn-sm btn-secondary" th:onclick="'BeeTrack.refreshRucher(\'' + ${rucher.id} + '\')'">
-                                    <i data-lucide="refresh-cw"></i>
-                                </button>
+                            <div class="rucher-status">
+                                <div class="rucher-count" th:text="${rucher.nombreRuches != null ? rucher.nombreRuches + ' ruches' : 'N/A'}">5 ruches</div>
+                                <div class="status-badge status-active">Actif</div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Message si aucun rucher -->
-                    <div class="empty-state" th:if="${#lists.isEmpty(ruchers)}">
-                        <div class="empty-state-icon">
-                            <i data-lucide="map-pin"></i>
+                    <div th:if="${ruchers == null || #lists.isEmpty(ruchers)}" class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
                         </div>
-                        <h3>Aucun rucher configuré</h3>
-                        <p>Commencez par créer votre premier rucher pour organiser vos ruches.</p>
-                        <button class="btn btn-primary" onclick="BeeTrack.showAddRucherModal()">
-                            <i data-lucide="plus" class="me-2"></i>
-                            <span>Créer un rucher</span>
-                        </button>
+                        <h4 class="empty-title">Aucun rucher</h4>
+                        <p class="empty-description">Ajoutez votre premier rucher pour commencer</p>
+                        <a href="/ruchers/nouveau" th:href="@{/ruchers/nouveau}" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Ajouter un rucher
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- État vide global si aucun rucher -->
-            <div class="empty-state fade-in animate-in" style="animation-delay: 0.7s;" th:if="${ruchers == null || #lists.isEmpty(ruchers)}">
-                <div class="empty-state-icon">
-                    <i data-lucide="map-pin"></i>
-                </div>
-                <h3>Bienvenue dans la gestion des ruchers</h3>
-                <p>Créez votre premier rucher pour commencer à organiser vos ruches par emplacements géographiques.</p>
-                <button class="btn btn-primary" onclick="BeeTrack.showAddRucherModal()">
-                    <i data-lucide="plus" class="me-2"></i>
-                    <span>Créer mon premier rucher</span>
-                </button>
-            </div>
-
-            <!-- Message d'erreur -->
-            <div class="alert alert-danger fade-in animate-in" style="animation-delay: 0.8s;" th:if="${error}">
-                <i data-lucide="alert-triangle" class="me-2"></i>
-                <span th:text="${error}">Erreur lors du chargement</span>
-            </div>
         </div>
-
-        <!-- Modal d'ajout de rucher -->
-        <div class="modal fade" id="addRucherModal" tabindex="-1" aria-labelledby="addRucherModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addRucherModalLabel">
-                            <i data-lucide="plus" class="me-2"></i>
-                            <span>Ajouter un nouveau rucher</span>
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <form id="addRucherForm" th:action="@{/ruchers}" method="post">
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="nom" class="form-label">
-                                            <i data-lucide="tag" class="me-1"></i>
-                                            <span>Nom du rucher</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="nom" name="nom" required placeholder="Ex: Rucher de la Vallée">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="surface" class="form-label">
-                                            <i data-lucide="maximize" class="me-1"></i>
-                                            <span>Surface (optionnel)</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="surface" name="surface" placeholder="Ex: 500m²">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="adresse" class="form-label">
-                                    <i data-lucide="map-pin" class="me-1"></i>
-                                    <span>Adresse</span>
-                                </label>
-                                <input type="text" class="form-control" id="adresse" name="adresse" required placeholder="Ex: 123 Route de la Campagne, 75000 Paris">
-                            </div>
-                            <div class="form-group">
-                                <label for="description" class="form-label">
-                                    <i data-lucide="file-text" class="me-1"></i>
-                                    <span>Description (optionnel)</span>
-                                </label>
-                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Décrivez les caractéristiques de ce rucher..."></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i data-lucide="x" class="me-1"></i>
-                                <span>Annuler</span>
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i data-lucide="plus" class="me-1"></i>
-                                <span>Créer le rucher</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <script>
-        // Fonctions JavaScript pour les ruchers
-        window.BeeTrack = window.BeeTrack || {};
-        
-        BeeTrack.showAddRucherModal = function() {
-            var modal = new bootstrap.Modal(document.getElementById('addRucherModal'));
-            modal.show();
-        };
-        
-        BeeTrack.showEditRucherModal = function(rucherId) {
-            console.log('Édition du rucher:', rucherId);
-            // TODO: Implémenter l'édition
-        };
-        
-        BeeTrack.refreshRucher = function(rucherId) {
-            console.log('Actualisation du rucher:', rucherId);
-            // TODO: Implémenter l'actualisation
-        };
-        </script>
     </div>
 </body>
 </html> 

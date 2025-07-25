@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Contrôleur REST pour la gestion des ruches.
@@ -60,7 +61,7 @@ public class RucheController {
         try {
             List<Ruche> ruches = rucheService.getRuchesByRucher(rucherId);
             return ResponseEntity.ok(ruches);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -101,7 +102,7 @@ public class RucheController {
             donnees.setRucheId(rucheId);
             rucheService.updateDonneesCapteurs(rucheId, donnees);
             return ResponseEntity.ok().build();
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -125,7 +126,7 @@ public class RucheController {
         try {
             List<DonneesCapteur> mesures = rucheService.getMesures7DerniersJours(rucheId);
             return ResponseEntity.ok(mesures);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

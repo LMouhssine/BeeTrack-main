@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Service pour la gestion des ruchers.
@@ -47,7 +48,7 @@ public abstract class RucherService {
     /**
      * Désactive un rucher (soft delete)
      */
-    public void desactiverRucher(String id) throws ExecutionException, InterruptedException {
+    public void desactiverRucher(String id) throws ExecutionException, InterruptedException, TimeoutException {
         Map<String, Object> updates = new HashMap<>();
         updates.put("actif", false);
         firebaseService.updateDocument(COLLECTION_RUCHERS, id, updates);
@@ -61,7 +62,7 @@ public abstract class RucherService {
     /**
      * Incrémente le nombre de ruches d'un rucher
      */
-    public void incrementerNombreRuches(String rucherId) throws ExecutionException, InterruptedException {
+    public void incrementerNombreRuches(String rucherId) throws ExecutionException, InterruptedException, TimeoutException {
         Rucher rucher = getRucherById(rucherId);
         if (rucher != null) {
             Map<String, Object> updates = new HashMap<>();
@@ -73,7 +74,7 @@ public abstract class RucherService {
     /**
      * Décrémente le nombre de ruches d'un rucher
      */
-    public void decrementerNombreRuches(String rucherId) throws ExecutionException, InterruptedException {
+    public void decrementerNombreRuches(String rucherId) throws ExecutionException, InterruptedException, TimeoutException {
         Rucher rucher = getRucherById(rucherId);
         if (rucher != null && rucher.getNombreRuches() > 0) {
             Map<String, Object> updates = new HashMap<>();

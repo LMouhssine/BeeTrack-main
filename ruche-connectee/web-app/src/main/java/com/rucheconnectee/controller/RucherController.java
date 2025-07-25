@@ -6,7 +6,7 @@ import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.ApiculteurService;
 import com.rucheconnectee.service.RucherService;
 import com.rucheconnectee.service.RucheService;
-import com.rucheconnectee.service.FirestoreService;
+import com.rucheconnectee.service.FirebaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -33,8 +33,7 @@ public class RucherController {
     @Autowired
     private RucheService rucheService;
     
-    @Autowired
-    private FirestoreService firestoreService;
+
 
     @GetMapping
     public String listRuchers(Model model, Authentication authentication) {
@@ -102,15 +101,30 @@ public class RucherController {
     @GetMapping("/{rucherId}")
     public String detailRucher(@PathVariable String rucherId, Model model, Authentication authentication) {
         logger.info("Affichage du rucher: {}", rucherId);
-        List<Ruche> ruches = firestoreService.getRuchesByRucherId(rucherId);
-        Map<String, Object> statistiques = firestoreService.getStatistiquesRucher(rucherId);
-        
-        logger.info("Nombre de ruches trouvées: {}", ruches.size());
-        logger.debug("Statistiques: {}", statistiques);
-        
-        model.addAttribute("ruches", ruches);
-        model.addAttribute("statistiques", statistiques);
-        return "ruchers/detail";
+        try {
+            List<Ruche> ruches = rucheService.getRuchesByRucher(rucherId);
+            
+            // Calculer les statistiques basiques
+            Map<String, Object> statistiques = Map.of(
+                "totalRuches", ruches.size(),
+                "temperatureMoyenne", ruches.stream()
+                    .filter(r -> r.getTemperature() != null)
+                    .mapToDouble(Ruche::getTemperature)
+                    .average()
+                    .orElse(0.0)
+            );
+            
+            logger.info("Nombre de ruches trouvées: {}", ruches.size());
+            logger.debug("Statistiques: {}", statistiques);
+            
+            model.addAttribute("ruches", ruches);
+            model.addAttribute("statistiques", statistiques);
+            return "ruchers/detail";
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération du rucher: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors du chargement du rucher");
+            return "ruchers/detail";
+        }
     }
 
     @PostMapping
@@ -173,18 +187,24 @@ public class RucherController {
                              @PathVariable String rucheId, 
                              Model model) {
         logger.info("Affichage de la ruche: {} du rucher: {}", rucheId, rucherId);
-        List<Ruche> ruches = firestoreService.getRuchesByRucherId(rucherId);
-        Ruche ruche = ruches.stream()
-                           .filter(r -> r.getId().equals(rucheId))
-                           .findFirst()
-                           .orElseThrow(() -> new RuntimeException("Ruche non trouvée"));
-                           
-        List<DonneesCapteur> historique = firestoreService.getHistoriqueDonneesCapteur(rucheId, 24); // 24 dernières mesures
-        
-        logger.info("Nombre de mesures dans l'historique: {}", historique.size());
-        
-        model.addAttribute("ruche", ruche);
-        model.addAttribute("historique", historique);
-        return "ruches/detail";
+        try {
+            List<Ruche> ruches = rucheService.getRuchesByRucher(rucherId);
+            Ruche ruche = ruches.stream()
+                               .filter(r -> r.getId().equals(rucheId))
+                               .findFirst()
+                               .orElseThrow(() -> new RuntimeException("Ruche non trouvée"));
+                               
+            List<DonneesCapteur> historique = rucheService.getHistoriqueDonnees(rucheId, 24); // 24 dernières mesures
+            
+            logger.info("Nombre de mesures dans l'historique: {}", historique.size());
+            
+            model.addAttribute("ruche", ruche);
+            model.addAttribute("historique", historique);
+            return "ruches/detail";
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération de la ruche: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors du chargement de la ruche");
+            return "ruches/detail";
+        }
     }
 } 

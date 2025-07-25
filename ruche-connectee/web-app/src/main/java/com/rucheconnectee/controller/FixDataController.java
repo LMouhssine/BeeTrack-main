@@ -55,18 +55,18 @@ public class FixDataController {
 
             int ruchesAssociated = 0;
             for (var rucheDoc : allRuches) {
-                String currentApiculteurId = (String) rucheDoc.getData().get("apiculteur_id");
+                String currentApiculteurId = (String) rucheDoc.get("apiculteur_id");
                 
                 if (currentApiculteurId == null || currentApiculteurId.isEmpty()) {
                     // Associer cette ruche à jean.dupont@email.com
                     Map<String, Object> updates = new HashMap<>();
                     updates.put("apiculteur_id", apiculteurId);
                     
-                    firebaseService.updateDocument("ruches", rucheDoc.getId(), updates);
+                    firebaseService.updateDocument("ruches", (String) rucheDoc.get("id"), updates);
                     ruchesAssociated++;
                     
-                    result.put("ruche_" + ruchesAssociated + "_id", rucheDoc.getId());
-                    result.put("ruche_" + ruchesAssociated + "_nom", rucheDoc.getData().get("nom"));
+                    result.put("ruche_" + ruchesAssociated + "_id", rucheDoc.get("id"));
+                    result.put("ruche_" + ruchesAssociated + "_nom", rucheDoc.get("nom"));
                 }
             }
 
@@ -112,14 +112,14 @@ public class FixDataController {
 
             int ruchersAssociated = 0;
             for (var rucherDoc : allRuchers) {
-                String currentApiculteurId = (String) rucherDoc.getData().get("apiculteur_id");
+                String currentApiculteurId = (String) rucherDoc.get("apiculteur_id");
                 
                 if (currentApiculteurId == null || currentApiculteurId.isEmpty()) {
                     // Associer ce rucher à jean.dupont@email.com
                     Map<String, Object> updates = new HashMap<>();
                     updates.put("apiculteur_id", apiculteurId);
                     
-                    firebaseService.updateDocument("ruchers", rucherDoc.getId(), updates);
+                    firebaseService.updateDocument("ruchers", (String) rucherDoc.get("id"), updates);
                     ruchersAssociated++;
                 }
             }
@@ -197,8 +197,8 @@ public class FixDataController {
                 // Lister les noms des ruches
                 for (int i = 0; i < ruchesFirebase.size(); i++) {
                     var doc = ruchesFirebase.get(i);
-                    result.put("ruche_" + i + "_nom", doc.getData().get("nom"));
-                    result.put("ruche_" + i + "_id", doc.getId());
+                    result.put("ruche_" + i + "_nom", doc.get("nom"));
+                    result.put("ruche_" + i + "_id", doc.get("id"));
                 }
             } catch (Exception e) {
                 result.put("ruches_firebase_direct", "ERROR");
@@ -214,8 +214,8 @@ public class FixDataController {
                 // Lister les noms des ruchers
                 for (int i = 0; i < ruchersFirebase.size(); i++) {
                     var doc = ruchersFirebase.get(i);
-                    result.put("rucher_" + i + "_nom", doc.getData().get("nom"));
-                    result.put("rucher_" + i + "_id", doc.getId());
+                    result.put("rucher_" + i + "_nom", doc.get("nom"));
+                    result.put("rucher_" + i + "_id", doc.get("id"));
                 }
             } catch (Exception e) {
                 result.put("ruchers_firebase_direct", "ERROR");

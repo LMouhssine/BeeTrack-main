@@ -107,7 +107,7 @@ public class TestFirebaseController {
                     
                     if (!documents.isEmpty()) {
                         var firstDoc = documents.get(0);
-                        collectionInfo.put("sample_fields", firstDoc.getData().keySet());
+                        collectionInfo.put("sample_fields", firstDoc.keySet());
                     }
                     
                     result.put(collection, collectionInfo);
@@ -149,9 +149,9 @@ public class TestFirebaseController {
                 for (int i = 0; i < allApiculteurs.size(); i++) {
                     var doc = allApiculteurs.get(i);
                     Map<String, Object> apiculteurInfo = new HashMap<>();
-                    apiculteurInfo.put("id", doc.getId());
-                    apiculteurInfo.put("email", doc.getData().get("email"));
-                    apiculteurInfo.put("nom", doc.getData().get("nom"));
+                    apiculteurInfo.put("id", doc.get("id"));
+                    apiculteurInfo.put("email", doc.get("email"));
+                    apiculteurInfo.put("nom", doc.get("nom"));
                     result.put("apiculteur_" + i, apiculteurInfo);
                 }
             } catch (Exception e) {
@@ -165,10 +165,10 @@ public class TestFirebaseController {
                 for (int i = 0; i < allRuches.size(); i++) {
                     var doc = allRuches.get(i);
                     Map<String, Object> rucheInfo = new HashMap<>();
-                    rucheInfo.put("id", doc.getId());
-                    rucheInfo.put("nom", doc.getData().get("nom"));
-                    rucheInfo.put("apiculteur_id", doc.getData().get("apiculteur_id"));
-                    rucheInfo.put("rucher_id", doc.getData().get("rucher_id"));
+                    rucheInfo.put("id", doc.get("id"));
+                    rucheInfo.put("nom", doc.get("nom"));
+                    rucheInfo.put("apiculteur_id", doc.get("apiculteur_id"));
+                    rucheInfo.put("rucher_id", doc.get("rucher_id"));
                     result.put("ruche_" + i, rucheInfo);
                 }
             } catch (Exception e) {

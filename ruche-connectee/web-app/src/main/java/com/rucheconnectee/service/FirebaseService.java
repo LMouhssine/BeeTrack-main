@@ -1,28 +1,29 @@
 package com.rucheconnectee.service;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
+import com.google.firebase.database.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
- * Service pour les opérations Firebase (Firestore et Authentication).
- * Reproduit la logique du FirebaseService de l'application mobile.
+ * Service pour les opérations Firebase (Realtime Database et Authentication).
+ * Remplace l'ancien service Firestore par Realtime Database.
  */
 @Service
 @ConditionalOnProperty(name = "firebase.project-id")
 public class FirebaseService {
 
     @Autowired
-    private Firestore firestore;
+    private FirebaseDatabase firebaseDatabase;
 
     @Autowired
     private FirebaseAuth firebaseAuth;
@@ -30,128 +31,235 @@ public class FirebaseService {
     /**
      * Récupère un document par ID dans une collection
      */
-    public DocumentSnapshot getDocument(String collection, String documentId) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = firestore.collection(collection).document(documentId);
-        ApiFuture<DocumentSnapshot> future = docRef.get();
-        return future.get();
+    public Map<String, Object> getDocument(String collection, String documentId) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection).child(documentId);
+        CountDownLatch latch = new CountDownLatch(1);
+        final Map<String, Object>[] result = new Map[1];
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", dataSnapshot.getKey());
+                    data.putAll((Map<String, Object>) dataSnapshot.getValue());
+                    result[0] = data;
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                error[0] = new RuntimeException("Erreur lors de la récupération du document: " + databaseError.getMessage());
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la récupération du document");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
+        
+        return result[0];
     }
 
     /**
      * Récupère tous les documents d'une collection avec un filtre
      */
-    public List<QueryDocumentSnapshot> getDocuments(String collection, String field, Object value) throws ExecutionException, InterruptedException {
-        CollectionReference colRef = firestore.collection(collection);
-        Query query = colRef.whereEqualTo(field, value);
-        ApiFuture<QuerySnapshot> future = query.get();
-        QuerySnapshot querySnapshot = future.get();
-        return querySnapshot.getDocuments();
+    public List<Map<String, Object>> getDocuments(String collection, String field, Object value) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection);
+        CountDownLatch latch = new CountDownLatch(1);
+        final List<Map<String, Object>>[] result = new List[1];
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.orderByChild(field).equalTo(value.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Map<String, Object>> documents = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", snapshot.getKey());
+                    data.putAll((Map<String, Object>) snapshot.getValue());
+                    documents.add(data);
+                }
+                result[0] = documents;
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                error[0] = new RuntimeException("Erreur lors de la récupération des documents: " + databaseError.getMessage());
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la récupération des documents");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
+        
+        return result[0];
     }
 
     /**
      * Récupère tous les documents d'une collection
      */
-    public List<QueryDocumentSnapshot> getAllDocuments(String collection) throws ExecutionException, InterruptedException {
-        CollectionReference colRef = firestore.collection(collection);
-        ApiFuture<QuerySnapshot> future = colRef.get();
-        QuerySnapshot querySnapshot = future.get();
-        return querySnapshot.getDocuments();
-    }
+    public List<Map<String, Object>> getAllDocuments(String collection) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection);
+        CountDownLatch latch = new CountDownLatch(1);
+        final List<Map<String, Object>>[] result = new List[1];
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Map<String, Object>> documents = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", snapshot.getKey());
+                    data.putAll((Map<String, Object>) snapshot.getValue());
+                    documents.add(data);
+                }
+                result[0] = documents;
+                latch.countDown();
+            }
 
-    /**
-     * Exécute une requête complexe avec filtres de date et tri
-     * @param collection Nom de la collection
-     * @param filterField Champ pour le filtre d'égalité
-     * @param filterValue Valeur pour le filtre d'égalité
-     * @param dateField Champ de date pour le filtre temporel
-     * @param dateLimit Date limite (les documents doivent avoir une date supérieure)
-     * @param orderByField Champ pour le tri
-     * @param ascending True pour tri croissant, false pour décroissant
-     * @return Liste des documents correspondant aux critères
-     */
-    public List<QueryDocumentSnapshot> getDocumentsWithDateFilter(
-            String collection, 
-            String filterField, 
-            Object filterValue,
-            String dateField,
-            com.google.cloud.Timestamp dateLimit,
-            String orderByField,
-            boolean ascending) throws ExecutionException, InterruptedException {
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                error[0] = new RuntimeException("Erreur lors de la récupération des documents: " + databaseError.getMessage());
+                latch.countDown();
+            }
+        });
         
-        CollectionReference colRef = firestore.collection(collection);
-        Query query = colRef
-            .whereEqualTo(filterField, filterValue)
-            .whereGreaterThan(dateField, dateLimit)
-            .orderBy(dateField, ascending ? Query.Direction.ASCENDING : Query.Direction.DESCENDING);
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la récupération des documents");
+        }
         
-        ApiFuture<QuerySnapshot> future = query.get();
-        QuerySnapshot querySnapshot = future.get();
-        return querySnapshot.getDocuments();
-    }
-
-    /**
-     * Récupère les documents d'une collection avec filtre, tri et limite
-     * @param collection Nom de la collection
-     * @param filterField Champ pour le filtre d'égalité
-     * @param filterValue Valeur pour le filtre d'égalité
-     * @param orderByField Champ pour le tri
-     * @param ascending True pour tri croissant, false pour décroissant
-     * @param limit Nombre maximum de documents à retourner
-     * @return Liste des documents correspondant aux critères
-     */
-    public List<QueryDocumentSnapshot> getDocumentsWithFilter(
-            String collection,
-            String filterField,
-            Object filterValue,
-            String orderByField,
-            boolean ascending,
-            int limit) throws ExecutionException, InterruptedException {
+        if (error[0] != null) {
+            throw error[0];
+        }
         
-        CollectionReference colRef = firestore.collection(collection);
-        Query query = colRef
-            .whereEqualTo(filterField, filterValue)
-            .orderBy(orderByField, ascending ? Query.Direction.ASCENDING : Query.Direction.DESCENDING)
-            .limit(limit);
-        
-        ApiFuture<QuerySnapshot> future = query.get();
-        QuerySnapshot querySnapshot = future.get();
-        return querySnapshot.getDocuments();
+        return result[0];
     }
 
     /**
      * Crée ou met à jour un document
      */
-    public void setDocument(String collection, String documentId, Map<String, Object> data) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = firestore.collection(collection).document(documentId);
-        ApiFuture<WriteResult> future = docRef.set(data);
-        future.get();
+    public void setDocument(String collection, String documentId, Map<String, Object> data) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection).child(documentId);
+        CountDownLatch latch = new CountDownLatch(1);
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.setValue(data, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    error[0] = new RuntimeException("Erreur lors de la sauvegarde: " + databaseError.getMessage());
+                }
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la sauvegarde");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
     }
 
     /**
      * Met à jour partiellement un document
      */
-    public void updateDocument(String collection, String documentId, Map<String, Object> updates) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = firestore.collection(collection).document(documentId);
-        ApiFuture<WriteResult> future = docRef.update(updates);
-        future.get();
+    public void updateDocument(String collection, String documentId, Map<String, Object> updates) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection).child(documentId);
+        CountDownLatch latch = new CountDownLatch(1);
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.updateChildren(updates, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    error[0] = new RuntimeException("Erreur lors de la mise à jour: " + databaseError.getMessage());
+                }
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la mise à jour");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
     }
 
     /**
      * Supprime un document
      */
-    public void deleteDocument(String collection, String documentId) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = firestore.collection(collection).document(documentId);
-        ApiFuture<WriteResult> future = docRef.delete();
-        future.get();
+    public void deleteDocument(String collection, String documentId) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection).child(documentId);
+        CountDownLatch latch = new CountDownLatch(1);
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    error[0] = new RuntimeException("Erreur lors de la suppression: " + databaseError.getMessage());
+                }
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de la suppression");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
     }
 
     /**
      * Ajoute un document avec un ID généré automatiquement
      */
-    public String addDocument(String collection, Map<String, Object> data) throws ExecutionException, InterruptedException {
-        CollectionReference colRef = firestore.collection(collection);
-        ApiFuture<DocumentReference> future = colRef.add(data);
-        DocumentReference docRef = future.get();
-        return docRef.getId();
+    public String addDocument(String collection, Map<String, Object> data) throws InterruptedException, TimeoutException {
+        DatabaseReference ref = firebaseDatabase.getReference(collection).push();
+        CountDownLatch latch = new CountDownLatch(1);
+        final String[] result = new String[1];
+        final RuntimeException[] error = new RuntimeException[1];
+        
+        ref.setValue(data, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    error[0] = new RuntimeException("Erreur lors de l'ajout: " + databaseError.getMessage());
+                } else {
+                    result[0] = databaseReference.getKey();
+                }
+                latch.countDown();
+            }
+        });
+        
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new TimeoutException("Timeout lors de l'ajout");
+        }
+        
+        if (error[0] != null) {
+            throw error[0];
+        }
+        
+        return result[0];
     }
 
     /**

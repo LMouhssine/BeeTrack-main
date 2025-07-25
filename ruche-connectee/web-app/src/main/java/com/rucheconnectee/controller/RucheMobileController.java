@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Contrôleur REST pour la gestion des ruches via les applications mobiles.
@@ -77,7 +78,7 @@ public class RucheMobileController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponse("ACCESS_DENIED", e.getMessage()));
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération des ruches"));
         }
@@ -127,7 +128,7 @@ public class RucheMobileController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("VALIDATION_ERROR", e.getMessage()));
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la suppression"));
         }
@@ -212,7 +213,7 @@ public class RucheMobileController {
             // Récupérer les mesures
             var mesures = rucheService.getMesures7DerniersJours(rucheId);
             return ResponseEntity.ok(mesures);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération des mesures"));
         }
@@ -244,7 +245,7 @@ public class RucheMobileController {
             }
             
             return ResponseEntity.ok(derniereMesure);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("SERVER_ERROR", "Erreur lors de la récupération de la dernière mesure"));
         }

@@ -3,277 +3,501 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Alertes - BeeTrack</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link th:href="@{/css/app.css}" rel="stylesheet">
-    
-    <style>
-        .alert-card {
-            border-left: 4px solid;
-            transition: all 0.3s ease;
-        }
-        
-        .alert-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .alert-critical { border-left-color: #dc3545; }
-        .alert-medium { border-left-color: #fd7e14; }
-        .alert-low { border-left-color: #ffc107; }
-        .alert-info { border-left-color: #20c997; }
-        
-        .alert-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-        }
-        
-        .alert-timestamp {
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-        
-        .alert-actions {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .alert-card:hover .alert-actions {
-            opacity: 1;
-        }
-        
-        .filter-buttons .btn {
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-    </style>
+    <title>Gestion des Alertes - BeeTrack</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav th:replace="layout :: navigation"></nav>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img th:src="@{/logo.svg}" alt="BeeTrack" class="logo">
+                <h2>BeeTrack</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/ruchers" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>Ruchers</span>
+                </a>
+                <a href="/ruches" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                        <polyline points="2,17 12,22 22,17"/>
+                        <polyline points="2,12 12,17 22,12"/>
+                    </svg>
+                    <span>Ruches</span>
+                </a>
+                <a href="/alertes" class="nav-item active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span>Alertes</span>
+                </a>
+                <a href="/stats" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"/>
+                        <line x1="18" y1="20" x2="18" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="16"/>
+                    </svg>
+                    <span>Statistiques</span>
+                </a>
+            </nav>
+        </aside>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav th:replace="layout :: sidebar"></nav>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Gestion des Alertes</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="rafraichirStatut()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,4 23,10 17,10"/>
+                            <polyline points="1,20 1,14 7,14"/>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Rafraîchir
+                    </button>
+                </div>
+            </header>
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                        Alertes
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshAlertes()">
-                                <i class="bi bi-arrow-clockwise"></i> Actualiser
+            <div class="content-body">
+                <!-- System Status -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Statut de Surveillance
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="statut-surveillance" class="loading">
+                            <div class="spinner"></div>
+                            <span>Chargement...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Alert -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            Test d'Alerte
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="test-alerte-form">
+                            <div class="form-group">
+                                <label for="ruche-id" class="form-label">ID de la Ruche</label>
+                                <input type="text" 
+                                       id="ruche-id" 
+                                       name="rucheId" 
+                                       class="form-control" 
+                                       placeholder="Ex: ruche_001" 
+                                       required>
+                            </div>
+                            <button type="submit" class="btn" style="background: var(--warning); color: var(--white);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                                Tester l'Alerte
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="markAllAsRead()">
-                                <i class="bi bi-check-all"></i> Tout marquer comme lu
-                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Active Inhibitions -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            Inhibitions Actives
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="inhibitions-list" class="loading">
+                            <div class="spinner"></div>
+                            <span>Chargement...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Statistiques rapides -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card stats-card">
-                            <div class="card-body text-center">
-                                <h3 class="card-title" th:text="${nombreAlertes ?: 0}">0</h3>
-                                <p class="card-text">Alertes totales</p>
-                            </div>
-                        </div>
+                <!-- Alert Logs -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                            </svg>
+                            Logs d'Alertes
+                        </h3>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card bg-danger text-white">
-                            <div class="card-body text-center">
-                                <h3 class="card-title" th:text="${alertes.stream().filter(a -> a.get('severite') == 'CRITIQUE').count()}">0</h3>
-                                <p class="card-text">Critiques</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-light">
-                            <div class="card-body text-center">
-                                <h3 class="card-title" th:text="${alertes.stream().filter(a -> a.get('severite') == 'MOYENNE').count()}">0</h3>
-                                <p class="card-text">Moyennes</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white">
-                            <div class="card-body text-center">
-                                <h3 class="card-title" th:text="${alertes.stream().filter(a -> a.get('severite') == 'FAIBLE').count()}">0</h3>
-                                <p class="card-text">Faibles</p>
+                    <div class="card-body">
+                        <div id="alertes-logs" class="logs-container">
+                            <div class="log-entry">
+                                <span class="log-time">[Système]</span>
+                                <span class="log-message">Système d'alertes initialisé</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Filtres -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title mb-3">
-                                    <i class="bi bi-funnel"></i> Filtres
-                                </h6>
-                                <div class="filter-buttons">
-                                    <button class="btn btn-outline-primary active" data-filter="all">
-                                        Toutes
-                                    </button>
-                                    <button class="btn btn-outline-danger" data-filter="CRITIQUE">
-                                        Critiques
-                                    </button>
-                                    <button class="btn btn-outline-warning" data-filter="MOYENNE">
-                                        Moyennes
-                                    </button>
-                                    <button class="btn btn-outline-info" data-filter="FAIBLE">
-                                        Faibles
-                                    </button>
-                                    <button class="btn btn-outline-success" data-filter="INFO">
-                                        Informations
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Messages d'erreur -->
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle"></i>
-                    <span th:text="${error}">Erreur</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-
-                <!-- Liste des alertes -->
-                <div class="row">
-                    <div class="col-12">
-                        <div th:if="${#lists.isEmpty(alertes)}" class="text-center py-5">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
-                            <h3 class="mt-3 text-muted">Aucune alerte</h3>
-                            <p class="text-muted">Toutes vos ruches fonctionnent normalement !</p>
-                        </div>
-
-                        <div th:each="alerte : ${alertes}" class="alert-card card mb-3" 
-                             th:classappend="${'alert-' + alerte.get('severite').toLowerCase()}"
-                             th:data-severite="${alerte.get('severite')}">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="alert-badge badge" 
-                                                  th:classappend="${'bg-' + alerte.get('couleur')}"
-                                                  th:text="${alerte.get('severite')}">CRITIQUE</span>
-                                            <span class="ms-2 text-muted" th:text="${alerte.get('type')}">TYPE</span>
-                                        </div>
-                                        <h6 class="card-title mb-1" th:text="${alerte.get('message')}">Message d'alerte</h6>
-                                        <p class="card-text text-muted mb-2">
-                                            <i class="bi bi-geo-alt"></i>
-                                            <span th:text="${alerte.get('rucheNom')}">Nom de la ruche</span>
-                                        </p>
-                                        <div class="alert-timestamp">
-                                            <i class="bi bi-clock"></i>
-                                            <span th:text="${#temporals.format(alerte.get('timestamp'), 'dd/MM/yyyy HH:mm')}">Timestamp</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <div class="alert-actions">
-                                            <button class="btn btn-sm btn-outline-primary me-2" 
-                                                    th:onclick="'viewRuche(\'' + ${alerte.get('rucheId')} + '\')'">
-                                                <i class="bi bi-eye"></i> Voir ruche
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-success" 
-                                                    th:onclick="'resolveAlerte(\'' + ${alerte.get('type')} + '\', \'' + ${alerte.get('rucheId')} + '\')'">
-                                                <i class="bi bi-check"></i> Résoudre
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom JS -->
-    <script th:src="@{/js/app.js}"></script>
-
     <script>
-        // Filtrage des alertes
-        document.querySelectorAll('[data-filter]').forEach(button => {
-            button.addEventListener('click', function() {
-                const filter = this.getAttribute('data-filter');
-                
-                // Mettre à jour les boutons actifs
-                document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Filtrer les alertes
-                document.querySelectorAll('.alert-card').forEach(card => {
-                    const severite = card.getAttribute('data-severite');
-                    if (filter === 'all' || severite === filter) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
+        let statutInterval;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            rafraichirStatut();
+            chargerInhibitions();
+            
+            statutInterval = setInterval(() => {
+                rafraichirStatut();
+                chargerInhibitions();
+            }, 30000);
         });
 
-        // Actualiser les alertes
-        function refreshAlertes() {
-            location.reload();
-        }
+        // Refresh surveillance status
+        async function rafraichirStatut() {
+            const container = document.getElementById('statut-surveillance');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><span>Chargement...</span></div>';
+            
+            try {
+                const response = await fetch('/api/alertes/statut', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-        // Marquer toutes les alertes comme lues
-        function markAllAsRead() {
-            if (confirm('Marquer toutes les alertes comme résolues ?')) {
-                // Ici on pourrait appeler une API pour marquer toutes les alertes comme lues
-                alert('Toutes les alertes ont été marquées comme résolues');
-                location.reload();
+                if (response.ok) {
+                    const data = await response.json();
+                    afficherStatut(data);
+                } else {
+                    throw new Error('Erreur lors de la récupération du statut');
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        <span>Erreur: ${error.message}</span>
+                    </div>
+                `;
             }
         }
 
-        // Voir une ruche spécifique
-        function viewRuche(rucheId) {
-            window.location.href = `/ruches/${rucheId}`;
+        // Display status
+        function afficherStatut(data) {
+            const container = document.getElementById('statut-surveillance');
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-2" style="gap: var(--space-6);">
+                    <div class="stat-card ${data.surveillanceActive ? 'border-success' : 'border-warning'}">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value ${data.surveillanceActive ? 'text-success' : 'text-warning'}">
+                                    ${data.surveillanceActive ? 'Active' : 'Inactive'}
+                                </div>
+                                <div class="stat-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    Surveillance
+                                </div>
+                            </div>
+                            <div class="stat-icon ${data.surveillanceActive ? 'bg-success' : 'bg-warning'}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">${data.nombreRuchesSurveillees || 0}</div>
+                                <div class="stat-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                                        <polyline points="2,17 12,22 22,17"/>
+                                        <polyline points="2,12 12,17 22,12"/>
+                                    </svg>
+                                    Ruches surveillées
+                                </div>
+                            </div>
+                            <div class="stat-icon bg-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                                    <polyline points="2,17 12,22 22,17"/>
+                                    <polyline points="2,12 12,17 22,12"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${data.ruchesSurveillees && data.ruchesSurveillees.length > 0 ? `
+                    <div class="mt-6">
+                        <h4 class="text-lg font-semibold mb-3">Ruches surveillées:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${Array.from(data.ruchesSurveillees).map(rucheId => `
+                                <span class="badge badge-secondary">${rucheId}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
         }
 
-        // Résoudre une alerte
-        function resolveAlerte(type, rucheId) {
-            if (confirm('Marquer cette alerte comme résolue ?')) {
-                // Ici on pourrait appeler une API pour résoudre l'alerte
-                console.log(`Résoudre alerte ${type} pour ruche ${rucheId}`);
-                alert('Alerte marquée comme résolue');
-                location.reload();
+        // Load inhibitions
+        async function chargerInhibitions() {
+            const container = document.getElementById('inhibitions-list');
+            
+            try {
+                const response = await fetch('/api/alertes/inhibition/actives', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    afficherInhibitions(data);
+                } else {
+                    throw new Error('Erreur lors de la récupération des inhibitions');
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        <span>Erreur: ${error.message}</span>
+                    </div>
+                `;
             }
         }
 
-        // Auto-actualisation toutes les 30 secondes
-        setInterval(function() {
-            // Optionnel : actualiser automatiquement les alertes
-            // refreshAlertes();
-        }, 30000);
+        // Display inhibitions
+        function afficherInhibitions(inhibitions) {
+            const container = document.getElementById('inhibitions-list');
+            
+            if (Object.keys(inhibitions).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <h3 class="empty-title">Aucune inhibition active</h3>
+                        <p class="empty-description">Toutes les alertes sont actives</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style="gap: var(--space-4);">
+                    ${Object.entries(inhibitions).map(([rucheId, info]) => `
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 bg-warning text-white rounded-lg flex items-center justify-center">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">${rucheId}</div>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Durée:</span>
+                                    <span class="font-medium">${info.dureeHeures}h</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Fin:</span>
+                                    <span class="font-medium">${new Date(info.finInhibition).toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Test alert form
+        document.getElementById('test-alerte-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const rucheId = document.getElementById('ruche-id').value;
+            const button = this.querySelector('button[type="submit"]');
+            const originalHTML = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner"></div><span>Envoi...</span>';
+            
+            try {
+                const response = await fetch('/api/alertes/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rucheId: rucheId })
+                });
+
+                if (response.ok) {
+                    ajouterLog('success', `Test d'alerte envoyé pour ${rucheId}`);
+                    document.getElementById('ruche-id').value = '';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erreur lors du test');
+                }
+            } catch (error) {
+                ajouterLog('error', `Erreur: ${error.message}`);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHTML;
+            }
+        });
+
+        // Add log entry
+        function ajouterLog(type, message) {
+            const logsContainer = document.getElementById('alertes-logs');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="log-time">[${timestamp}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
+            if (statutInterval) {
+                clearInterval(statutInterval);
+            }
+        });
     </script>
+
+    <style>
+        .logs-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            font-family: var(--font-mono);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .log-entry:last-child {
+            margin-bottom: 0;
+        }
+
+        .log-time {
+            color: var(--gray-500);
+            min-width: 80px;
+            flex-shrink: 0;
+        }
+
+        .log-message {
+            color: var(--gray-900);
+        }
+
+        .log-entry.success .log-message {
+            color: var(--success);
+        }
+
+        .log-entry.error .log-message {
+            color: var(--error);
+        }
+
+        .border-success {
+            border-color: var(--success) !important;
+        }
+
+        .border-warning {
+            border-color: var(--warning) !important;
+        }
+
+        .w-8 {
+            width: 2rem;
+        }
+
+        .h-8 {
+            height: 2rem;
+        }
+
+        .space-y-2 > * + * {
+            margin-top: var(--space-2);
+        }
+
+        .md\:grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .lg\:grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .md\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </body>
-</html> 
+</html>

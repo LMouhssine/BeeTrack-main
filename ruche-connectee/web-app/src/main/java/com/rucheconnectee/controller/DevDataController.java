@@ -71,8 +71,7 @@ public class DevDataController {
                     // Créer l'objet de données
                     Map<String, Object> donnees = new HashMap<>();
                     donnees.put("rucheId", rucheId);
-                    donnees.put("timestamp", com.google.cloud.Timestamp.of(
-                        java.sql.Timestamp.valueOf(timestampMesure)));
+                    donnees.put("timestamp", timestampMesure.toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
                     donnees.put("temperature", Math.round(temperature * 10.0) / 10.0);
                     donnees.put("humidity", Math.round(humidity * 10.0) / 10.0);
                     donnees.put("batterie", batterie);
@@ -123,13 +122,13 @@ public class DevDataController {
     @GetMapping("/test-data/{rucheId}")
     public ResponseEntity<?> getTestData(@PathVariable String rucheId) {
         try {
-            // Récupérer les documents depuis Firestore
-            List<com.google.cloud.firestore.QueryDocumentSnapshot> documents = firebaseService.getDocuments("donneesCapteurs", "rucheId", rucheId);
+            // Récupérer les documents depuis Realtime Database
+            List<Map<String, Object>> documents = firebaseService.getDocuments("donneesCapteurs", "rucheId", rucheId);
             
             List<Map<String, Object>> mesures = new ArrayList<>();
-            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : documents) {
+            for (Map<String, Object> doc : documents) {
                 Map<String, Object> mesure = new HashMap<>();
-                mesure.put("id", doc.getId());
+                mesure.put("id", doc.get("id"));
                 mesure.put("rucheId", doc.get("rucheId"));
                 mesure.put("timestamp", doc.get("timestamp"));
                 mesure.put("temperature", doc.get("temperature"));

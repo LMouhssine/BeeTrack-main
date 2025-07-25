@@ -4,6 +4,7 @@ import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.service.ApiculteurService;
 import com.rucheconnectee.service.RucheService;
 import com.rucheconnectee.service.RucherService;
+import com.rucheconnectee.service.DashboardDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Contrôleur principal pour les pages web Thymeleaf avec services Firebase
@@ -31,6 +33,9 @@ public class WebController {
     
     @Autowired
     private RucherService rucherService;
+    
+    @Autowired
+    private DashboardDataService dashboardDataService;
 
     /**
      * Test endpoint simple
@@ -104,55 +109,57 @@ public class WebController {
             String userEmail = authentication.getName();
             System.out.println("🔍 Dashboard - Utilisateur connecté: " + userEmail);
             
-            // Initialiser avec des valeurs par défaut
-            model.addAttribute("totalRuches", 0);
-            model.addAttribute("totalRuchers", 0);
-            model.addAttribute("ruchesEnService", 0);
-            model.addAttribute("alertesActives", 0);
-            model.addAttribute("ruches", List.of());
-            model.addAttribute("ruchesRecentes", List.of());
-            model.addAttribute("apiculteur", null);
-            
             try {
-                // Essayer de récupérer l'apiculteur par email
-                var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+                // Utiliser le nouveau service pour récupérer les données du dashboard
+                Map<String, Object> stats = dashboardDataService.getDashboardStats();
                 
-                // Si pas trouvé avec l'email de connexion, essayer avec l'email par défaut
-                if (apiculteur == null) {
-                    apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
-                    System.out.println("🔍 Fallback vers jean.dupont@email.com - Apiculteur trouvé: " + (apiculteur != null));
+                System.out.println("📊 Données récupérées depuis Firebase Realtime Database:");
+                System.out.println("   - Ruches: " + stats.get("totalRuches"));
+                System.out.println("   - Ruchers: " + stats.get("totalRuchers"));
+                System.out.println("   - Ruches en service: " + stats.get("ruchesEnService"));
+                System.out.println("   - Alertes: " + stats.get("alertesActives"));
+                
+                // Ajouter les données au modèle
+                model.addAttribute("totalRuches", stats.get("totalRuches"));
+                model.addAttribute("totalRuchers", stats.get("totalRuchers"));
+                model.addAttribute("ruchesEnService", stats.get("ruchesEnService"));
+                model.addAttribute("alertesActives", stats.get("alertesActives"));
+                model.addAttribute("ruches", stats.get("ruches"));
+                model.addAttribute("ruchesRecentes", stats.get("ruchesRecentes"));
+                model.addAttribute("mesures", stats.get("mesures"));
+                
+                // Ajouter les moyennes si disponibles
+                if (stats.containsKey("temperatureMoyenne")) {
+                    model.addAttribute("temperatureMoyenne", stats.get("temperatureMoyenne"));
+                }
+                if (stats.containsKey("humiditeMoyenne")) {
+                    model.addAttribute("humiditeMoyenne", stats.get("humiditeMoyenne"));
                 }
                 
-                if (apiculteur == null) {
-                    System.out.println("❌ Aucun apiculteur trouvé pour: " + userEmail);
-                    model.addAttribute("message", "Bienvenue! Aucune ruche n'est encore configurée pour votre compte.");
-                } else {
-                    System.out.println("✅ Apiculteur trouvé: " + apiculteur.getNom());
-                    
-                    try {
-                        var ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
-                        var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
-                        
-                        System.out.println("📊 Ruches trouvées: " + ruches.size());
-                        System.out.println("📍 Ruchers trouvés: " + ruchers.size());
-                        
-                        // Calculer les statistiques pour le dashboard
-                        model.addAttribute("totalRuches", ruches.size());
-                        model.addAttribute("totalRuchers", ruchers.size());
-                        model.addAttribute("ruchesEnService", ruches.stream().mapToInt(r -> r.isActif() ? 1 : 0).sum());
-                        model.addAttribute("alertesActives", 0); // À implémenter
-                        model.addAttribute("ruches", ruches); // Toutes les ruches pour le dashboard
-                        model.addAttribute("ruchesRecentes", ruches.stream().limit(5).toList()); // Limiter à 5 pour la sidebar
-                        model.addAttribute("apiculteur", apiculteur);
-                    } catch (Exception dataException) {
-                        System.err.println("⚠️ Erreur de récupération des données: " + dataException.getMessage());
-                        model.addAttribute("message", "Données en cours de chargement... (Erreur Firebase)");
-                        model.addAttribute("apiculteur", apiculteur);
+                // Essayer de récupérer l'apiculteur pour les informations utilisateur
+                try {
+                    var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+                    if (apiculteur == null) {
+                        apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
                     }
+                    model.addAttribute("apiculteur", apiculteur);
+                } catch (Exception e) {
+                    System.err.println("⚠️ Erreur récupération apiculteur: " + e.getMessage());
+                    model.addAttribute("apiculteur", null);
                 }
-            } catch (Exception serviceException) {
-                System.err.println("⚠️ Erreur de service Firebase: " + serviceException.getMessage());
-                model.addAttribute("message", "Mode déconnecté - Services temporairement indisponibles");
+                
+            } catch (Exception dataException) {
+                System.err.println("⚠️ Erreur de récupération des données Firebase: " + dataException.getMessage());
+                // Valeurs par défaut en cas d'erreur
+                model.addAttribute("totalRuches", 0);
+                model.addAttribute("totalRuchers", 0);
+                model.addAttribute("ruchesEnService", 0);
+                model.addAttribute("alertesActives", 0);
+                model.addAttribute("ruches", List.of());
+                model.addAttribute("ruchesRecentes", List.of());
+                model.addAttribute("mesures", List.of());
+                model.addAttribute("apiculteur", null);
+                model.addAttribute("message", "Données en cours de chargement... (Erreur Firebase)");
             }
             
             // Définir les variables de layout
@@ -311,102 +318,27 @@ public class WebController {
     }
 
     /**
-     * Page des alertes
+     * Page de gestion des alertes
      */
     @GetMapping("/alertes")
-    public String alertes(Model model) {
-        try {
-            // Utiliser l'utilisateur existant dans Firebase
-            var apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
-            
-            if (apiculteur != null) {
-                List<Ruche> ruches = rucheService.getRuchesByApiculteur(apiculteur.getId());
-                
-                // Générer des alertes basées sur les données des ruches
-                List<Map<String, Object>> alertes = new ArrayList<>();
-                
-                for (Ruche ruche : ruches) {
-                    // Alerte batterie faible
-                    if (ruche.getNiveauBatterie() != null && ruche.getNiveauBatterie() < 20) {
-                        Map<String, Object> alerte = new HashMap<>();
-                        alerte.put("type", "BATTERIE_FAIBLE");
-                        alerte.put("severite", "CRITIQUE");
-                        alerte.put("rucheId", ruche.getId());
-                        alerte.put("rucheNom", ruche.getNom());
-                        alerte.put("message", "Batterie faible (" + ruche.getNiveauBatterie() + "%)");
-                        alerte.put("timestamp", LocalDateTime.now().minusMinutes(15));
-                        alerte.put("couleur", "red");
-                        alertes.add(alerte);
-                    }
-                    
-                    // Alerte température anormale
-                    if (ruche.getTemperature() != null) {
-                        if (ruche.getTemperature() < 10 || ruche.getTemperature() > 40) {
-                            Map<String, Object> alerte = new HashMap<>();
-                            alerte.put("type", "TEMPERATURE_ANORMALE");
-                            alerte.put("severite", "MOYENNE");
-                            alerte.put("rucheId", ruche.getId());
-                            alerte.put("rucheNom", ruche.getNom());
-                            alerte.put("message", "Température anormale (" + ruche.getTemperature() + "°C)");
-                            alerte.put("timestamp", LocalDateTime.now().minusHours(1));
-                            alerte.put("couleur", "orange");
-                            alertes.add(alerte);
-                        }
-                    }
-                    
-                    // Alerte humidité trop élevée
-                    if (ruche.getHumidite() != null && ruche.getHumidite() > 80) {
-                        Map<String, Object> alerte = new HashMap<>();
-                        alerte.put("type", "HUMIDITE_ELEVEE");
-                        alerte.put("severite", "FAIBLE");
-                        alerte.put("rucheId", ruche.getId());
-                        alerte.put("rucheNom", ruche.getNom());
-                        alerte.put("message", "Humidité élevée (" + ruche.getHumidite() + "%)");
-                        alerte.put("timestamp", LocalDateTime.now().minusHours(2));
-                        alerte.put("couleur", "yellow");
-                        alertes.add(alerte);
-                    }
-                    
-                    // Alerte ruche inactive
-                    if (!ruche.isActif()) {
-                        Map<String, Object> alerte = new HashMap<>();
-                        alerte.put("type", "RUCHE_INACTIVE");
-                        alerte.put("severite", "MOYENNE");
-                        alerte.put("rucheId", ruche.getId());
-                        alerte.put("rucheNom", ruche.getNom());
-                        alerte.put("message", "Ruche inactive - Pas de données reçues");
-                        alerte.put("timestamp", LocalDateTime.now().minusHours(6));
-                        alerte.put("couleur", "gray");
-                        alertes.add(alerte);
-                    }
-                }
-                
-                // Ajouter une alerte de test si aucune alerte n'existe
-                if (alertes.isEmpty()) {
-                    Map<String, Object> alerte = new HashMap<>();
-                    alerte.put("type", "SYSTEME_OK");
-                    alerte.put("severite", "INFO");
-                    alerte.put("rucheId", "system");
-                    alerte.put("rucheNom", "Système");
-                    alerte.put("message", "✅ Toutes les ruches fonctionnent normalement");
-                    alerte.put("timestamp", LocalDateTime.now());
-                    alerte.put("couleur", "green");
-                    alertes.add(alerte);
-                }
-                
-                model.addAttribute("alertes", alertes);
-                model.addAttribute("nombreAlertes", alertes.size());
-            }
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "Erreur lors du chargement des alertes: " + e.getMessage());
+    public String alertes(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
         }
-        
+
+        String userEmail = authentication.getName();
+        System.out.println("🚨 Alertes - Utilisateur connecté: " + userEmail);
+
         model.addAttribute("currentPage", "alertes");
-        model.addAttribute("pageTitle", "Alertes");
+        model.addAttribute("pageTitle", "Gestion des Alertes");
         
         return "alertes";
     }
+
+    /**
+     * Page de gestion des ruchers
+     */
+
 
     /**
      * Page de profil utilisateur
@@ -435,10 +367,38 @@ public class WebController {
      * Création d'une nouvelle ruche (formulaire)
      */
     @GetMapping("/ruches/nouvelle")
-    public String nouvelleRuche(Model model) {
-        model.addAttribute("ruche", new Ruche());
-        model.addAttribute("currentPage", "ruches");
-        model.addAttribute("pageTitle", "Nouvelle Ruche");
+    public String nouvelleRuche(Model model, Authentication authentication) {
+        try {
+            // Vérifier l'authentification
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+            
+            String userEmail = authentication.getName();
+            
+            // Récupérer l'apiculteur
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            }
+            
+            // Récupérer la liste des ruchers pour le select
+            if (apiculteur != null) {
+                var ruchers = rucherService.getRuchersByApiculteur(apiculteur.getId());
+                model.addAttribute("ruchers", ruchers);
+            } else {
+                model.addAttribute("ruchers", List.of());
+            }
+            
+            model.addAttribute("ruche", new Ruche());
+            model.addAttribute("currentPage", "ruches");
+            model.addAttribute("pageTitle", "Nouvelle Ruche");
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors du chargement du formulaire: " + e.getMessage());
+            model.addAttribute("ruchers", List.of());
+            model.addAttribute("ruche", new Ruche());
+        }
         
         return "ruche-form";
     }
@@ -447,15 +407,53 @@ public class WebController {
      * Traitement de la création d'une ruche
      */
     @PostMapping("/ruches/nouvelle")
-    public String creerRuche(@ModelAttribute Ruche ruche, 
-                           RedirectAttributes redirectAttributes) {
+    public String creerRuche(@ModelAttribute Ruche ruche,
+                           @RequestParam(value = "rucherId", required = false) String rucherId,
+                           RedirectAttributes redirectAttributes,
+                           Authentication authentication) {
         try {
-            // Créer la ruche avec le service
-            rucheService.createRuche(ruche);
-            redirectAttributes.addFlashAttribute("message", "Ruche créée avec succès !");
-            return "redirect:/ruches";
+            // Vérifier l'authentification
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+            
+            String userEmail = authentication.getName();
+            
+            // Récupérer l'apiculteur
+            var apiculteur = apiculteurService.getApiculteurByEmail(userEmail);
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            }
+            
+            if (apiculteur != null) {
+                // Assigner l'apiculteur à la ruche
+                ruche.setApiculteurId(apiculteur.getId());
+                
+                // Assigner le rucher si spécifié
+                if (rucherId != null && !rucherId.isEmpty()) {
+                    var rucher = rucherService.getRucherById(rucherId);
+                    if (rucher != null) {
+                        ruche.setRucherId(rucher.getId());
+                        ruche.setRucherNom(rucher.getNom());
+                    }
+                }
+                
+                // Créer la ruche avec le service
+                rucheService.createRuche(ruche);
+                redirectAttributes.addFlashAttribute("message", "Ruche '" + ruche.getNom() + "' créée avec succès !");
+                redirectAttributes.addFlashAttribute("messageType", "success");
+                
+                return "redirect:/ruches";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Impossible de créer la ruche : utilisateur non trouvé");
+                redirectAttributes.addFlashAttribute("messageType", "danger");
+            }
+            
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Erreur lors de la création de la ruche");
+            System.err.println("Erreur lors de la création de la ruche: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la création de la ruche: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("messageType", "danger");
         }
         
         return "redirect:/ruches/nouvelle";
@@ -478,4 +476,5 @@ public class WebController {
         
         return "redirect:/ruches";
     }
+
 }

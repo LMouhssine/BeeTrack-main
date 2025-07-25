@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Contrôleur de test pour vérifier les services.
@@ -68,7 +69,7 @@ public class TestController {
             }
             
             return ResponseEntity.ok(response);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("erreur", "Erreur lors de la récupération des mesures");
             errorResponse.put("message", e.getMessage());
@@ -111,7 +112,7 @@ public class TestController {
             response.put("timestamp", LocalDateTime.now());
             
             return ResponseEntity.ok(response);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("erreur", "Erreur lors de la création des données de test");
             errorResponse.put("message", e.getMessage());
@@ -138,7 +139,7 @@ public class TestController {
             
             return ResponseEntity.ok(response);
             
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "ERROR");
             errorResponse.put("message", "Erreur lors de la récupération de la dernière mesure");
@@ -165,7 +166,7 @@ public class TestController {
             
             return ResponseEntity.ok(response);
             
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "ERROR");
             errorResponse.put("message", "Erreur lors de la récupération des mesures");

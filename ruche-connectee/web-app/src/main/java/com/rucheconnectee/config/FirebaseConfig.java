@@ -4,8 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.FirestoreOptions;
+import com.google.firebase.database.FirebaseDatabase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Configuration Firebase pour l'authentification et Firestore.
+ * Configuration Firebase pour l'authentification et Realtime Database.
  * S'active uniquement si Firebase est configuré (mode production).
  * En mode développement, utilise les services mockés.
  */
@@ -31,6 +30,9 @@ public class FirebaseConfig {
     @Value("${firebase.credentials-path:firebase-service-account.json}")
     private String credentialsPath;
 
+    @Value("${firebase.database-url:}")
+    private String databaseUrl;
+
     @PostConstruct
     public void initialize() {
         if (projectId == null || projectId.isEmpty()) {
@@ -42,12 +44,16 @@ public class FirebaseConfig {
             if (FirebaseApp.getApps().isEmpty()) {
                 InputStream serviceAccount = new ClassPathResource(credentialsPath).getInputStream();
                 
-                FirebaseOptions options = FirebaseOptions.builder()
+                FirebaseOptions.Builder optionsBuilder = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setProjectId(projectId)
-                        .build();
+                        .setProjectId(projectId);
+                
+                // Ajouter l'URL de la base de données si elle est configurée
+                if (databaseUrl != null && !databaseUrl.isEmpty()) {
+                    optionsBuilder.setDatabaseUrl(databaseUrl);
+                }
 
-                FirebaseApp.initializeApp(options);
+                FirebaseApp.initializeApp(optionsBuilder.build());
                 System.out.println("Firebase initialisé avec succès pour le projet: " + projectId);
             }
         } catch (IOException e) {
@@ -64,19 +70,7 @@ public class FirebaseConfig {
 
     @Bean
     @ConditionalOnProperty(name = "firebase.project-id")
-    public Firestore firestore() {
-        try {
-            InputStream serviceAccount = new ClassPathResource(credentialsPath).getInputStream();
-            GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-            
-            FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder()
-                    .setCredentials(credentials)
-                    .setProjectId(projectId)
-                    .build();
-                    
-            return firestoreOptions.getService();
-        } catch (IOException e) {
-            throw new RuntimeException("Erreur lors de l'initialisation de Firestore", e);
-        }
+    public FirebaseDatabase firebaseDatabase() {
+        return FirebaseDatabase.getInstance();
     }
 } 

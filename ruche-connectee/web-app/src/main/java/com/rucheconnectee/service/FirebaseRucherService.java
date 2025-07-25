@@ -1,6 +1,6 @@
 package com.rucheconnectee.service;
 
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+
 import com.google.cloud.Timestamp;
 import com.rucheconnectee.model.Rucher;
 import com.rucheconnectee.config.FirebaseTimestampConverter;
@@ -26,7 +26,7 @@ public class FirebaseRucherService extends RucherService {
     public Rucher getRucherById(String id) {
         try {
             var document = firebaseService.getDocument(COLLECTION_RUCHERS, id);
-            if (document != null && document.exists()) {
+            if (document != null) {
                 Rucher rucher = mapDocumentToRucher(document);
                 return rucher;
             }
@@ -41,18 +41,18 @@ public class FirebaseRucherService extends RucherService {
     public List<Rucher> getRuchersByApiculteur(String apiculteurId) {
         try {
             System.out.println("🔍 Récupération des ruchers pour l'apiculteur: " + apiculteurId);
-            List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_RUCHERS, "apiculteur_id", apiculteurId);
+            List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_RUCHERS, "apiculteur_id", apiculteurId);
             List<Rucher> ruchers = new ArrayList<>();
             
             System.out.println("📊 Nombre de documents trouvés: " + documents.size());
             
-            for (QueryDocumentSnapshot document : documents) {
+            for (Map<String, Object> document : documents) {
                 try {
                     Rucher rucher = mapDocumentToRucher(document);
                     ruchers.add(rucher);
                     System.out.println("✅ Rucher mappé: " + rucher.getNom());
                 } catch (Exception e) {
-                    System.err.println("❌ Erreur lors du mapping du rucher " + document.getId() + ": " + e.getMessage());
+                    System.err.println("❌ Erreur lors du mapping du rucher " + document.get("id") + ": " + e.getMessage());
                     // Continuer avec les autres documents au lieu de tout arrêter
                 }
             }
@@ -66,41 +66,44 @@ public class FirebaseRucherService extends RucherService {
     }
 
     /**
-     * Mappe manuellement un document Firestore vers un objet Rucher
+     * Mappe manuellement un document Map vers un objet Rucher
      * pour éviter les problèmes de désérialisation automatique avec les timestamps
      */
-    private Rucher mapDocumentToRucher(com.google.cloud.firestore.DocumentSnapshot document) {
+    private Rucher mapDocumentToRucher(Map<String, Object> document) {
         Rucher rucher = new Rucher();
         
-        rucher.setId(document.getId());
+        rucher.setId((String) document.get("id"));
         
         // Champs string
-        if (document.contains("nom")) rucher.setNom(document.getString("nom"));
-        if (document.contains("description")) rucher.setDescription(document.getString("description"));
-        if (document.contains("adresse")) rucher.setAdresse(document.getString("adresse"));
-        if (document.contains("ville")) rucher.setVille(document.getString("ville"));
-        if (document.contains("code_postal")) rucher.setCodePostal(document.getString("code_postal"));
-        if (document.contains("apiculteur_id")) rucher.setApiculteurId(document.getString("apiculteur_id"));
-        if (document.contains("notes")) rucher.setNotes(document.getString("notes"));
-        if (document.contains("coordonnees")) rucher.setCoordonnees(document.getString("coordonnees"));
+        if (document.containsKey("nom")) rucher.setNom((String) document.get("nom"));
+        if (document.containsKey("description")) rucher.setDescription((String) document.get("description"));
+        if (document.containsKey("adresse")) rucher.setAdresse((String) document.get("adresse"));
+        if (document.containsKey("ville")) rucher.setVille((String) document.get("ville"));
+        if (document.containsKey("code_postal")) rucher.setCodePostal((String) document.get("code_postal"));
+        if (document.containsKey("apiculteur_id")) rucher.setApiculteurId((String) document.get("apiculteur_id"));
+        if (document.containsKey("notes")) rucher.setNotes((String) document.get("notes"));
+        if (document.containsKey("coordonnees")) rucher.setCoordonnees((String) document.get("coordonnees"));
         
         // Champs numériques
-        if (document.contains("position_lat")) rucher.setPositionLat(document.getDouble("position_lat"));
-        if (document.contains("position_lng")) rucher.setPositionLng(document.getDouble("position_lng"));
-        if (document.contains("nombre_ruches")) {
-            Long nombreRuches = document.getLong("nombre_ruches");
-            rucher.setNombreRuches(nombreRuches != null ? nombreRuches.intValue() : 0);
+        if (document.containsKey("position_lat") && document.get("position_lat") instanceof Number) {
+            rucher.setPositionLat(((Number) document.get("position_lat")).doubleValue());
+        }
+        if (document.containsKey("position_lng") && document.get("position_lng") instanceof Number) {
+            rucher.setPositionLng(((Number) document.get("position_lng")).doubleValue());
+        }
+        if (document.containsKey("nombre_ruches") && document.get("nombre_ruches") instanceof Number) {
+            rucher.setNombreRuches(((Number) document.get("nombre_ruches")).intValue());
         }
         
         // Champ boolean
-        if (document.contains("actif")) {
-            Boolean actif = document.getBoolean("actif");
+        if (document.containsKey("actif")) {
+            Boolean actif = (Boolean) document.get("actif");
             rucher.setActif(actif != null ? actif : true);
         }
         
         // Gestion spéciale pour les timestamps
-        if (document.contains("date_creation")) {
-            Timestamp timestamp = document.getTimestamp("date_creation");
+        if (document.containsKey("date_creation") && document.get("date_creation") instanceof com.google.cloud.Timestamp) {
+            Timestamp timestamp = (com.google.cloud.Timestamp) document.get("date_creation");
             if (timestamp != null) {
                 rucher.setDateCreation(FirebaseTimestampConverter.timestampToLocalDateTime(timestamp));
             }

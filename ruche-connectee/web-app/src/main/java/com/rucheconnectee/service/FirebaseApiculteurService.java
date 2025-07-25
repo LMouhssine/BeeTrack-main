@@ -1,6 +1,6 @@
 package com.rucheconnectee.service;
 
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.rucheconnectee.model.Apiculteur;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -31,43 +32,59 @@ public class FirebaseApiculteurService implements ApiculteurService {
 
     @Override
     public Apiculteur getApiculteurById(String id) throws ExecutionException, InterruptedException {
-        var document = firebaseService.getDocument(COLLECTION_APICULTEURS, id);
-        if (document.exists()) {
-            return documentToApiculteur(document.getId(), document.getData());
+        try {
+            var document = firebaseService.getDocument(COLLECTION_APICULTEURS, id);
+            if (document != null) {
+                return documentToApiculteur((String) document.get("id"), document);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de l'apiculteur", e);
         }
-        return null;
     }
 
     @Override
     public Apiculteur getApiculteurByEmail(String email) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "email", email);
-        if (!documents.isEmpty()) {
-            QueryDocumentSnapshot doc = documents.get(0);
-            return documentToApiculteur(doc.getId(), doc.getData());
+        try {
+            List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "email", email);
+            if (!documents.isEmpty()) {
+                Map<String, Object> doc = documents.get(0);
+                return documentToApiculteur((String) doc.get("id"), doc);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de l'apiculteur par email", e);
         }
-        return null;
     }
 
     @Override
     public Apiculteur getApiculteurByIdentifiant(String identifiant) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "identifiant", identifiant);
-        if (!documents.isEmpty()) {
-            QueryDocumentSnapshot doc = documents.get(0);
-            return documentToApiculteur(doc.getId(), doc.getData());
+        try {
+            List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "identifiant", identifiant);
+            if (!documents.isEmpty()) {
+                Map<String, Object> doc = documents.get(0);
+                return documentToApiculteur((String) doc.get("id"), doc);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de l'apiculteur par identifiant", e);
         }
-        return null;
     }
 
     @Override
     public List<Apiculteur> getAllApiculteurs() throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "actif", true);
-        return documents.stream()
-                .map(doc -> documentToApiculteur(doc.getId(), doc.getData()))
-                .collect(Collectors.toList());
+        try {
+            List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_APICULTEURS, "actif", true);
+            return documents.stream()
+                    .map(doc -> documentToApiculteur((String) doc.get("id"), doc))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération des apiculteurs", e);
+        }
     }
 
     @Override
-    public Apiculteur createApiculteur(Apiculteur apiculteur, String password) throws ExecutionException, InterruptedException, FirebaseAuthException {
+    public Apiculteur createApiculteur(Apiculteur apiculteur, String password) throws ExecutionException, InterruptedException, FirebaseAuthException, TimeoutException {
         // Créer l'utilisateur dans Firebase Auth
         UserRecord userRecord = firebaseService.createUser(
                 apiculteur.getEmail(),
@@ -89,7 +106,7 @@ public class FirebaseApiculteurService implements ApiculteurService {
     }
 
     @Override
-    public Apiculteur updateApiculteur(String id, Apiculteur apiculteur) throws ExecutionException, InterruptedException {
+    public Apiculteur updateApiculteur(String id, Apiculteur apiculteur) throws ExecutionException, InterruptedException, TimeoutException {
         Map<String, Object> updates = apiculteurToMap(apiculteur);
         firebaseService.updateDocument(COLLECTION_APICULTEURS, id, updates);
         
@@ -98,14 +115,14 @@ public class FirebaseApiculteurService implements ApiculteurService {
     }
 
     @Override
-    public void desactiverApiculteur(String id) throws ExecutionException, InterruptedException {
+    public void desactiverApiculteur(String id) throws ExecutionException, InterruptedException, TimeoutException {
         Map<String, Object> updates = new HashMap<>();
         updates.put("actif", false);
         firebaseService.updateDocument(COLLECTION_APICULTEURS, id, updates);
     }
 
     @Override
-    public void deleteApiculteur(String id) throws ExecutionException, InterruptedException, FirebaseAuthException {
+    public void deleteApiculteur(String id) throws ExecutionException, InterruptedException, FirebaseAuthException, TimeoutException {
         // Supprimer de Firestore
         firebaseService.deleteDocument(COLLECTION_APICULTEURS, id);
         

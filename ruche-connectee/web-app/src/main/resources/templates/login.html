@@ -4,247 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - BeeTrack</title>
-    <meta name="description" content="Connexion à votre compte BeeTrack">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" th:href="@{/logo.svg}">
-    
-    <style>
-        .login-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-4);
-        }
-        
-        .login-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-2xl);
-            overflow: hidden;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-        }
-        
-        .login-header {
-            background: var(--gradient-primary);
-            padding: var(--space-8);
-            text-align: center;
-            color: white;
-        }
-        
-        .login-logo {
-            width: 64px;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: var(--radius-xl);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto var(--space-4);
-            backdrop-filter: blur(10px);
-        }
-        
-        .login-title {
-            font-size: var(--text-2xl);
-            font-weight: 700;
-            margin: 0;
-            margin-bottom: var(--space-2);
-        }
-        
-        .login-subtitle {
-            font-size: var(--text-sm);
-            opacity: 0.9;
-            margin: 0;
-        }
-        
-        .login-body {
-            padding: var(--space-8);
-        }
-        
-        .form-group {
-            margin-bottom: var(--space-6);
-        }
-        
-        .form-label {
-            display: block;
-            font-size: var(--text-sm);
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: var(--space-2);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: var(--space-4);
-            font-size: var(--text-base);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: var(--transition-all);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--color-primary-500);
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .btn-login {
-            width: 100%;
-            padding: var(--space-4);
-            font-size: var(--text-base);
-            font-weight: 600;
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            transition: var(--transition-all);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: var(--space-6);
-            padding-top: var(--space-6);
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .login-footer a {
-            color: var(--color-primary-600);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition-all);
-        }
-        
-        .login-footer a:hover {
-            color: var(--color-primary-700);
-        }
-        
-        .alert {
-            margin-bottom: var(--space-4);
-            padding: var(--space-4);
-            border-radius: var(--radius-lg);
-            border: 1px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-        }
-        
-        .alert-danger {
-            background: var(--color-danger-light);
-            border-color: var(--color-danger);
-            color: var(--color-danger);
-        }
-        
-        .alert-success {
-            background: var(--color-success-light);
-            border-color: var(--color-success);
-            color: var(--color-success);
-        }
-        
-        .password-toggle {
-            position: absolute;
-            right: var(--space-4);
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: var(--space-2);
-            border-radius: var(--radius-md);
-            transition: var(--transition-all);
-        }
-        
-        .password-toggle:hover {
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-        }
-        
-        .form-group {
-            position: relative;
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: var(--space-2);
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .btn-login.loading .loading-spinner {
-            display: inline-block;
-        }
-        
-        .btn-login.loading span {
-            opacity: 0.7;
-        }
-        
-        @media (max-width: 480px) {
-            .login-container {
-                padding: var(--space-2);
-            }
-            
-            .login-card {
-                max-width: 100%;
-            }
-            
-            .login-header {
-                padding: var(--space-6);
-            }
-            
-            .login-body {
-                padding: var(--space-6);
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                     </svg>
                 </div>
@@ -252,132 +20,63 @@
                 <p class="login-subtitle">Connexion à votre compte</p>
             </div>
             
-            <div class="login-body">
-                <!-- Messages d'erreur -->
-                <div th:if="${error}" class="alert alert-danger">
-                    <i data-lucide="alert-circle"></i>
-                    <span th:text="${error}">Erreur de connexion</span>
+            <!-- Messages -->
+            <div th:if="${error}" class="alert alert-danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span th:text="${error}">Erreur de connexion</span>
+            </div>
+            
+            <div th:if="${message}" class="alert alert-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                </svg>
+                <span th:text="${message}">Message</span>
+            </div>
+            
+            <!-- Formulaire -->
+            <form th:action="@{/login}" method="post" id="loginForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">Email</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="form-control" 
+                           placeholder="votre@email.com"
+                           th:value="${param.username}"
+                           required 
+                           autocomplete="username">
                 </div>
                 
-                <div th:if="${message}" class="alert alert-success">
-                    <i data-lucide="check-circle"></i>
-                    <span th:text="${message}">Message</span>
+                <div class="form-group">
+                    <label for="password" class="form-label">Mot de passe</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-control" 
+                           placeholder="••••••••"
+                           required 
+                           autocomplete="current-password">
                 </div>
                 
-                <!-- Formulaire de connexion -->
-                <form th:action="@{/login}" method="post" id="loginForm">
-                    <div class="form-group">
-                        <label for="username" class="form-label">Email ou identifiant</label>
-                        <input type="text" 
-                               id="username" 
-                               name="username" 
-                               class="form-control" 
-                               placeholder="votre@email.com"
-                               th:value="${param.username}"
-                               required 
-                               autocomplete="username">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password" class="form-label">Mot de passe</label>
-                        <input type="password" 
-                               id="password" 
-                               name="password" 
-                               class="form-control" 
-                               placeholder="Votre mot de passe"
-                               required 
-                               autocomplete="current-password">
-                        <button type="button" class="password-toggle" onclick="togglePassword()">
-                            <i data-lucide="eye" id="passwordIcon"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="checkbox-container">
-                            <input type="checkbox" name="remember-me" id="remember-me">
-                            <span class="checkmark"></span>
-                            Se souvenir de moi
-                        </label>
-                    </div>
-                    
-                    <button type="submit" class="btn-login" id="loginBtn">
-                        <div class="loading-spinner"></div>
-                        <span>Se connecter</span>
-                    </button>
-                </form>
-                
-                <div class="login-footer">
-                    <a href="/reset-password" th:href="@{/reset-password}">Mot de passe oublié ?</a>
-                    <br>
-                    <span class="text-muted">Pas encore de compte ? </span>
-                    <a href="/register" th:href="@{/register}">S'inscrire</a>
-                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: var(--space-6);">
+                    Se connecter
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <a href="/reset-password" th:href="@{/reset-password}">Mot de passe oublié ?</a>
             </div>
         </div>
     </div>
     
-    <!-- JavaScript -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
-        // Initialiser les icônes Lucide
+        // Auto-focus
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        });
-        
-        // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const passwordIcon = document.getElementById('passwordIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.setAttribute('data-lucide', 'eye');
-            }
-            
-            // Re-initialiser l'icône
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-        
-        // Gestion du formulaire de connexion
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const loginBtn = document.getElementById('loginBtn');
-            const loadingSpinner = loginBtn.querySelector('.loading-spinner');
-            const btnText = loginBtn.querySelector('span');
-            
-            // Afficher l'état de chargement
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
-            
-            // Simuler un délai pour l'UX
-            setTimeout(() => {
-                // Le formulaire sera soumis normalement
-            }, 1000);
-        });
-        
-        // Auto-focus sur le premier champ
-        document.addEventListener('DOMContentLoaded', function() {
-            const usernameInput = document.getElementById('username');
-            if (usernameInput) {
-                usernameInput.focus();
-            }
-        });
-        
-        // Raccourcis clavier
-        document.addEventListener('keydown', function(e) {
-            // Entrée pour soumettre le formulaire
-            if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
-                const loginBtn = document.getElementById('loginBtn');
-                if (loginBtn && !loginBtn.disabled) {
-                    loginBtn.click();
-                }
-            }
+            document.getElementById('username').focus();
         });
     </script>
 </body>

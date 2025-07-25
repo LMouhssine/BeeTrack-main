@@ -1,6 +1,6 @@
 package com.rucheconnectee.service;
 
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+
 import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.model.DonneesCapteur;
 import org.springframework.stereotype.Service;
@@ -22,19 +22,23 @@ public class FirebaseRucheService extends RucheService {
 
     @Override
     public Ruche getRucheById(String id) throws ExecutionException, InterruptedException {
-        var document = firebaseService.getDocument("ruches", id);
-        if (document != null && document.exists()) {
-            return documentToRuche(document.getId(), document.getData());
+        try {
+            var document = firebaseService.getDocument("ruches", id);
+            if (document != null) {
+                return documentToRuche((String) document.get("id"), document);
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération de la ruche", e);
         }
-        return null;
     }
 
     @Override
     public List<Ruche> getRuchesByApiculteur(String apiculteurId) {
         try {
-            List<QueryDocumentSnapshot> documents = firebaseService.getDocuments("ruches", "apiculteur_id", apiculteurId);
+            List<Map<String, Object>> documents = firebaseService.getDocuments("ruches", "apiculteur_id", apiculteurId);
             return documents.stream()
-                    .map(doc -> documentToRuche(doc.getId(), doc.getData()))
+                    .map(doc -> documentToRuche((String) doc.get("id"), doc))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de la récupération des ruches", e);
@@ -44,16 +48,18 @@ public class FirebaseRucheService extends RucheService {
     @Override
     public List<DonneesCapteur> getHistoriqueDonnees(String rucheId, int limit) {
         try {
-            List<QueryDocumentSnapshot> documents = firebaseService.getDocumentsWithFilter(
-                "donnees_capteurs",
-                "rucheId",
-                rucheId,
-                "timestamp",
-                false,
-                limit
-            );
+            List<Map<String, Object>> documents = firebaseService.getDocuments("donnees_capteurs", "rucheId", rucheId);
             return documents.stream()
-                    .map(doc -> documentToDonnees(doc.getId(), doc.getData()))
+                    .sorted((a, b) -> {
+                        Object aTime = a.get("timestamp");
+                        Object bTime = b.get("timestamp");
+                        if (aTime instanceof Long && bTime instanceof Long) {
+                            return Long.compare((Long) bTime, (Long) aTime); // Décroissant
+                        }
+                        return 0;
+                    })
+                    .limit(limit)
+                    .map(doc -> documentToDonnees((String) doc.get("id"), doc))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de la récupération de l'historique", e);
