@@ -6,7 +6,7 @@ import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.ApiculteurService;
 import com.rucheconnectee.service.RucherService;
 import com.rucheconnectee.service.RucheService;
-import com.rucheconnectee.service.FirebaseService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

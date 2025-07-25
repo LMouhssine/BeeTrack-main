@@ -1,6 +1,5 @@
 package com.rucheconnectee.service;
 
-import java.util.Map;
 import com.rucheconnectee.model.Ruche;
 import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.model.CreateRucheRequest;

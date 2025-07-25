@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -34,6 +34,7 @@ public class FirebaseService {
     public Map<String, Object> getDocument(String collection, String documentId) throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference(collection).child(documentId);
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final Map<String, Object>[] result = new Map[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -43,7 +44,9 @@ public class FirebaseService {
                 if (dataSnapshot.exists()) {
                     Map<String, Object> data = new HashMap<>();
                     data.put("id", dataSnapshot.getKey());
-                    data.putAll((Map<String, Object>) dataSnapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) dataSnapshot.getValue();
+                    data.putAll(value);
                     result[0] = data;
                 }
                 latch.countDown();
@@ -73,6 +76,7 @@ public class FirebaseService {
     public List<Map<String, Object>> getDocuments(String collection, String field, Object value) throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference(collection);
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final List<Map<String, Object>>[] result = new List[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -83,7 +87,9 @@ public class FirebaseService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Map<String, Object> data = new HashMap<>();
                     data.put("id", snapshot.getKey());
-                    data.putAll((Map<String, Object>) snapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
+                    data.putAll(value);
                     documents.add(data);
                 }
                 result[0] = documents;
@@ -114,6 +120,7 @@ public class FirebaseService {
     public List<Map<String, Object>> getAllDocuments(String collection) throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference(collection);
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final List<Map<String, Object>>[] result = new List[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -124,7 +131,9 @@ public class FirebaseService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Map<String, Object> data = new HashMap<>();
                     data.put("id", snapshot.getKey());
-                    data.putAll((Map<String, Object>) snapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
+                    data.putAll(value);
                     documents.add(data);
                 }
                 result[0] = documents;

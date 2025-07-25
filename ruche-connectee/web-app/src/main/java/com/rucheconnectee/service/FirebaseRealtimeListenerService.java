@@ -48,6 +48,7 @@ public class FirebaseRealtimeListenerService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot mesureSnapshot : dataSnapshot.getChildren()) {
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> mesure = (Map<String, Object>) mesureSnapshot.getValue();
                     if (mesure != null) {
                         traiterNouvelleMesure(mesureSnapshot.getKey(), mesure);
@@ -84,6 +85,7 @@ public class FirebaseRealtimeListenerService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot mesureSnapshot : dataSnapshot.getChildren()) {
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> mesure = (Map<String, Object>) mesureSnapshot.getValue();
                     if (mesure != null) {
                         traiterNouvelleMesure(rucheId, mesure);

@@ -80,6 +80,7 @@ public class DashboardDataService {
     public List<Map<String, Object>> getAllRuches() throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference("ruches");
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final List<Map<String, Object>>[] result = new List[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -90,7 +91,9 @@ public class DashboardDataService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Map<String, Object> ruche = new HashMap<>();
                     ruche.put("id", snapshot.getKey());
-                    ruche.putAll((Map<String, Object>) snapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
+                    ruche.putAll(value);
                     ruches.add(ruche);
                 }
                 result[0] = ruches;
@@ -121,6 +124,7 @@ public class DashboardDataService {
     public List<Map<String, Object>> getAllRuchers() throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference("ruchers");
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final List<Map<String, Object>>[] result = new List[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -131,7 +135,9 @@ public class DashboardDataService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Map<String, Object> rucher = new HashMap<>();
                     rucher.put("id", snapshot.getKey());
-                    rucher.putAll((Map<String, Object>) snapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
+                    rucher.putAll(value);
                     ruchers.add(rucher);
                 }
                 result[0] = ruchers;
@@ -162,6 +168,7 @@ public class DashboardDataService {
     public List<Map<String, Object>> getLatestMesures() throws InterruptedException, TimeoutException {
         DatabaseReference ref = firebaseDatabase.getReference("mesures");
         CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unchecked")
         final List<Map<String, Object>>[] result = new List[1];
         final RuntimeException[] error = new RuntimeException[1];
         
@@ -172,7 +179,9 @@ public class DashboardDataService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Map<String, Object> mesure = new HashMap<>();
                     mesure.put("id", snapshot.getKey());
-                    mesure.putAll((Map<String, Object>) snapshot.getValue());
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
+                    mesure.putAll(value);
                     mesures.add(mesure);
                 }
                 // Trier par timestamp décroissant
