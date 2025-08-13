@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>ApiculteursNew - BeeTrack</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title">ApiculteursNew</h1>
+                <p class="page-subtitle">Gestion des apiculteurs (Auth + DB)</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-primary" th:href="@{/ApiculteursNew/nouveau}">Ajouter</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Rôle</th>
+                            <th>Créé le</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="it : ${items}">
+                            <td><a th:href="@{'/ApiculteursNew/' + ${it.id}}" th:text="${it.email}">email</a></td>
+                            <td th:text="${it.nom}">nom</td>
+                            <td th:text="${it.prenom}">prenom</td>
+                            <td th:text="${it.role}">role</td>
+                            <td th:text="${#dates.format(new java.util.Date(it.createdAt), 'dd/MM/yyyy HH:mm')}">date</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-secondary" th:href="@{'/ApiculteursNew/' + ${it.id} + '/editer'}">Modifier</a>
+                                <form th:action="@{'/ApiculteursNew/' + ${it.id} + '/supprimer'}" method="post" style="display:inline-block" onsubmit="return confirm('Supprimer cet utilisateur ? (Auth + DB)');">
+                                    <button class="btn btn-sm btn-danger" type="submit">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${items == null or #lists.isEmpty(items)}">
+                            <td colspan="6" class="text-center text-muted">Aucun apiculteur</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+

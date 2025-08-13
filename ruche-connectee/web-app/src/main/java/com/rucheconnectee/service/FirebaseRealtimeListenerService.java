@@ -158,18 +158,20 @@ public class FirebaseRealtimeListenerService {
                 }
             }
 
-            // Vérifier les seuils de température
-            Double temperature = (Double) mesure.get("temperature");
-            if (temperature != null) {
+            // Vérifier les seuils de température (gérer Long/Integer/Double)
+            Number temperatureNumber = (Number) mesure.get("temperature");
+            if (temperatureNumber != null) {
+                double temperature = temperatureNumber.doubleValue();
                 String rucheId = (String) mesure.get("rucheId");
                 if (rucheId != null) {
                     verifierSeuilsTemperature(rucheId, temperature, mesure);
                 }
             }
 
-            // Vérifier les seuils d'humidité
-            Double humidite = (Double) mesure.get("humidite");
-            if (humidite != null) {
+            // Vérifier les seuils d'humidité (gérer Long/Integer/Double)
+            Number humiditeNumber = (Number) mesure.get("humidite");
+            if (humiditeNumber != null) {
+                double humidite = humiditeNumber.doubleValue();
                 String rucheId = (String) mesure.get("rucheId");
                 if (rucheId != null) {
                     verifierSeuilsHumidite(rucheId, humidite, mesure);

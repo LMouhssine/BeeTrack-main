@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,8 +51,8 @@
         <!-- Navigation principale avec icônes modernes -->
         <ul class="nav-list">
             <li class="nav-item">
-                <a href="/dashboard" th:href="@{/dashboard}" 
-                   class="nav-link" 
+                <a href="/dashboard" th:href="@{/dashboard}"
+                   class="nav-link"
                    th:classappend="${currentPage == 'dashboard' ? 'active' : ''}"
                    th:aria-current="${currentPage == 'dashboard' ? 'page' : 'false'}">
                     <i data-lucide="layout-dashboard" class="nav-icon" aria-hidden="true"></i>
@@ -60,25 +60,35 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/ruchers" th:href="@{/ruchers}" 
+                <a href="/RuchesNew" th:href="@{/RuchesNew}"
                    class="nav-link"
-                   th:classappend="${currentPage == 'ruchers' ? 'active' : ''}"
-                   th:aria-current="${currentPage == 'ruchers' ? 'page' : 'false'}">
-                    <i data-lucide="map-pin" class="nav-icon" aria-hidden="true"></i>
-                    <span>Ruchers</span>
+                   th:classappend="${currentPage == 'ruchesnew' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'ruchesnew' ? 'page' : 'false'}">
+                    <i data-lucide="list" class="nav-icon" aria-hidden="true"></i>
+                    <span>RuchesNew</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/ruches" th:href="@{/ruches}" 
+                <a href="/RuchersNew" th:href="@{/RuchersNew}"
                    class="nav-link"
-                   th:classappend="${currentPage == 'ruches' ? 'active' : ''}"
-                   th:aria-current="${currentPage == 'ruches' ? 'page' : 'false'}">
-                    <i data-lucide="hexagon" class="nav-icon" aria-hidden="true"></i>
-                    <span>Ruches</span>
+                   th:classappend="${currentPage == 'ruchersnew' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'ruchersnew' ? 'page' : 'false'}">
+                    <i data-lucide="map" class="nav-icon" aria-hidden="true"></i>
+                    <span>RuchersNew</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/statistiques" th:href="@{/statistiques}" 
+                <a href="/alertes" th:href="@{/alertes}"
+                   class="nav-link"
+                   th:classappend="${currentPage == 'alertes' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'alertes' ? 'page' : 'false'}">
+                    <i data-lucide="alert-triangle" class="nav-icon" aria-hidden="true"></i>
+                    <span>Alertes</span>
+                    <span class="notification-badge" th:if="${alertCount > 0}" th:text="${alertCount}" aria-label="Nombre d'alertes"></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/statistiques" th:href="@{/statistiques}"
                    class="nav-link"
                    th:classappend="${currentPage == 'statistiques' ? 'active' : ''}"
                    th:aria-current="${currentPage == 'statistiques' ? 'page' : 'false'}">
@@ -86,14 +96,13 @@
                     <span>Statistiques</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="/alertes" th:href="@{/alertes}" 
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a href="/ApiculteursNew" th:href="@{/ApiculteursNew}"
                    class="nav-link"
-                   th:classappend="${currentPage == 'alertes' ? 'active' : ''}"
-                   th:aria-current="${currentPage == 'alertes' ? 'page' : 'false'}">
-                    <i data-lucide="alert-triangle" class="nav-icon" aria-hidden="true"></i>
-                    <span>Alertes</span>
-                    <span class="notification-badge" th:if="${alertCount > 0}" th:text="${alertCount}" aria-label="Nombre d'alertes"></span>
+                   th:classappend="${currentPage == 'apiculteursnew' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'apiculteursnew' ? 'page' : 'false'}">
+                    <i data-lucide="users" class="nav-icon" aria-hidden="true"></i>
+                    <span>ApiculteursNew</span>
                 </a>
             </li>
         </ul>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Détail apiculteur - ApiculteursNew</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title" th:text="${item.prenom} + ' ' + ${item.nom}">Apiculteur</h1>
+                <p class="page-subtitle">Fiche apiculteur</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-secondary" th:href="@{/ApiculteursNew}">Retour</a>
+                <a class="btn btn-primary" th:href="@{'/ApiculteursNew/' + ${item.id} + '/editer'}">Modifier</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9" th:text="${item.email}">email</dd>
+
+                <dt class="col-sm-3">Nom</dt>
+                <dd class="col-sm-9" th:text="${item.nom}">nom</dd>
+
+                <dt class="col-sm-3">Prénom</dt>
+                <dd class="col-sm-9" th:text="${item.prenom}">prenom</dd>
+
+                <dt class="col-sm-3">Rôle</dt>
+                <dd class="col-sm-9" th:text="${item.role}">role</dd>
+
+                <dt class="col-sm-3">Créé le</dt>
+                <dd class="col-sm-9" th:text="${#dates.format(new java.util.Date(item.createdAt), 'dd/MM/yyyy HH:mm')}">date</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+

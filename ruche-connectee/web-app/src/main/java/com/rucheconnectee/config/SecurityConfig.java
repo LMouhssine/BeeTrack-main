@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,15 +15,24 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.rucheconnectee.service.FirebaseAuthenticationProvider;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * Configuration de sécurité simple pour BeeTrack
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
 
+
+    @Autowired(required = false)
+    private FirebaseAuthenticationProvider firebaseAuthenticationProvider;
+    @Autowired
+    private AuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -32,12 +42,16 @@ public class SecurityConfig {
                 .requestMatchers("/test/**").permitAll()  // Permet l'accès aux endpoints de test Firebase
                 .requestMatchers("/fix/**").permitAll()   // Permet l'accès aux endpoints de correction
                 .requestMatchers("/debug", "/safe-login", "/force-logout", "/simple-dashboard").permitAll()  // Endpoints de débogage
+                .requestMatchers("/ApiculteursNew/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
+            // Enregistrer le provider Firebase si disponible
+            .authenticationProvider(firebaseAuthenticationProvider)
             .authenticationManager(authenticationManager(http))
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
+                .loginProcessingUrl("/login")
+                .successHandler(customAuthenticationSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -60,13 +74,13 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authManagerBuilder = 
-            http.getSharedObject(AuthenticationManagerBuilder.class);
-        
-        // Utiliser l'authentification en mémoire pour le développement et les tests
-        authManagerBuilder.userDetailsService(fallbackUserDetailsService())
-            .passwordEncoder(passwordEncoder());
-        
+        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        // Préférer Firebase si disponible
+        if (firebaseAuthenticationProvider != null) {
+            authManagerBuilder.authenticationProvider(firebaseAuthenticationProvider);
+        }
+        // Fallback in-memory users
+        authManagerBuilder.userDetailsService(fallbackUserDetailsService()).passwordEncoder(passwordEncoder());
         return authManagerBuilder.build();
     }
 

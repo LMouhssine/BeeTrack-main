@@ -45,8 +45,15 @@ public abstract class RucheService {
      * Récupère toutes les ruches d'un rucher
      */
     public List<Ruche> getRuchesByRucher(String rucherId) throws ExecutionException, InterruptedException, TimeoutException {
-        List<Map<String, Object>> documents = firebaseService.getDocuments(COLLECTION_RUCHES, "rucher_id", rucherId);
-        return documents.stream()
+        // Supporter rucher_id et rucherId
+        List<Map<String, Object>> snakeCase = firebaseService.getDocuments(COLLECTION_RUCHES, "rucher_id", rucherId);
+        List<Map<String, Object>> camelCase = firebaseService.getDocuments(COLLECTION_RUCHES, "rucherId", rucherId);
+
+        List<Map<String, Object>> merged = new java.util.ArrayList<>();
+        if (snakeCase != null) merged.addAll(snakeCase);
+        if (camelCase != null) merged.addAll(camelCase);
+
+        return merged.stream()
                 .filter(doc -> (Boolean) doc.getOrDefault("actif", true))
                 .map(doc -> documentToRuche((String) doc.get("id"), doc))
                 .collect(Collectors.toList());
@@ -162,9 +169,18 @@ public abstract class RucheService {
         Ruche ruche = new Ruche();
         ruche.setId(id);
         ruche.setNom((String) data.get("nom"));
-        ruche.setApiculteurId((String) data.get("apiculteur_id"));
-        ruche.setRucherId((String) data.get("rucher_id"));
-        ruche.setRucherNom((String) data.get("rucher_nom"));
+        // Accepter snake_case et camelCase
+        String apiculteurId = (String) data.get("apiculteur_id");
+        if (apiculteurId == null) apiculteurId = (String) data.get("apiculteurId");
+        ruche.setApiculteurId(apiculteurId);
+
+        String rucherId = (String) data.get("rucher_id");
+        if (rucherId == null) rucherId = (String) data.get("rucherId");
+        ruche.setRucherId(rucherId);
+
+        String rucherNom = (String) data.get("rucher_nom");
+        if (rucherNom == null) rucherNom = (String) data.get("rucherNom");
+        ruche.setRucherNom(rucherNom);
         ruche.setDescription((String) data.get("description"));
         ruche.setTypeRuche((String) data.get("type_ruche"));
         ruche.setActif((Boolean) data.getOrDefault("actif", true));

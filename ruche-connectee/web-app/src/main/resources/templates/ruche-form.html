@@ -17,7 +17,7 @@
                 <div class="page-info">
                     <h1 class="page-title">
                         <i data-lucide="plus-circle" class="me-2"></i>
-                        Nouvelle ruche
+                        <span th:text="${ruche != null and ruche.id != null} ? 'Modifier la ruche' : 'Nouvelle ruche'">Nouvelle ruche</span>
                     </h1>
                     <p class="page-subtitle">
                         Ajoutez une nouvelle ruche à votre système de surveillance
@@ -28,6 +28,10 @@
                         <i data-lucide="arrow-left" class="me-2"></i>
                         <span>Retour</span>
                     </a>
+                    <button type="button" class="btn btn-primary" id="headerSaveBtn">
+                        <i data-lucide="save" class="me-2"></i>
+                        <span th:text="${ruche != null and ruche.id != null} ? 'Enregistrer' : 'Créer la ruche'">Créer la ruche</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -39,13 +43,14 @@
                     <i data-lucide="hexagon" class="me-2"></i>
                     <span>Informations de la ruche</span>
                 </h2>
-                <div class="card-subtitle">
+                <div class="card-subtitle" th:text="${ruche != null and ruche.id != null} ? 'Modifiez les informations de votre ruche' : 'Remplissez les informations ci-dessous pour enregistrer votre nouvelle ruche'">
                     Remplissez les informations ci-dessous pour enregistrer votre nouvelle ruche
                 </div>
             </div>
             
             <div class="card-body">
-                <form th:action="@{/ruches/nouvelle}" th:object="${ruche}" method="post" id="rucheForm" novalidate>
+                <form th:action="${ruche != null and ruche.id != null} ? @{'/ruches/' + ${ruche.id} + '/editer'} : @{/ruches/nouvelle}"
+                      th:object="${ruche}" method="post" id="rucheForm" novalidate>
                     <div class="form-sections">
                         <!-- Section Informations générales -->
                         <div class="form-section">
@@ -66,7 +71,7 @@
                                                th:field="*{nom}"
                                                class="form-control" 
                                                placeholder="Ex: Ruche Alpha, Ruche 001..."
-                                               required
+                                                required
                                                maxlength="50">
                                         <div class="form-help">
                                             Donnez un nom unique et facilement reconnaissable à votre ruche
@@ -86,6 +91,7 @@
                                             <option value="">Sélectionner un rucher</option>
                                             <option th:each="rucher : ${ruchers}" 
                                                     th:value="${rucher.id}" 
+                                                    th:selected="${ruche != null and ruche.rucherId == rucher.id}"
                                                     th:text="${rucher.nom}">Rucher Principal</option>
                                         </select>
                                         <div class="form-help">
@@ -162,7 +168,7 @@
                                                        id="actif" 
                                                        th:field="*{actif}"
                                                        class="form-check-input"
-                                                       checked>
+                                                        th:checked="${ruche == null or ruche.actif}">
                                                 <span class="checkmark"></span>
                                                 Ruche active
                                             </label>
@@ -289,7 +295,7 @@
                             <button type="submit" class="btn btn-primary" id="submitBtn">
                                 <div class="loading-spinner"></div>
                                 <i data-lucide="save" class="me-2"></i>
-                                <span>Créer la ruche</span>
+                                <span th:text="${ruche != null and ruche.id != null} ? 'Enregistrer' : 'Créer la ruche'">Créer la ruche</span>
                             </button>
                         </div>
                     </div>
@@ -513,6 +519,11 @@
                 margin-top: 2rem;
                 padding-top: 1.5rem;
                 border-top: 1px solid var(--border-color);
+                position: sticky;
+                bottom: 0;
+                background: var(--bg-primary);
+                padding-bottom: 1rem;
+                z-index: 1;
             }
 
             .actions-right {
@@ -792,6 +803,7 @@
             function initFormSubmission() {
                 const form = document.getElementById('rucheForm');
                 const submitBtn = document.getElementById('submitBtn');
+                const headerSaveBtn = document.getElementById('headerSaveBtn');
 
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -821,6 +833,13 @@
                         form.submit();
                     }, 1000);
                 });
+
+                // Bouton en haut à droite qui déclenche la soumission
+                if (headerSaveBtn) {
+                    headerSaveBtn.addEventListener('click', function() {
+                        submitBtn.click();
+                    });
+                }
             }
 
             // Auto-complétion et suggestions

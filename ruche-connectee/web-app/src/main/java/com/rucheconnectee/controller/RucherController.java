@@ -82,6 +82,7 @@ public class RucherController {
                 model.addAttribute("ruchers", ruchers);
                 model.addAttribute("totalRuchers", ruchers.size());
                 model.addAttribute("totalRuches", ruches.size());
+                model.addAttribute("ruches", ruches);
                 model.addAttribute("apiculteur", apiculteur);
             }
             

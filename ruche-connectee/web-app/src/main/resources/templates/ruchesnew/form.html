@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title th:text="${item != null && item.id != null} ? 'Modifier ruche' : 'Nouvelle ruche'">Ruche</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title" th:text="${item != null && item.id != null} ? 'Modifier ruche' : 'Nouvelle ruche'">Ruche</h1>
+                <p class="page-subtitle">Renseignez le nom, l'identifiant et la description</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-secondary" th:href="@{/RuchesNew}">Retour</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${item != null && item.id != null} ? @{'/RuchesNew/' + ${item.id}} : @{/RuchesNew}" th:object="${item}" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nom" class="form-label">Nom de la ruche</label>
+                            <input id="nom" th:field="*{nom}" class="form-control" placeholder="Ex: Ruche Alpha" required maxlength="100" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ruchesid" class="form-label">RuchesID</label>
+                            <input id="ruchesid" th:field="*{ruchesid}" class="form-control" placeholder="Ex: RCH-001" required maxlength="100" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rucherId" class="form-label">Rucher</label>
+                            <select id="rucherId" th:field="*{rucherId}" class="form-control" required>
+                                <option value="">Sélectionner un rucher</option>
+                                <option th:each="r : ${ruchers}" th:value="${r.id}" th:text="${r.nom}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Notes ou observations..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a class="btn btn-secondary" th:href="@{/RuchesNew}">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+

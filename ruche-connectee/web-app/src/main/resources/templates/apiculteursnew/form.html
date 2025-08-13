@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title th:text="${item != null && item.id != null} ? 'Modifier apiculteur' : 'Nouvel apiculteur'">Apiculteur</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title" th:text="${item != null && item.id != null} ? 'Modifier apiculteur' : 'Nouvel apiculteur'">Apiculteur</h1>
+                <p class="page-subtitle">Création / édition avec Firebase Auth</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-secondary" th:href="@{/ApiculteursNew}">Retour</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${item != null && item.id != null} ? @{'/ApiculteursNew/' + ${item.id}} : @{/ApiculteursNew}" th:object="${item}" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="prenom">Prénom</label>
+                            <input id="prenom" th:field="*{prenom}" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="nom">Nom</label>
+                            <input id="nom" th:field="*{nom}" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input id="email" type="email" th:field="*{email}" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="role">Rôle</label>
+                            <select id="role" th:field="*{role}" class="form-control" required>
+                                <option value="apiculteur">Apiculteur</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" th:if="${item == null || item.id == null}">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="password">Mot de passe</label>
+                            <input id="password" type="password" th:field="*{password}" class="form-control" minlength="6" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a class="btn btn-secondary" th:href="@{/ApiculteursNew}">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+

@@ -78,7 +78,7 @@ public class WebController {
                     model.addAttribute("error", "Erreur lors du chargement du tableau de bord. Veuillez vous reconnecter.");
                     break;
                 default:
-                    model.addAttribute("error", "Les identifiants sont erronés. Utilisez admin@beetrackdemo.com / admin123 ou apiculteur@beetrackdemo.com / demo123");
+                    model.addAttribute("error", "Identifiants incorrects. Vérifiez l'email/mot de passe et les logs [LOGIN] côté serveur.");
                     break;
             }
         }
@@ -99,13 +99,15 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         try {
+            System.out.println("[LOGIN] ⏩ Entrée dashboard");
             // Vérifier l'authentification
             if (authentication == null || !authentication.isAuthenticated()) {
+                System.out.println("[LOGIN] ❌ Non authentifié, redirection login");
                 return "redirect:/login?error=notauthenticated";
             }
             
             String userEmail = authentication.getName();
-            System.out.println("🔍 Dashboard - Utilisateur connecté: " + userEmail);
+            System.out.println("[LOGIN] 🔍 Utilisateur connecté: " + userEmail + " | Authorities=" + authentication.getAuthorities());
             
             try {
                 // Utiliser le nouveau service pour récupérer les données du dashboard
@@ -188,6 +190,14 @@ public class WebController {
     }
 
     /**
+     * Dashboard admin (même template pour l’instant, mais route dédiée pour la redirection post-login)
+     */
+    @GetMapping("/dashboard-admin")
+    public String dashboardAdmin(Model model, Authentication authentication) {
+        return dashboard(model, authentication);
+    }
+
+    /**
      * Page des ruches
      */
     @GetMapping("/ruches")
@@ -243,7 +253,7 @@ public class WebController {
             model.addAttribute("error", "Erreur lors du chargement des ruches: " + e.getMessage());
         }
         
-        return "ruches-list";
+        return "ruches";
     }
 
     /**
@@ -257,13 +267,18 @@ public class WebController {
             if (ruche != null) {
                 // Récupérer l'historique des données depuis Firebase
                 var historique = rucheService.getHistoriqueDonnees(id, 50);
+                // Déterminer la dernière mesure pour l'affichage des cartes
+                if (historique != null && !historique.isEmpty()) {
+                    // L'implémentation Firebase renvoie trié décroissant et limité
+                    ruche.setDernieresDonnees(historique.get(0));
+                }
                 
                 model.addAttribute("ruche", ruche);
                 model.addAttribute("historique", historique);
                 model.addAttribute("currentPage", "ruches");
                 model.addAttribute("pageTitle", "Détails - " + ruche.getNom());
                 
-                return "ruche-details";
+                return "ruches/detail";
             } else {
                 model.addAttribute("error", "Ruche non trouvée");
                 return "redirect:/ruches";
@@ -342,10 +357,14 @@ public class WebController {
      * Page de profil utilisateur
      */
     @GetMapping("/profil")
-    public String profil(Model model) {
+    public String profil(Model model, Authentication authentication) {
         try {
-            // Utiliser l'utilisateur existant dans Firebase
-            var apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+
+            String email = authentication.getName();
+            var apiculteur = apiculteurService.getApiculteurByEmail(email);
             
             if (apiculteur != null) {
                 model.addAttribute("apiculteur", apiculteur);
@@ -455,6 +474,80 @@ public class WebController {
         }
         
         return "redirect:/ruches/nouvelle";
+    }
+
+    /**
+     * Formulaire d'édition d'une ruche
+     */
+    @GetMapping("/ruches/{id}/editer")
+    public String editerRuche(@PathVariable String id,
+                              Model model,
+                              Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+
+            // Récupérer la ruche
+            var ruche = rucheService.getRucheById(id);
+            if (ruche == null) {
+                model.addAttribute("error", "Ruche introuvable");
+                return "redirect:/ruches";
+            }
+
+            // Charger la liste des ruchers pour le select
+            var apiculteur = apiculteurService.getApiculteurByEmail(authentication.getName());
+            if (apiculteur == null) {
+                apiculteur = apiculteurService.getApiculteurByEmail("jean.dupont@email.com");
+            }
+            var ruchers = (apiculteur != null) ? rucherService.getRuchersByApiculteur(apiculteur.getId()) : List.of();
+
+            model.addAttribute("ruchers", ruchers);
+            model.addAttribute("ruche", ruche);
+            model.addAttribute("currentPage", "ruches");
+            model.addAttribute("pageTitle", "Modifier Ruche");
+            return "ruche-form";
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur chargement ruche: " + e.getMessage());
+            return "redirect:/ruches";
+        }
+    }
+
+    /**
+     * Traitement de l'édition d'une ruche
+     */
+    @PostMapping("/ruches/{id}/editer")
+    public String mettreAJourRuche(@PathVariable String id,
+                                   @ModelAttribute Ruche ruche,
+                                   @RequestParam(value = "rucherId", required = false) String rucherId,
+                                   RedirectAttributes redirectAttributes,
+                                   Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login?error=notauthenticated";
+            }
+
+            // Forcer l'id sur l'objet
+            ruche.setId(id);
+
+            // Mettre à jour l'association rucher si fournie
+            if (rucherId != null && !rucherId.isEmpty()) {
+                var rucher = rucherService.getRucherById(rucherId);
+                if (rucher != null) {
+                    ruche.setRucherId(rucher.getId());
+                    ruche.setRucherNom(rucher.getNom());
+                }
+            }
+
+            rucheService.updateRuche(id, ruche);
+            redirectAttributes.addFlashAttribute("message", "Ruche mise à jour avec succès");
+            redirectAttributes.addFlashAttribute("messageType", "success");
+            return "redirect:/ruches";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la mise à jour: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("messageType", "danger");
+            return "redirect:/ruches/" + id + "/editer";
+        }
     }
 
     /**

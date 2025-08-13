@@ -13,39 +13,28 @@
         <!-- Container principal -->
         <div class="dashboard-wrapper">
             
-            <!-- En-tête du dashboard -->
-            <div class="dashboard-hero">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h1 class="hero-title">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                <polyline points="9,22 9,12 15,12 15,22"/>
-                            </svg>
-                            Tableau de bord
-                        </h1>
-                        <p class="hero-subtitle">
-                            Bonjour <span th:text="${#authentication != null ? #authentication.name : 'Apiculteur'}">Apiculteur</span>, 
-                            voici l'état de vos ruches
-                        </p>
-                    </div>
-                    <div class="hero-actions">
-                        <button class="btn btn-light" onclick="location.reload()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="23,4 23,10 17,10"/>
-                                <polyline points="1,20 1,14 7,14"/>
-                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
-                            </svg>
-                            Actualiser
-                        </button>
-                        <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                            Nouvelle ruche
-                        </a>
-                    </div>
+            <!-- En-tête alignée comme les autres pages -->
+            <div class="page-header">
+                <div class="page-info">
+                    <h1 class="page-title">Tableau de bord</h1>
+                    <p class="page-subtitle">Gestion de vos ruches connectées</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="location.reload()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,4 23,10 17,10"/>
+                            <polyline points="1,20 1,14 7,14"/>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Actualiser
+                    </button>
+                    <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Nouvelle ruche
+                    </a>
                 </div>
             </div>
 

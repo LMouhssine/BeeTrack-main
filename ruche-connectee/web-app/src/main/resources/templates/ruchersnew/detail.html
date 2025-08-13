@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Détail rucher - RuchersNew</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title" th:text="${item.nom}">Rucher</h1>
+                <p class="page-subtitle">Fiche rucher</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-secondary" th:href="@{/RuchersNew}">Retour</a>
+                <a class="btn btn-primary" th:href="@{'/RuchersNew/' + ${item.id} + '/editer'}">Modifier</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Nom</dt>
+                <dd class="col-sm-9" th:text="${item.nom}">Nom</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9" th:text="${item.description}">Description</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+

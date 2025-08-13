@@ -1,6 +1,7 @@
 package com.rucheconnectee.service;
 
 import com.rucheconnectee.model.Apiculteur;
+import com.rucheconnectee.model.ApiculteursNew;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,33 +26,70 @@ public class FirebaseAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private ApiculteurService apiculteurService;
 
+    @Autowired(required = false)
+    private FirebaseAuthRestService firebaseAuthRestService;
+
+    @Autowired(required = false)
+    private ApiculteursNewService apiculteursNewService;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
         String password = authentication.getCredentials().toString();
 
         try {
-            // Valider l'utilisateur contre Firebase
-            Map<String, Object> validationResult = apiculteurService.authenticateWithPassword(email, password);
-            
-            if (validationResult.containsKey("error")) {
-                throw new BadCredentialsException("Invalid credentials: " + validationResult.get("error"));
+            // 1) Vérification via Firebase REST si la clé API est configurée
+            if (firebaseAuthRestService != null) {
+                try {
+                    var res = firebaseAuthRestService.signInWithEmailAndPassword(email, password);
+                    if (!res.success) {
+                        System.err.println("[LOGIN] ❌ Firebase signIn FAILED | email=" + email + " | error=" + res.error);
+                        throw new BadCredentialsException("Invalid credentials: " + (res.error != null ? res.error : "AUTH_FAILED"));
+                    }
+                    System.out.println("[LOGIN] ✅ Firebase signIn OK | email=" + email + " | uid=" + res.uid);
+                } catch (Exception ex) {
+                    System.err.println("[LOGIN] ❌ Firebase signIn error: " + ex.getMessage());
+                    throw ex;
+                }
+            } else {
+                // 2) Fallback: légère vérification via service (ne vérifie pas réellement le mot de passe)
+                Map<String, Object> validationResult = apiculteurService.authenticateWithPassword(email, password);
+                if (validationResult.containsKey("error")) {
+                    throw new BadCredentialsException("Invalid credentials: " + validationResult.get("error"));
+                }
             }
 
-            // Récupérer les informations de l'apiculteur
-            Apiculteur apiculteur = apiculteurService.getApiculteurByEmail(email);
-            
-            if (apiculteur == null || !apiculteur.isActif()) {
+            // Récupérer les informations de l'apiculteur pour les rôles
+            // Récupérer les informations pour les rôles depuis la DB principale, sinon depuis ApiculteursNew
+            String role = null;
+            Apiculteur apiculteur = null;
+            try {
+                apiculteur = apiculteurService.getApiculteurByEmail(email);
+            } catch (Exception ignored) {}
+
+            if (apiculteur != null && apiculteur.isActif()) {
+                role = apiculteur.getRole();
+            } else if (apiculteursNewService != null) {
+                ApiculteursNew alt = apiculteursNewService.findByEmail(email);
+                if (alt != null) {
+                    role = alt.getRole();
+                }
+            }
+
+            if (role == null) {
                 throw new BadCredentialsException("Compte utilisateur inactif ou inexistant");
             }
 
             // Créer les autorités (rôles)
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            if ("admin".equalsIgnoreCase(role)) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            }
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
             // Créer le token d'authentification réussi
-            return new UsernamePasswordAuthenticationToken(email, password, authorities);
-            
+            return new UsernamePasswordAuthenticationToken(email, null, authorities);
+
         } catch (Exception e) {
             throw new BadCredentialsException("Erreur lors de l'authentification: " + e.getMessage(), e);
         }

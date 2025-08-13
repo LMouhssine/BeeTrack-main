@@ -1,175 +1,156 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Alertes - BeeTrack</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    
+    <!-- Le CSS principal est déjà inclus par layout.html -->
+    
+    <!-- Styles spécifiques à la page -->
+    <style>
+        .logs-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            font-family: var(--font-mono);
+        }
+        .log-entry { display: flex; gap: var(--space-2); margin-bottom: var(--space-2); font-size: 13px; line-height: 1.4; }
+        .log-entry:last-child { margin-bottom: 0; }
+        .log-time { color: var(--gray-500); min-width: 80px; flex-shrink: 0; }
+        .log-message { color: var(--gray-900); }
+        .log-entry.success .log-message { color: var(--success); }
+        .log-entry.error .log-message { color: var(--error); }
+        .border-success { border-color: var(--success) !important; }
+        .border-warning { border-color: var(--warning) !important; }
+        .w-8 { width: 2rem; } .h-8 { height: 2rem; }
+        .space-y-2 > * + * { margin-top: var(--space-2); }
+        .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 1024px) { .lg\:grid-cols-3 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .md\:grid-cols-2 { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img th:src="@{/logo.svg}" alt="BeeTrack" class="logo">
-                <h2>BeeTrack</h2>
+    <div layout:fragment="content">
+        <div class="content-section">
+            <!-- En-tête de page organisé -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" th:text="${pageTitle ?: 'Gestion des Alertes'}">Gestion des Alertes</h1>
+                    <p class="page-subtitle" th:text="${pageSubtitle ?: 'Gestion de vos ruches connectées'}">Gestion de vos ruches connectées</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="btn btn-secondary">
+                        <i data-lucide="wifi" aria-hidden="true"></i>
+                        <span class="text-sm">Connecté</span>
+                    </div>
+                    <div class="btn btn-secondary">
+                        <i data-lucide="bell" aria-hidden="true"></i>
+                        <span class="text-sm">Alertes</span>
+                    </div>
+                    <div class="btn btn-secondary">
+                        <i data-lucide="user" aria-hidden="true"></i>
+                        <span class="text-sm" th:text="${#authentication != null ? #authentication.name : 'Utilisateur'}">Utilisateur</span>
+                        <span class="text-sm text-gray-600" style="margin-left:6px;" th:text="${userRole ?: 'Apiculteur'}">Apiculteur</span>
+                    </div>
+                </div>
             </div>
-            
-            <nav class="sidebar-nav">
-                <a href="/dashboard" class="nav-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9,22 9,12 15,12 15,22"/>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/ruchers" class="nav-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <span>Ruchers</span>
-                </a>
-                <a href="/ruches" class="nav-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12,2 2,7 12,12 22,7 12,2"/>
-                        <polyline points="2,17 12,22 22,17"/>
-                        <polyline points="2,12 12,17 22,12"/>
-                    </svg>
-                    <span>Ruches</span>
-                </a>
-                <a href="/alertes" class="nav-item active">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                    <span>Alertes</span>
-                </a>
-                <a href="/stats" class="nav-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="20" x2="12" y2="10"/>
-                        <line x1="18" y1="20" x2="18" y2="4"/>
-                        <line x1="6" y1="20" x2="6" y2="16"/>
-                    </svg>
-                    <span>Statistiques</span>
-                </a>
-            </nav>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="content-header">
-                <h1>Gestion des Alertes</h1>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="rafraichirStatut()">
+            <!-- System Status -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h3 class="card-title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23,4 23,10 17,10"/>
-                            <polyline points="1,20 1,14 7,14"/>
-                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
                         </svg>
-                        Rafraîchir
-                    </button>
+                        Statut de Surveillance
+                    </h3>
                 </div>
-            </header>
-
-            <div class="content-body">
-                <!-- System Status -->
-                <div class="card mb-6">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                            Statut de Surveillance
-                        </h3>
+                <div class="card-body">
+                    <div id="statut-surveillance" class="loading">
+                        <div class="spinner"></div>
+                        <span>Chargement...</span>
                     </div>
-                    <div class="card-body">
-                        <div id="statut-surveillance" class="loading">
-                            <div class="spinner"></div>
-                            <span>Chargement...</span>
+                </div>
+            </div>
+
+            <!-- Test Alert -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        Test d'Alerte
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="test-alerte-form">
+                        <div class="form-group">
+                            <label for="ruche-id" class="form-label">ID de la Ruche</label>
+                            <input type="text" id="ruche-id" name="rucheId" class="form-control" placeholder="Ex: ruche_001" required>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Test Alert -->
-                <div class="card mb-6">
-                    <div class="card-header">
-                        <h3 class="card-title">
+                        <button type="submit" class="btn" style="background: var(--warning); color: var(--white);">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                             </svg>
-                            Test d'Alerte
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="test-alerte-form">
-                            <div class="form-group">
-                                <label for="ruche-id" class="form-label">ID de la Ruche</label>
-                                <input type="text" 
-                                       id="ruche-id" 
-                                       name="rucheId" 
-                                       class="form-control" 
-                                       placeholder="Ex: ruche_001" 
-                                       required>
-                            </div>
-                            <button type="submit" class="btn" style="background: var(--warning); color: var(--white);">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                                </svg>
-                                Tester l'Alerte
-                            </button>
-                        </form>
+                            Tester l'Alerte
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Active Inhibitions -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Inhibitions Actives
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="inhibitions-list" class="loading">
+                        <div class="spinner"></div>
+                        <span>Chargement...</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Active Inhibitions -->
-                <div class="card mb-6">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                            </svg>
-                            Inhibitions Actives
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="inhibitions-list" class="loading">
-                            <div class="spinner"></div>
-                            <span>Chargement...</span>
-                        </div>
-                    </div>
+            <!-- Alert Logs -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Logs d'Alertes
+                    </h3>
                 </div>
-
-                <!-- Alert Logs -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                                <polyline points="10,9 9,9 8,9"/>
-                            </svg>
-                            Logs d'Alertes
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="alertes-logs" class="logs-container">
-                            <div class="log-entry">
-                                <span class="log-time">[Système]</span>
-                                <span class="log-message">Système d'alertes initialisé</span>
-                            </div>
+                <div class="card-body">
+                    <div id="alertes-logs" class="logs-container">
+                        <div class="log-entry">
+                            <span class="log-time">[Système]</span>
+                            <span class="log-message">Système d'alertes initialisé</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
+    <!-- Scripts spécifiques à la page -->
+    <th:block layout:fragment="scripts">
     <script>
         let statutInterval;
 
@@ -417,87 +398,6 @@
             }
         });
     </script>
-
-    <style>
-        .logs-container {
-            max-height: 300px;
-            overflow-y: auto;
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            font-family: var(--font-mono);
-        }
-
-        .log-entry {
-            display: flex;
-            gap: var(--space-2);
-            margin-bottom: var(--space-2);
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .log-entry:last-child {
-            margin-bottom: 0;
-        }
-
-        .log-time {
-            color: var(--gray-500);
-            min-width: 80px;
-            flex-shrink: 0;
-        }
-
-        .log-message {
-            color: var(--gray-900);
-        }
-
-        .log-entry.success .log-message {
-            color: var(--success);
-        }
-
-        .log-entry.error .log-message {
-            color: var(--error);
-        }
-
-        .border-success {
-            border-color: var(--success) !important;
-        }
-
-        .border-warning {
-            border-color: var(--warning) !important;
-        }
-
-        .w-8 {
-            width: 2rem;
-        }
-
-        .h-8 {
-            height: 2rem;
-        }
-
-        .space-y-2 > * + * {
-            margin-top: var(--space-2);
-        }
-
-        .md\:grid-cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .lg\:grid-cols-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        @media (max-width: 1024px) {
-            .lg\:grid-cols-3 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .md\:grid-cols-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    </th:block>
 </body>
 </html>

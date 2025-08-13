@@ -36,8 +36,27 @@ public class FirebaseRucheService extends RucheService {
     @Override
     public List<Ruche> getRuchesByApiculteur(String apiculteurId) {
         try {
-            List<Map<String, Object>> documents = firebaseService.getDocuments("ruches", "apiculteur_id", apiculteurId);
-            return documents.stream()
+            // Supporter les deux conventions de champs: apiculteur_id et apiculteurId
+            List<Map<String, Object>> snakeCase = firebaseService.getDocuments("ruches", "apiculteur_id", apiculteurId);
+            List<Map<String, Object>> camelCase = firebaseService.getDocuments("ruches", "apiculteurId", apiculteurId);
+
+            List<Map<String, Object>> merged = new java.util.ArrayList<>();
+            if (snakeCase != null) merged.addAll(snakeCase);
+            if (camelCase != null) merged.addAll(camelCase);
+
+            // Dédupliquer par id si présent
+            java.util.Map<String, Map<String, Object>> idToDoc = new java.util.LinkedHashMap<>();
+            for (Map<String, Object> doc : merged) {
+                String id = (String) doc.get("id");
+                if (id != null) {
+                    idToDoc.put(id, doc);
+                } else {
+                    // Pas d'id? on garde quand même
+                    idToDoc.put(java.util.UUID.randomUUID().toString(), doc);
+                }
+            }
+
+            return idToDoc.values().stream()
                     .map(doc -> documentToRuche((String) doc.get("id"), doc))
                     .collect(Collectors.toList());
         } catch (Exception e) {

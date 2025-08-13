@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>RuchersNew - BeeTrack</title>
+</head>
+<body>
+<div layout:fragment="content" class="page-container">
+    <div class="page-header mb-4">
+        <div class="header-content">
+            <div class="page-info">
+                <h1 class="page-title">RuchersNew</h1>
+                <p class="page-subtitle">Gestion des ruchers (CRUD)</p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-primary" th:href="@{/RuchersNew/nouveau}">Ajouter</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="it : ${items}">
+                            <td>
+                                <a th:href="@{'/RuchersNew/' + ${it.id}}" th:text="${it.nom}">Nom</a>
+                            </td>
+                            <td th:text="${it.description}">Desc</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-secondary" th:href="@{'/RuchersNew/' + ${it.id} + '/editer'}">Modifier</a>
+                                <form th:action="@{'/RuchersNew/' + ${it.id} + '/supprimer'}" method="post" style="display:inline-block" onsubmit="return confirm('Supprimer?');">
+                                    <button class="btn btn-sm btn-danger" type="submit">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${items == null or #lists.isEmpty(items)}">
+                            <td colspan="3" class="text-center text-muted">Aucun rucher</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
