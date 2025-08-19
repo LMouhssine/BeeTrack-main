@@ -1,0 +1,40 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <header class="app-header" role="banner" th:fragment="header">
+        <div class="header-left">
+            <button id="sidebar-toggle" class="btn mobile-menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="sidebar">
+                <i data-lucide="menu" aria-hidden="true"></i>
+            </button>
+            <div class="page-info">
+                <h1 class="page-title" th:text="${pageTitle ?: 'Tableau de bord'}">Tableau de bord</h1>
+                <p class="page-subtitle" th:text="${pageSubtitle ?: 'Gestion de vos ruches connectées'}">Gestion de vos ruches connectées</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="connection-status">
+                <div class="status-indicator online" title="Connecté">
+                    <i data-lucide="wifi" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <div class="notifications-dropdown">
+                <button class="btn btn-icon" type="button" aria-label="Notifications" aria-expanded="false">
+                    <i data-lucide="bell" aria-hidden="true"></i>
+                    <span class="notification-badge" th:if="${notificationCount > 0}" th:text="${notificationCount}" aria-label="Nombre de notifications"></span>
+                </button>
+            </div>
+
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="user-name" th:text="${#authentication != null ? #authentication.name : 'Utilisateur'}">Utilisateur</span>
+                    <span class="user-role" th:text="${userRole ?: 'Apiculteur'}">Apiculteur</span>
+                </div>
+                <button class="btn btn-icon user-avatar" aria-label="Menu utilisateur" aria-expanded="false">
+                    <i data-lucide="user-circle" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+}</div>
+
+
