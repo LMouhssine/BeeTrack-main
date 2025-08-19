@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'package:ruche_connectee/screens/ruchers/rucher_list_screen_alternative.dart';
-import 'package:ruche_connectee/screens/ruches/ruches_list_screen.dart';
+import 'package:ruche_connectee/screens/ruchers/rucher_list_screen.dart';
+import 'package:ruche_connectee/screens/ruches/ruche_list_screen.dart';
 import 'package:ruche_connectee/screens/ruches/ajouter_ruche_screen.dart';
 import 'package:ruche_connectee/screens/profile/profile_screen.dart';
 import 'package:ruche_connectee/screens/stats/stats_screen.dart';
@@ -19,8 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _screens = [
-    RucherListScreenAlternative(),
-    RuchesListScreen(),
+    RucherListScreen(),
+    RucheListScreen(),
     StatsScreen(),
     ProfileScreen(),
   ];
