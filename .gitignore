@@ -24,9 +24,32 @@ dist-ssr
 *.sw?
 .env
 
-# Firebase service account keys
+# Firebase service account keys et fichiers secrets
 config/*firebase-adminsdk*.json
 config/firebase/*.json
+config/firebase/service-account.json
+**/firebase-service-account*.json
+**/service-account*.json
+
+# Variables d'environnement et fichiers de configuration sensibles
+.env
+.env.local
+.env.*.local
+application-secrets.properties
+application-production.properties
+secrets.h
+config/secrets/*
+
+# Clés et certificats
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+
+# Fichiers de configuration avec secrets
+**/firebase_options.dart
+!**/firebase_options.template.dart
 
 # Java/Maven
 target/

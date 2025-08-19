@@ -71,14 +71,16 @@ service cloud.firestore {
 Le fichier `firebase_options.dart` doit contenir :
 ```dart
 static const FirebaseOptions web = FirebaseOptions(
-  apiKey: "AIzaSyCtPJSY4K3K7NgqPF3pGHgeICtzn4Wbu5M",
-  authDomain: "ruche-connectee-93eab.firebaseapp.com",
-  projectId: "ruche-connectee-93eab",
-  storageBucket: "ruche-connectee-93eab.firebasestorage.app",
-  messagingSenderId: "331852612281",
-  appId: "1:331852612281:web:7b80072001f8a8ce3d5168",
+  apiKey: "YOUR_API_KEY", // Remplacer par votre clé API
+  authDomain: "your-project-id.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project-id.firebasestorage.app",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
 );
 ```
+
+⚠️ **SÉCURITÉ**: Ne jamais committer de vraies clés API dans le code source !
 
 ### 3. Activer l'Authentification Firebase
 
@@ -124,8 +126,8 @@ flutter run
 ### Vérifications
 
 #### ✅ Configuration Firebase
-- [ ] Projet ID correct : `ruche-connectee-93eab`
-- [ ] API Key valide
+- [ ] Projet ID correct : `your-project-id`
+- [ ] API Key valide (ne pas exposer dans le code)
 - [ ] Auth Domain correct
 
 #### ✅ Règles Firestore
