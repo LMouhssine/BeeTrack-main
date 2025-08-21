@@ -25,6 +25,10 @@ jobs:
         flutter-version: '3.24.x'
         cache: true
         
+    - name: Setup Firebase config for CI
+      run: cp lib/firebase_options.template.dart lib/firebase_options.dart
+      working-directory: ruche-connectee/mobile-app
+      
     - name: Get dependencies
       run: flutter pub get
       working-directory: ruche-connectee/mobile-app
