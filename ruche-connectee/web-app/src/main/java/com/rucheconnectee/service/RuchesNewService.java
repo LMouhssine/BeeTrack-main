@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
  * Service CRUD pour la collection "RuchesNew" dans Firebase Realtime Database.
  */
 @Service
-@ConditionalOnProperty(name = "firebase.project-id")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class RuchesNewService {
 
     private static final String COLLECTION = "RuchesNew";

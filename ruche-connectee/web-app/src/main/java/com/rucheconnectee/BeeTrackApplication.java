@@ -18,11 +18,11 @@ public class BeeTrackApplication {
         System.out.println("🚀 Démarrage de BeeTrack Application...");
         SpringApplication.run(BeeTrackApplication.class, args);
         System.out.println("✅ BeeTrack Application démarrée avec succès !");
-        System.out.println("🔥 Connexion Firebase activée - Données réelles !");
+        System.out.println("🔧 Mode développement - Données mock activées");
         System.out.println("📱 Dashboard: http://localhost:8080/dashboard");
-        System.out.println("🐝 Ruches: http://localhost:8080/ruches");
-        System.out.println("📍 Ruchers: http://localhost:8080/ruchers");
+        System.out.println("🐝 Ruches Web: http://localhost:8080/RuchesNew");
+        System.out.println("📍 Ruchers Web: http://localhost:8080/RuchersNew");
         System.out.println("📊 Stats: http://localhost:8080/statistiques");
-        System.out.println("📚 API: http://localhost:8080/swagger-ui.html");
+        System.out.println("📱 API Mobile: http://localhost:8080/api/mobile/health");
     }
 } 

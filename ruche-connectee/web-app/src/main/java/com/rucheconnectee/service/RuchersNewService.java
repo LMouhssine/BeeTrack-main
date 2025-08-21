@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 @Service
-@ConditionalOnProperty(name = "firebase.project-id")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class RuchersNewService {
 
     private static final String COLLECTION = "RuchersNew";

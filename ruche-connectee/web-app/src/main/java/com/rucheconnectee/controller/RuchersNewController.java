@@ -3,6 +3,7 @@ package com.rucheconnectee.controller;
 import com.rucheconnectee.model.RuchersNew;
 import com.rucheconnectee.service.RuchersNewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/RuchersNew")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class RuchersNewController {
 
     @Autowired

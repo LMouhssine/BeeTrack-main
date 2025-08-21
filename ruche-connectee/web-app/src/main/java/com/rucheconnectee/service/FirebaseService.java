@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
  * Remplace l'ancien service Firestore par Realtime Database.
  */
 @Service
-@ConditionalOnProperty(name = "firebase.project-id")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class FirebaseService {
 
     @Autowired

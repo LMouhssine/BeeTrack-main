@@ -9,34 +9,21 @@
 </head>
 
 <body>
-    <div layout:fragment="content">
-        <!-- Container principal -->
-        <div class="dashboard-wrapper">
-            
-            <!-- En-tête alignée comme les autres pages -->
-            <div class="page-header">
-                <div class="page-info">
-                    <h1 class="page-title">Tableau de bord</h1>
-                    <p class="page-subtitle">Gestion de vos ruches connectées</p>
-                </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="location.reload()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23,4 23,10 17,10"/>
-                            <polyline points="1,20 1,14 7,14"/>
-                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64l1.27 1.27m4.27 12.22l1.27 1.27A9 9 0 0 0 20.49 15"/>
-                        </svg>
-                        Actualiser
-                    </button>
-                    <a href="/ruches/nouvelle" th:href="@{/ruches/nouvelle}" class="btn btn-primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        Nouvelle ruche
-                    </a>
-                </div>
+    <div layout:fragment="content" class="dashboard-wrapper">
+        
+        <!-- Actions rapides dans le header -->
+        <div class="page-header">
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="location.reload()" title="Actualiser les données">
+                    <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    Actualiser
+                </button>
+                <a href="/RuchesNew/new" th:href="@{/RuchesNew/new}" class="btn btn-primary">
+                    <i data-lucide="plus" aria-hidden="true"></i>
+                    Nouvelle ruche
+                </a>
             </div>
+        </div>
 
             <!-- Section des statistiques -->
             <div class="stats-section">

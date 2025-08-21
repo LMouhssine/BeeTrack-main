@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 @Service
-@ConditionalOnProperty(name = "firebase.project-id")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class ApiculteursNewService {
 
     private static final String COLLECTION = "ApiculteursNew";

@@ -21,7 +21,7 @@ import java.io.InputStream;
  * En mode développement, utilise les services mockés.
  */
 @Configuration
-@ConditionalOnProperty(name = "firebase.project-id")
+@ConditionalOnProperty(name = "app.use-mock-data", havingValue = "false", matchIfMissing = true)
 public class FirebaseConfig {
 
     @Value("${firebase.project-id:}")
@@ -63,13 +63,11 @@ public class FirebaseConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "firebase.project-id")
     public FirebaseAuth firebaseAuth() {
         return FirebaseAuth.getInstance();
     }
 
     @Bean
-    @ConditionalOnProperty(name = "firebase.project-id")
     public FirebaseDatabase firebaseDatabase() {
         return FirebaseDatabase.getInstance();
     }
