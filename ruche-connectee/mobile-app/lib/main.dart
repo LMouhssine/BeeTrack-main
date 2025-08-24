@@ -5,7 +5,7 @@ import 'package:ruche_connectee/config/router.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:ruche_connectee/blocs/auth/auth_bloc.dart';
-import 'firebase_options.dart';
+import 'firebase_options.template.dart';
 
 void main() async {
   // Assure que les widgets Flutter sont initialisés
