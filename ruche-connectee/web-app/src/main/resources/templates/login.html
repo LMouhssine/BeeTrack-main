@@ -36,6 +36,23 @@
                 </svg>
                 <span th:text="${message}">Message</span>
             </div>
+
+            <!-- Messages Firebase -->
+            <div id="firebase-error" class="alert alert-danger" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span id="firebase-error-text">Erreur Firebase</span>
+            </div>
+            
+            <div id="firebase-success" class="alert alert-success" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                </svg>
+                <span id="firebase-success-text">Connexion réussie</span>
+            </div>
             
             <!-- Formulaire -->
             <form th:action="@{/login}" method="post" id="loginForm">
@@ -62,21 +79,89 @@
                            autocomplete="current-password">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: var(--space-6);">
-                    Se connecter
+                <button type="submit" class="btn btn-primary" id="login-btn" style="width: 100%; margin-bottom: var(--space-6);">
+                    <span id="login-text">Se connecter</span>
+                    <span id="login-spinner" style="display: none;">⏳ Connexion...</span>
                 </button>
             </form>
             
             <div class="login-footer">
+                <div th:if="${firebaseEnabled}" class="text-center text-muted" style="font-size: 0.9em; margin-bottom: 10px;">
+                    🔥 Authentification Firebase activée
+                </div>
                 <a href="/reset-password" th:href="@{/reset-password}">Mot de passe oublié ?</a>
             </div>
         </div>
     </div>
     
-    <script>
-        // Auto-focus
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('username').focus();
+            
+            // Vérifier si Firebase est activé côté serveur
+            const firebaseEnabled = /*[[${firebaseEnabled}]]*/ false;
+            
+            if (firebaseEnabled) {
+                // Intercepter le formulaire pour utiliser Firebase
+                document.getElementById('loginForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    const loginBtn = document.getElementById('login-btn');
+                    const loginText = document.getElementById('login-text');
+                    const loginSpinner = document.getElementById('login-spinner');
+                    const errorDiv = document.getElementById('firebase-error');
+                    const errorText = document.getElementById('firebase-error-text');
+                    const successDiv = document.getElementById('firebase-success');
+                    const successText = document.getElementById('firebase-success-text');
+                    
+                    // Reset messages
+                    errorDiv.style.display = 'none';
+                    successDiv.style.display = 'none';
+                    
+                    // Show loading
+                    loginBtn.disabled = true;
+                    loginText.style.display = 'none';
+                    loginSpinner.style.display = 'inline';
+                    
+                    // Call Firebase auth API
+                    fetch('/api/firebase-auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            email: email,
+                            password: password
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            successText.textContent = result.message;
+                            successDiv.style.display = 'block';
+                            
+                            setTimeout(() => {
+                                window.location.href = result.redirectUrl || '/dashboard';
+                            }, 1000);
+                        } else {
+                            errorText.textContent = result.message;
+                            errorDiv.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        errorText.textContent = 'Erreur de connexion: ' + error.message;
+                        errorDiv.style.display = 'block';
+                    })
+                    .finally(() => {
+                        // Hide loading
+                        loginBtn.disabled = false;
+                        loginText.style.display = 'inline';
+                        loginSpinner.style.display = 'none';
+                    });
+                });
+            }
         });
     </script>
 </body>

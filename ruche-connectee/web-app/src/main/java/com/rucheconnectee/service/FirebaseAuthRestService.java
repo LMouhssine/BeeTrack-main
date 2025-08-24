@@ -99,6 +99,26 @@ public class FirebaseAuthRestService {
             this.idToken = idToken;
             this.error = error;
         }
+
+        public String getIdToken() {
+            return idToken;
+        }
+
+        public String getLocalId() {
+            return uid;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getError() {
+            return error;
+        }
     }
 }
 
