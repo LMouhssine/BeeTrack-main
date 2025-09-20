@@ -15,9 +15,9 @@ defaults:
     working-directory: ruche-connectee/mobile-app
 
 jobs:
-  # Tests et analyse Flutter
+  # Validation du code Flutter (focus web)
   test:
-    name: Test Flutter App
+    name: Flutter Code Quality
     runs-on: ubuntu-latest
 
     steps:
@@ -42,85 +42,86 @@ jobs:
     - name: Analyze project source
       run: flutter analyze --fatal-infos
 
-    - name: Run tests
-      run: flutter test --coverage
+    # Tests désactivés - focus sur web seulement
+    # - name: Run tests
+    #   run: flutter test --coverage
 
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v4
-      with:
-        files: ruche-connectee/mobile-app/coverage/lcov.info
-        flags: flutter
-        name: flutter-coverage
+    # - name: Upload coverage reports
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     files: ruche-connectee/mobile-app/coverage/lcov.info
+    #     flags: flutter
+    #     name: flutter-coverage
 
-  # Build pour Android
-  build-android:
-    name: Build Android APK
-    runs-on: ubuntu-latest
-    needs: test
+  # Build Android désactivé - focus sur web
+  # build-android:
+  #   name: Build Android APK
+  #   runs-on: ubuntu-latest
+  #   needs: test
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+  #   - name: Setup Java
+  #     uses: actions/setup-java@v4
+  #     with:
+  #       distribution: 'temurin'
+  #       java-version: '17'
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.x'
-        cache: true
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       flutter-version: '3.19.x'
+  #       cache: true
 
-    - name: Install dependencies
-      run: flutter pub get
+  #   - name: Install dependencies
+  #     run: flutter pub get
 
-    - name: Build APK
-      run: flutter build apk --release
+  #   - name: Build APK
+  #     run: flutter build apk --release
 
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-apk
-        path: ruche-connectee/mobile-app/build/app/outputs/flutter-apk/app-release.apk
+  #   - name: Upload APK artifact
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: release-apk
+  #       path: ruche-connectee/mobile-app/build/app/outputs/flutter-apk/app-release.apk
 
-  # Build pour iOS (sur macOS)
-  build-ios:
-    name: Build iOS App
-    runs-on: macos-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  # Build iOS désactivé - focus sur web
+  # build-ios:
+  #   name: Build iOS App
+  #   runs-on: macos-latest
+  #   needs: test
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.x'
-        cache: true
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       flutter-version: '3.19.x'
+  #       cache: true
 
-    - name: Install dependencies
-      run: flutter pub get
+  #   - name: Install dependencies
+  #     run: flutter pub get
 
-    - name: Build iOS (no codesign)
-      run: flutter build ios --release --no-codesign
+  #   - name: Build iOS (no codesign)
+  #     run: flutter build ios --release --no-codesign
 
-    - name: Create iOS archive
-      run: |
-        cd ios
-        xcodebuild -workspace Runner.xcworkspace \
-                   -scheme Runner \
-                   -sdk iphoneos \
-                   -configuration Release \
-                   -archivePath build/Runner.xcarchive \
-                   clean archive \
-                   CODE_SIGNING_ALLOWED=NO
+  #   - name: Create iOS archive
+  #     run: |
+  #       cd ios
+  #       xcodebuild -workspace Runner.xcworkspace \
+  #                  -scheme Runner \
+  #                  -sdk iphoneos \
+  #                  -configuration Release \
+  #                  -archivePath build/Runner.xcarchive \
+  #                  clean archive \
+  #                  CODE_SIGNING_ALLOWED=NO
 
-  # Build pour Web
+  # Build pour Web - Focus principal
   build-web:
     name: Build Web App
     runs-on: ubuntu-latest

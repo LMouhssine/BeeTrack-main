@@ -35,8 +35,8 @@ echo "7. Test d'analyse du code..."
 flutter analyze --no-fatal-infos
 
 echo ""
-echo "8. Test de compilation..."
-flutter build apk --debug
+echo "8. Test de compilation Web (focus principal)..."
+flutter build web --debug
 
 echo ""
 echo "============================================"
@@ -51,5 +51,6 @@ echo "- flutter_lints: ^4.0.0 (compatible Dart 3.5.4)"
 echo "- Firebase: versions compatibles"
 echo ""
 echo "Vous pouvez maintenant lancer l'application avec :"
-echo "flutter run"
+echo "flutter run -d chrome  # pour le web (focus principal)"
+echo "flutter run             # pour mobile"
 echo ""

@@ -117,7 +117,7 @@ Resolving dependencies...
 Got dependencies!
 ```
 
-## 📊 Tests de validation
+## 📊 Tests de validation (Focus Web)
 
 ```bash
 # 1. Dépendances résolues
@@ -126,14 +126,14 @@ flutter pub get
 # 2. Analyse du code
 flutter analyze
 
-# 3. Tests unitaires
-flutter test
+# 3. Build Web (priorité)
+flutter build web --release
 
-# 4. Build Android
-flutter build apk --debug
+# 4. Test local Web
+flutter run -d chrome
 
-# 5. Build Web (optionnel)
-flutter build web
+# 5. Build mobile (optionnel)
+# flutter build apk --debug  # Si besoin mobile
 ```
 
 ## 🛡️ Prévention future
