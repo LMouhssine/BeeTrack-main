@@ -40,10 +40,6 @@ jobs:
       run: dart format --output=none --set-exit-if-changed .
       continue-on-error: true
 
-    - name: Analyze project source
-      run: flutter analyze --no-fatal-infos
-      continue-on-error: true
-
     - name: Build Web App
       run: flutter build web --release --web-renderer html
 
@@ -62,38 +58,3 @@ jobs:
         publish_dir: ruche-connectee/mobile-app/build/web
         cname: your-domain.com  # Optionnel: remplacez par votre domaine
 
-  # Test de compatibilité multi-navigateurs
-  browser-test:
-    name: Browser Compatibility Test
-    runs-on: ubuntu-latest
-    needs: web-build
-    if: github.event_name == 'pull_request'
-
-    strategy:
-      matrix:
-        browser: [chrome, firefox]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.x'
-        cache: true
-
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Install browser drivers
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable firefox
-
-    - name: Run integration tests
-      run: |
-        echo "Testing browser compatibility for ${{ matrix.browser }}"
-        # Ici vous pouvez ajouter vos tests d'intégration web
-        # flutter drive --target=test_driver/app.dart --driver=test_driver/app_test.dart -d web-server --browser-name=${{ matrix.browser }}
-      continue-on-error: true

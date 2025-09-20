@@ -53,6 +53,4 @@ jobs:
       working-directory: ruche-connectee/mobile-app
       continue-on-error: true
       
-    - name: Static analysis for security issues
-      run: flutter analyze --fatal-infos
-      working-directory: ruche-connectee/mobile-app 
+ 

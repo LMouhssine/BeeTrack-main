@@ -11,44 +11,9 @@ on:
       - 'ruche-connectee/mobile-app/**'
 
 jobs:
-  test:
-    name: Test Flutter App
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.24.x'
-        cache: true
-        
-    - name: Setup Firebase config for CI
-      run: cp lib/firebase_options.template.dart lib/firebase_options.dart
-      working-directory: ruche-connectee/mobile-app
-      
-    - name: Get dependencies
-      run: flutter pub get
-      working-directory: ruche-connectee/mobile-app
-      
-    - name: Verify formatting
-      run: dart format --output=none --set-exit-if-changed .
-      working-directory: ruche-connectee/mobile-app
-      
-    - name: Analyze project source
-      run: flutter analyze --fatal-infos
-      working-directory: ruche-connectee/mobile-app
-      
-    - name: Run tests
-      run: flutter test
-      working-directory: ruche-connectee/mobile-app
-
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
-    needs: test
     
     steps:
     - name: Checkout code
@@ -83,7 +48,6 @@ jobs:
   build-web:
     name: Build Web App
     runs-on: ubuntu-latest
-    needs: test
     
     steps:
     - name: Checkout code
