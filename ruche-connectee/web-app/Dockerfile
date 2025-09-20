@@ -1,7 +1,7 @@
 # Dockerfile pour l'API BeeTrack Spring Boot
 
 # Étape 1: Construction de l'application
-FROM maven:3.9.4-openjdk-17-slim AS build
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
 
 # Définir le répertoire de travail
 WORKDIR /app
@@ -14,15 +14,18 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Étape 2: Image de production
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # Métadonnées
 LABEL maintainer="BeeTrack Team"
 LABEL description="API REST Spring Boot pour le système de ruches connectées BeeTrack"
 LABEL version="1.0.0"
 
+# Installer curl pour le health check
+RUN apk add --no-cache curl
+
 # Créer un utilisateur non-root pour la sécurité
-RUN groupadd -r beetrack && useradd -r -g beetrack beetrack
+RUN addgroup -g 1001 -S beetrack && adduser -u 1001 -S beetrack -G beetrack
 
 # Définir le répertoire de travail
 WORKDIR /app
