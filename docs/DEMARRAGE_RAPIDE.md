@@ -74,8 +74,10 @@ server.port=8081
 ## 📚 Documentation complète
 
 - **Configuration Firebase**: `docs/configuration/FIREBASE_CONFIGURATION.md`
-- **Structure du projet**: `docs/STRUCTURE_PROJET.md`
+- **Structure du projet**: `docs/architecture/STRUCTURE_PROJET.md`
+- **Organisation du projet**: `docs/architecture/ORGANISATION_PROJET.md`
 - **Guide utilisateur**: `docs/utilisateur/GUIDE_UTILISATEUR_WEB.md`
+- **Documentation complète**: `docs/README.md`
 
 ## 🎉 Félicitations !
 
