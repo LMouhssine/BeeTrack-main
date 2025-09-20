@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: beetrackapp/beetrack
+  IMAGE_NAME: lmouhssine/beetrack
 
 jobs:
   # Tests et validation du code
@@ -46,8 +46,8 @@ jobs:
       run: |
         cd ruche-connectee/web-app
         mvn sonar:sonar \
-          -Dsonar.projectKey=beetrackapp_beetrack \
-          -Dsonar.organization=beetrackapp \
+          -Dsonar.projectKey=lmouhssine_beetrack \
+          -Dsonar.organization=lmouhssine \
           -Dsonar.host.url=https://sonarcloud.io
       continue-on-error: true
 
