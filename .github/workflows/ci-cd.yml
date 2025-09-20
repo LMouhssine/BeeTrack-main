@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: lmouhssine/beetrack
+  IMAGE_NAME: ${{ github.repository_owner }}/beetrack
 
 jobs:
   # Tests et validation du code
@@ -98,6 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
 
     outputs:
       image: ${{ steps.image.outputs.image }}
@@ -110,11 +113,11 @@ jobs:
     - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Login to Container Registry
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Extract metadata
