@@ -43,6 +43,8 @@ echo    Correction terminee !
 echo ============================================
 echo.
 echo Versions compatibles installees :
+echo - get_it: ^7.7.0 (compatible meta 1.11.0)
+echo - injectable: ^2.1.2 (compatible meta 1.11.0)
 echo - go_router: ^14.2.7 (compatible Dart 3.5.4)
 echo - flutter_lints: ^4.0.0 (compatible Dart 3.5.4)
 echo - Firebase: versions compatibles

@@ -1,9 +1,21 @@
 # 🔧 Correction du Problème de Version Flutter
 
-## 🐛 Problème identifié
+## 🐛 Problèmes identifiés
 
+### 1. Conflit flutter_lints vs SDK Dart
 ```
 Because flutter_lints 6.0.0 requires SDK version ^3.8.0 and no versions of flutter_lints match >6.0.0 <7.0.0, flutter_lints ^6.0.0 is forbidden.
+```
+
+### 2. Conflit go_router vs SDK Dart
+```
+Because ruche_connectee depends on go_router >=15.1.3 which requires SDK version >=3.6.0 <4.0.0, version solving failed.
+```
+
+### 3. Conflit injectable vs meta (Flutter SDK)
+```
+Because injectable >=1.5.3 <2.5.0 depends on get_it ^7.2.0 and injectable >=2.4.3 depends on meta ^1.12.0, injectable >=1.5.3 requires get_it ^7.2.0 or meta ^1.12.0.
+And because every version of flutter_test from sdk depends on meta 1.11.0 and ruche_connectee depends on get_it ^8.2.0, injectable >=1.5.3 is incompatible with flutter_test from sdk.
 ```
 
 ## ✅ Solutions appliquées
@@ -15,11 +27,17 @@ dev_dependencies:
 
 dependencies:
   go_router: ^14.2.7     # Au lieu de ^16.2.0
+  get_it: ^7.7.0         # Au lieu de ^8.2.0 (compatible meta 1.11.0)
+  injectable: ^2.1.2     # Au lieu de ^2.3.0 (compatible meta 1.11.0)
   firebase_core: ^3.6.0  # Version compatible
   firebase_auth: ^5.3.1  # Version compatible
   firebase_database: ^11.1.4  # Version compatible
   fl_chart: ^0.69.0      # Version compatible
   intl: ^0.19.0          # Version compatible
+
+dev_dependencies:
+  injectable_generator: ^2.1.6  # Au lieu de ^2.4.0
+  bloc_test: ^9.1.7      # Au lieu de ^10.0.0
 ```
 
 ### 2. **Script automatique de correction**
