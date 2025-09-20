@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ruche_connectee/services/ruche_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
+import 'package:get_it/get_it.dart';
 import 'dart:async';
 
 /// Exemple d'utilisation du RucheService dans un widget Flutter
@@ -17,10 +18,10 @@ class ExempleGestionRuches extends StatefulWidget {
   final String nomRucher;
 
   const ExempleGestionRuches({
-    Key? key,
+    super.key,
     required this.idRucher,
     required this.nomRucher,
-  }) : super(key: key);
+  });
 
   @override
   State<ExempleGestionRuches> createState() => _ExempleGestionRuchesState();
@@ -60,7 +61,7 @@ class _ExempleGestionRuchesState extends State<ExempleGestionRuches> {
   }
 
   void _initializeService() {
-    final firebaseService = FirebaseService();
+    final firebaseService = GetIt.I<FirebaseRealtimeService>();
     _rucheService = RucheService(firebaseService);
   }
 

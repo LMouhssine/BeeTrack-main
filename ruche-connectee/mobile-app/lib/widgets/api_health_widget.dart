@@ -6,7 +6,7 @@ import 'package:ruche_connectee/models/api_models.dart';
 import 'package:ruche_connectee/config/api_config.dart';
 
 class ApiHealthWidget extends StatefulWidget {
-  const ApiHealthWidget({Key? key}) : super(key: key);
+  const ApiHealthWidget({super.key});
 
   @override
   State<ApiHealthWidget> createState() => _ApiHealthWidgetState();

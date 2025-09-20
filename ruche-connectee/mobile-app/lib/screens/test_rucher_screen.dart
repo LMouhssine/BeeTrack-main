@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/rucher_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class TestRucherScreen extends StatefulWidget {
-  const TestRucherScreen({Key? key}) : super(key: key);
+  const TestRucherScreen({super.key});
 
   @override
   State<TestRucherScreen> createState() => _TestRucherScreenState();
@@ -19,7 +19,7 @@ class _TestRucherScreenState extends State<TestRucherScreen> {
   @override
   void initState() {
     super.initState();
-    _rucherService = RucherService(GetIt.I<FirebaseService>());
+    _rucherService = RucherService(GetIt.I<FirebaseRealtimeService>());
   }
 
   Future<void> _testAjouterRucher() async {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,9 +10,9 @@ class AjouterRucheScreen extends StatefulWidget {
   final String? rucherId; // Si fourni, pré-sélectionne ce rucher
 
   const AjouterRucheScreen({
-    Key? key,
+    super.key,
     this.rucherId,
-  }) : super(key: key);
+  });
 
   @override
   State<AjouterRucheScreen> createState() => _AjouterRucheScreenState();
@@ -60,27 +60,22 @@ class _AjouterRucheScreenState extends State<AjouterRucheScreen> {
     try {
       setState(() => _isLoading = true);
 
-      final currentUser = getIt<FirebaseService>().auth.currentUser;
+      final currentUser = getIt<FirebaseRealtimeService>().currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
 
-      final querySnapshot = await getIt<FirebaseService>()
-          .firestore
-          .collection('ruchers')
-          .where('idApiculteur', isEqualTo: currentUser.uid)
-          .where('actif', isEqualTo: true)
-          .orderBy('nom')
-          .get();
+      final ruchers = await getIt<FirebaseRealtimeService>()
+          .getDocuments('ruchers', 'idApiculteur', currentUser.uid);
 
-      final ruchers = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      // Filtrer les ruchers actifs et trier par nom
+      final ruchersActifs = ruchers
+          .where((rucher) => rucher['actif'] == true)
+          .toList()
+        ..sort((a, b) => (a['nom'] as String).compareTo(b['nom'] as String));
 
       setState(() {
-        _ruchers = ruchers;
+        _ruchers = ruchersActifs; // Utiliser ruchersActifs au lieu de ruchers
       });
 
       // Si aucun rucher n'est trouvé

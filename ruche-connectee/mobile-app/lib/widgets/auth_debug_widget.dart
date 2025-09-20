@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class AuthDebugWidget extends StatefulWidget {
-  const AuthDebugWidget({Key? key}) : super(key: key);
+  const AuthDebugWidget({super.key});
 
   @override
   State<AuthDebugWidget> createState() => _AuthDebugWidgetState();

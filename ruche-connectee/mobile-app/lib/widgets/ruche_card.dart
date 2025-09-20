@@ -13,7 +13,7 @@ class RucheCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const RucheCard({
-    Key? key,
+    super.key,
     required this.id,
     required this.name,
     required this.rucherName,
@@ -23,7 +23,7 @@ class RucheCard extends StatelessWidget {
     required this.lastUpdate,
     required this.batteryLevel,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

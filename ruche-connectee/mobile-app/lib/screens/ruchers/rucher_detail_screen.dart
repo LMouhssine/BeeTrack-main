@@ -5,9 +5,9 @@ class RucherDetailScreen extends StatelessWidget {
   final String rucherId;
 
   const RucherDetailScreen({
-    Key? key,
+    super.key,
     required this.rucherId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

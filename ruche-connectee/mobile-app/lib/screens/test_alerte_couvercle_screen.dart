@@ -7,7 +7,7 @@ import 'package:ruche_connectee/services/alerte_couvercle_service.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 
 class TestAlerteCouvercleScreen extends StatelessWidget {
-  const TestAlerteCouvercleScreen({Key? key}) : super(key: key);
+  const TestAlerteCouvercleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class TestAlerteCouvercleScreen extends StatelessWidget {
 }
 
 class _TestAlerteCouvercleScreenContent extends StatefulWidget {
-  const _TestAlerteCouvercleScreenContent({Key? key}) : super(key: key);
+  const _TestAlerteCouvercleScreenContent();
 
   @override
   State<_TestAlerteCouvercleScreenContent> createState() =>

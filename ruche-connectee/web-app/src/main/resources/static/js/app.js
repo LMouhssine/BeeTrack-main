@@ -56,24 +56,11 @@ const BeeTrack = {
     // Gestion de la sidebar
     initSidebar() {
         const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');
-        const mainContent = document.querySelector('.main-content');
 
-        if (!sidebar || !sidebarToggle) return;
+        if (!sidebar) return;
 
-        // Toggle sidebar sur mobile
-        sidebarToggle.addEventListener('click', () => {
-            const isVisible = sidebar.classList.contains('mobile-visible');
-            
-            if (isVisible) {
-                this.hideSidebar();
-            } else {
-                this.showSidebar();
-            }
-        });
-
-        // Fermer sidebar en cliquant sur l'overlay
+        // Fermer sidebar en cliquant sur l'overlay (pour le mobile)
         if (overlay) {
             overlay.addEventListener('click', () => {
                 this.hideSidebar();
@@ -92,17 +79,11 @@ const BeeTrack = {
         const overlay = document.getElementById('sidebar-overlay');
         
         if (sidebar) {
-            sidebar.classList.add('mobile-visible');
+            sidebar.classList.add('visible');
         }
         
         if (overlay) {
             overlay.classList.add('visible');
-        }
-        
-        // Mettre à jour l'état du bouton
-        const toggle = document.getElementById('sidebar-toggle');
-        if (toggle) {
-            toggle.setAttribute('aria-expanded', 'true');
         }
     },
 
@@ -111,17 +92,11 @@ const BeeTrack = {
         const overlay = document.getElementById('sidebar-overlay');
         
         if (sidebar) {
-            sidebar.classList.remove('mobile-visible');
+            sidebar.classList.remove('visible');
         }
         
         if (overlay) {
             overlay.classList.remove('visible');
-        }
-        
-        // Mettre à jour l'état du bouton
-        const toggle = document.getElementById('sidebar-toggle');
-        if (toggle) {
-            toggle.setAttribute('aria-expanded', 'false');
         }
     },
 

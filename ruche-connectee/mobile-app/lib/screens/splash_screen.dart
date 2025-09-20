@@ -5,7 +5,7 @@ import 'package:ruche_connectee/widgets/bee_logo.dart';
 import 'package:get_it/get_it.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _checkAuthAndRedirect() async {
     try {
       final authService = GetIt.instance<AuthService>();
-      final user = await authService.getCurrentUser();
+      final user = authService.currentUser;
 
       if (!mounted) return;
       if (user != null) {

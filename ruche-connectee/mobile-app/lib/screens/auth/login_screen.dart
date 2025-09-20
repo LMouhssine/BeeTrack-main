@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();

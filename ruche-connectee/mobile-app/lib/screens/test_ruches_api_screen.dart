@@ -13,7 +13,7 @@ Color colorWithOpacity(Color color, double opacity) {
 }
 
 class TestRuchesApiScreen extends StatefulWidget {
-  const TestRuchesApiScreen({Key? key}) : super(key: key);
+  const TestRuchesApiScreen({super.key});
 
   @override
   State<TestRuchesApiScreen> createState() => _TestRuchesApiScreenState();

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/rucher_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class AjouterRucherScreen extends StatefulWidget {
-  const AjouterRucherScreen({Key? key}) : super(key: key);
+  const AjouterRucherScreen({super.key});
 
   @override
   State<AjouterRucherScreen> createState() => _AjouterRucherScreenState();
@@ -24,7 +24,7 @@ class _AjouterRucherScreenState extends State<AjouterRucherScreen> {
   void initState() {
     super.initState();
     // Initialiser le service avec l'instance Firebase
-    _rucherService = RucherService(GetIt.I<FirebaseService>());
+    _rucherService = RucherService(GetIt.I<FirebaseRealtimeService>());
   }
 
   @override

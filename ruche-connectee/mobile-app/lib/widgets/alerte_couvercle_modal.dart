@@ -16,14 +16,14 @@ class AlerteCouvercleModal extends StatefulWidget {
   final VoidCallback onFermer;
 
   const AlerteCouvercleModal({
-    Key? key,
+    super.key,
     required this.rucheId,
     this.rucheNom,
     required this.mesure,
     required this.onIgnorerTemporairement,
     required this.onIgnorerSession,
     required this.onFermer,
-  }) : super(key: key);
+  });
 
   @override
   State<AlerteCouvercleModal> createState() => _AlerteCouvercleModalState();

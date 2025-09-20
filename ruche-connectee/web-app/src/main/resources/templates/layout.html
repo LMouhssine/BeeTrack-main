@@ -30,13 +30,13 @@
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
     <!-- Overlay et Sidebar via fragments -->
-    <div th:replace="fragments/sidebar :: overlay"></div>
-    <div th:replace="fragments/sidebar :: sidebar"></div>
-    
+    <div th:replace="~{fragments/sidebar :: overlay}"></div>
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
     <!-- Contenu principal avec header moderne -->
     <main id="main-content" class="main-content" role="main">
         <!-- Header via fragment -->
-        <div th:replace="fragments/header :: header"></div>
+        <div th:replace="~{fragments/header :: header}"></div>
         
         <!-- Système de notifications amélioré -->
         <div id="notifications" role="alert" aria-live="polite" class="notifications-container">
@@ -70,7 +70,7 @@
     </main>
     
     <!-- Footer via fragment (optionnel) -->
-    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
     
     <!-- JavaScript optimisé -->
     <script th:src="@{/webjars/jquery/jquery.min.js}" defer></script>

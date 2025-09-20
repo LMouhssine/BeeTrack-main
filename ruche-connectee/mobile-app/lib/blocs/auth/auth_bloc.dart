@@ -84,7 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoadingState());
     try {
-      final user = await _authService.getCurrentUser();
+      final user = _authService.currentUser;
       if (user != null) {
         emit(AuthenticatedState(userId: user.uid));
       } else {

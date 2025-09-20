@@ -16,10 +16,10 @@ class RuchesByRucherScreen extends StatefulWidget {
   final String rucherNom;
 
   const RuchesByRucherScreen({
-    Key? key,
+    super.key,
     required this.rucherId,
     required this.rucherNom,
-  }) : super(key: key);
+  });
 
   @override
   State<RuchesByRucherScreen> createState() => _RuchesByRucherScreenState();

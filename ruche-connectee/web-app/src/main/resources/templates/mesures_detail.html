@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title th:text="'Mesures - Ruche ' + ${rucheId} + ' - BeeTrack'">Mesures détaillées - BeeTrack</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="mesures-detail-wrapper">
+        
+        <!-- Header de la page -->
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="/mesures">Mesures</a>
+                <span>/</span>
+                <span th:text="'Ruche ' + ${rucheId}">Ruche</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="location.reload()" title="Actualiser les données">
+                    <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    Actualiser
+                </button>
+                <a href="/mesures" class="btn btn-outline-secondary">
+                    <i data-lucide="arrow-left" aria-hidden="true"></i>
+                    Retour
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${hasData}">
+            <!-- Dernière mesure -->
+            <div th:if="${derniereMesure != null}" class="current-status-section">
+                <div class="section-header">
+                    <h2>État actuel</h2>
+                    <p th:text="'Dernière mesure: ' + ${#temporals.format(derniereMesure.timestamp, 'dd/MM/yyyy à HH:mm:ss')}">Dernière mesure</p>
+                </div>
+
+                <div class="current-status-grid">
+                    <div class="status-card temperature">
+                        <div class="status-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>
+                            </svg>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-value" th:text="${derniereMesure.temperature != null ? derniereMesure.temperature + '°C' : 'N/A'}">N/A</div>
+                            <div class="status-label">Température</div>
+                        </div>
+                    </div>
+
+                    <div class="status-card humidity">
+                        <div class="status-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 12h20M2 6h20M2 18h20"/>
+                            </svg>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-value" th:text="${derniereMesure.humidity != null ? derniereMesure.humidity + '%' : 'N/A'}">N/A</div>
+                            <div class="status-label">Humidité</div>
+                        </div>
+                    </div>
+
+                    <div class="status-card couvercle" th:classappend="${derniereMesure.couvercleOuvert != null && derniereMesure.couvercleOuvert} ? 'alert' : ''">
+                        <div class="status-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                <path d="m7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-value" th:text="${derniereMesure.couvercleOuvert != null ? (derniereMesure.couvercleOuvert ? 'OUVERT' : 'FERMÉ') : 'N/A'}">N/A</div>
+                            <div class="status-label">Couvercle</div>
+                        </div>
+                    </div>
+
+                    <div class="status-card battery">
+                        <div class="status-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="16" height="10" x="2" y="7" rx="2" ry="2"/>
+                                <line x1="22" y1="11" x2="22" y2="13"/>
+                            </svg>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-value" th:text="${derniereMesure.batterie != null ? derniereMesure.batterie + '%' : 'N/A'}">N/A</div>
+                            <div class="status-label">Batterie</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div th:if="${statistiques != null}" class="statistics-section">
+                <div class="section-header">
+                    <h2>Statistiques</h2>
+                    <p th:text="'Basées sur ' + ${nombreJours} + ' derniers jours (' + ${statistiques.nombreMesures} + ' mesures)'">Statistiques</p>
+                </div>
+
+                <div class="statistics-grid">
+                    <div class="stat-group">
+                        <h4>Température</h4>
+                        <div class="stat-values">
+                            <div class="stat-item">
+                                <span class="stat-label">Moyenne</span>
+                                <span class="stat-value" th:text="${statistiques.temperatureMoyenne != null ? statistiques.temperatureMoyenne + '°C' : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Min</span>
+                                <span class="stat-value" th:text="${statistiques.temperatureMin != null ? statistiques.temperatureMin + '°C' : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max</span>
+                                <span class="stat-value" th:text="${statistiques.temperatureMax != null ? statistiques.temperatureMax + '°C' : 'N/A'}">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-group">
+                        <h4>Humidité</h4>
+                        <div class="stat-values">
+                            <div class="stat-item">
+                                <span class="stat-label">Moyenne</span>
+                                <span class="stat-value" th:text="${statistiques.humiditeMoyenne != null ? statistiques.humiditeMoyenne + '%' : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Min</span>
+                                <span class="stat-value" th:text="${statistiques.humiditeMin != null ? statistiques.humiditeMin + '%' : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max</span>
+                                <span class="stat-value" th:text="${statistiques.humiditeMax != null ? statistiques.humiditeMax + '%' : 'N/A'}">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-group">
+                        <h4>Activité</h4>
+                        <div class="stat-values">
+                            <div class="stat-item">
+                                <span class="stat-label">Ouvertures</span>
+                                <span class="stat-value" th:text="${statistiques.ouverturesCouvercle != null ? statistiques.ouverturesCouvercle : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">% Ouvertures</span>
+                                <span class="stat-value" th:text="${statistiques.pourcentageOuvertures != null ? statistiques.pourcentageOuvertures + '%' : 'N/A'}">N/A</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Mesures</span>
+                                <span class="stat-value" th:text="${statistiques.nombreMesures != null ? statistiques.nombreMesures : 'N/A'}">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mesures récentes -->
+            <div th:if="${mesuresRecentes != null && !#lists.isEmpty(mesuresRecentes)}" class="recent-measures-section">
+                <div class="section-header">
+                    <h2>Mesures récentes</h2>
+                    <p th:text="'Dernières ' + ${nombreHeures} + ' heures'">Mesures récentes</p>
+                </div>
+
+                <div class="measures-table-container">
+                    <table class="measures-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Température</th>
+                                <th>Humidité</th>
+                                <th>Couvercle</th>
+                                <th>Batterie</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="mesure : ${mesuresRecentes}">
+                                <td th:text="${#temporals.format(mesure.timestamp, 'dd/MM HH:mm')}">--</td>
+                                <td class="temperature" th:text="${mesure.temperature != null ? mesure.temperature + '°C' : 'N/A'}">N/A</td>
+                                <td class="humidity" th:text="${mesure.humidity != null ? mesure.humidity + '%' : 'N/A'}">N/A</td>
+                                <td class="couvercle" 
+                                    th:text="${mesure.couvercleOuvert != null ? (mesure.couvercleOuvert ? 'OUVERT' : 'FERMÉ') : 'N/A'}"
+                                    th:classappend="${mesure.couvercleOuvert != null && mesure.couvercleOuvert} ? 'alert' : ''">N/A</td>
+                                <td class="battery" th:text="${mesure.batterie != null ? mesure.batterie + '%' : 'N/A'}">N/A</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Graphiques (placeholder) -->
+            <div class="charts-section">
+                <div class="section-header">
+                    <h2>Graphiques</h2>
+                    <p>Évolution des mesures dans le temps</p>
+                </div>
+                
+                <div class="chart-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    <h4>Graphiques à venir</h4>
+                    <p>Les graphiques de température et d'humidité seront disponibles prochainement.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div th:unless="${hasData}" class="error-section">
+            <div class="error-card">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <h3>Aucune donnée disponible</h3>
+                <p th:text="${errorMessage}">Impossible de charger les mesures pour cette ruche.</p>
+                <div class="error-actions">
+                    <a href="/mesures" class="btn btn-primary">Retour aux mesures</a>
+                    <button onclick="location.reload()" class="btn btn-secondary">Réessayer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts spécifiques à la page -->
+    <th:block layout:fragment="scripts">
+    <script>
+        // Auto-refresh toutes les 30 secondes
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+
+        // Initialisation de Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+    </th:block>
+
+    <!-- Styles spécifiques à la page -->
+    <th:block layout:fragment="styles">
+    <style>
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .current-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .status-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .status-card.alert {
+            border-color: #f59e0b;
+            background: #fef3c7;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+        }
+
+        .status-card.temperature .status-icon {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .status-card.humidity .status-icon {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .status-card.couvercle .status-icon {
+            background: #f3e8ff;
+            color: #8b5cf6;
+        }
+
+        .status-card.couvercle.alert .status-icon {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .status-card.battery .status-icon {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .status-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat-group {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+
+        .stat-group h4 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .stat-values {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .measures-table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .measures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .measures-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .measures-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        .measures-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .measures-table .temperature {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .measures-table .humidity {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .measures-table .couvercle.alert {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .measures-table .battery {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .chart-placeholder {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 3rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .chart-placeholder svg {
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder h4 {
+            color: #6b7280;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .chart-placeholder p {
+            color: #9ca3af;
+            margin: 0;
+        }
+
+        .error-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .error-card {
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 3rem;
+            max-width: 500px;
+        }
+
+        .error-card svg {
+            color: #ef4444;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-card h3 {
+            color: #1f2937;
+            margin: 0 0 1rem 0;
+        }
+
+        .error-card p {
+            color: #6b7280;
+            margin: 0 0 2rem 0;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+    </style>
+    </th:block>
+</body>
+</html>

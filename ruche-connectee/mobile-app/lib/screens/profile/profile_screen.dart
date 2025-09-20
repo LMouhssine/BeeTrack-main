@@ -4,7 +4,7 @@ import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -32,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUserData() async {
     try {
       setState(() => _isLoading = true);
-      final user = await GetIt.I<AuthService>().getCurrentUser();
+      final user = GetIt.I<AuthService>().currentUser;
 
       if (!mounted) return;
 
@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isLoading = true);
 
       // Mise à jour du profil
-      final user = await GetIt.I<AuthService>().getCurrentUser();
+      final user = GetIt.I<AuthService>().currentUser;
       if (user != null) {
         await user.updateDisplayName(_nameController.text);
         if (user.email != _emailController.text) {

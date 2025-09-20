@@ -2,6 +2,32 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { 
+            url = uri("https://dl.google.com/dl/android/maven2/")
+            isAllowInsecureProtocol = true
+        }
+        maven { 
+            url = uri("https://maven.google.com/")
+            isAllowInsecureProtocol = true
+        }
+        maven { 
+            url = uri("https://repo1.maven.org/maven2/")
+            isAllowInsecureProtocol = true
+        }
+        maven { 
+            url = uri("https://plugins.gradle.org/m2/")
+            isAllowInsecureProtocol = true
+        }
+        @Suppress("DEPRECATION")
+        jcenter()
+        maven { 
+            url = uri("https://maven.aliyun.com/repository/google")
+            isAllowInsecureProtocol = true
+        }
+        maven { 
+            url = uri("https://maven.aliyun.com/repository/public")
+            isAllowInsecureProtocol = true
+        }
     }
 }
 

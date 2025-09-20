@@ -1,13 +1,12 @@
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  // TODO: Replace with your Firebase configuration
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyCVuz8sO1DXUMzvZhqS8Evv4eJEm4Hq0e8",
+  authDomain: "rucheconnecteeesp32.firebaseapp.com",
+  projectId: "rucheconnecteeesp32",
+  storageBucket: "rucheconnecteeesp32.firebasestorage.app",
+  messagingSenderId: "331852612281",
+  appId: "1:331852612281:web:7b80072001f8a8ce3d5168",
+  measurementId: "G-XXXXXXXXXX"
 };
 
 // Initialize Firebase

@@ -7,7 +7,7 @@ import 'package:ruche_connectee/widgets/ruche_card.dart';
 import 'package:go_router/go_router.dart';
 
 class RucheListScreen extends StatefulWidget {
-  const RucheListScreen({Key? key}) : super(key: key);
+  const RucheListScreen({super.key});
 
   @override
   State<RucheListScreen> createState() => _RucheListScreenState();

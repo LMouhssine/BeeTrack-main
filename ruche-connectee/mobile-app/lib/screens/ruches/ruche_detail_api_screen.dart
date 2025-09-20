@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ruche_connectee/models/api_models.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/api_ruche_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/config/service_locator.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -19,10 +18,10 @@ class RucheDetailApiScreen extends StatefulWidget {
   final String rucheNom;
 
   const RucheDetailApiScreen({
-    Key? key,
+    super.key,
     required this.rucheId,
     required this.rucheNom,
-  }) : super(key: key);
+  });
 
   @override
   State<RucheDetailApiScreen> createState() => _RucheDetailApiScreenState();
@@ -30,6 +29,7 @@ class RucheDetailApiScreen extends StatefulWidget {
 
 class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
   late final ApiRucheService _apiRucheService;
+  late final FirebaseRealtimeService _firebaseService;
   RucheResponse? _ruche;
   List<DonneesCapteur> _mesures = [];
   bool _isLoadingRuche = true;
@@ -47,6 +47,7 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
     final firebaseAuth = FirebaseAuth.instance;
     final apiClient = ApiClientService(firebaseAuth);
     _apiRucheService = ApiRucheService(apiClient);
+    _firebaseService = getIt<FirebaseRealtimeService>();
   }
 
   Future<void> _loadData() async {
@@ -77,107 +78,73 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
         return;
       } catch (apiError) {
         LoggerService.warning(
-            '⚠️ API indisponible, utilisation de Firestore...');
+            '⚠️ API indisponible, utilisation de Realtime Database...');
 
-        // Fallback vers Firestore
+        // Fallback vers Realtime Database
         try {
-          final rucheFirestore = await _loadRucheFromFirestore();
+          final rucheRealtime = await _loadRucheFromRealtimeDatabase();
 
           setState(() {
-            _ruche = rucheFirestore;
+            _ruche = rucheRealtime;
             _isLoadingRuche = false;
           });
 
-          LoggerService.info('🔥 Détails de ruche chargés depuis Firestore');
+          LoggerService.info('🔥 Détails de ruche chargés depuis Realtime Database');
 
           // Afficher un message d'information sur le fallback
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('API indisponible, utilisation de Firestore'),
+                content: Text('API indisponible, utilisation de Realtime Database'),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 2),
               ),
             );
           }
-          return;
-        } catch (firestoreError) {
-          LoggerService.error(
-              '❌ Échec du fallback Firestore pour les détails de ruche',
-              firestoreError);
+        } catch (firebaseError) {
+          LoggerService.error('❌ Erreur lors du chargement depuis Realtime Database', firebaseError);
           rethrow;
         }
       }
     } catch (e) {
-      LoggerService.error(
-          'Erreur lors du chargement des détails de la ruche', e);
+      LoggerService.error('❌ Erreur lors du chargement des détails de ruche', e);
       setState(() {
+        _errorMessage = 'Erreur lors du chargement des détails: ${e.toString()}';
         _isLoadingRuche = false;
-        _errorMessage = 'Erreur lors du chargement de la ruche';
       });
     }
   }
 
-  /// Récupère les détails de la ruche depuis Firestore (méthode de fallback)
-  Future<RucheResponse?> _loadRucheFromFirestore() async {
+  Future<RucheResponse> _loadRucheFromRealtimeDatabase() async {
     try {
-      // Récupérer la ruche depuis Firestore
-      final docSnapshot = await getIt<FirebaseService>()
-          .firestore
-          .collection('ruches')
-          .doc(widget.rucheId)
-          .get();
-
-      if (!docSnapshot.exists) {
-        throw Exception('Ruche non trouvée dans Firestore');
+      final rucheData = await _firebaseService.getDocument('ruches', widget.rucheId);
+      
+      if (rucheData == null) {
+        throw Exception('Ruche non trouvée dans Realtime Database');
       }
 
-      final data = docSnapshot.data()!;
-
-      // Convertir les données Firestore en RucheResponse
-      final rucheResponse = RucheResponse(
+      // Convertir les données Realtime Database en RucheResponse
+      return RucheResponse(
         id: widget.rucheId,
-        idRucher: data['idRucher'] ?? '',
-        nom: data['nom'] ?? widget.rucheNom,
-        position: data['position'] ?? 'Non définie',
-        rucherNom: await _getRucherNomFromFirestore(data['idRucher']),
-        typeRuche: data['typeRuche'],
-        description: data['description'],
-        enService: data['enService'] ?? true,
-        dateCreation:
-            (data['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
-        dateInstallation: (data['dateInstallation'] as Timestamp?)?.toDate(),
-        actif: data['actif'] ?? true,
-        idApiculteur: data['idApiculteur'] ?? '',
+        nom: rucheData['nom'] ?? 'Sans nom',
+        position: rucheData['position'] ?? 'Position non définie',
+        typeRuche: rucheData['typeRuche'] ?? 'Type non défini',
+        description: rucheData['description'] ?? '',
+        enService: rucheData['enService'] ?? true,
+        dateInstallation: rucheData['dateInstallation'] != null 
+            ? DateTime.fromMillisecondsSinceEpoch(rucheData['dateInstallation'])
+            : DateTime.now(),
+        dateCreation: rucheData['dateCreation'] != null 
+            ? DateTime.fromMillisecondsSinceEpoch(rucheData['dateCreation'])
+            : DateTime.now(),
+        idRucher: rucheData['idRucher'] ?? '',
+        idApiculteur: rucheData['idApiculteur'] ?? '',
+        actif: rucheData['actif'] ?? true,
       );
-
-      return rucheResponse;
     } catch (e) {
-      LoggerService.error(
-          'Erreur lors de la récupération de la ruche depuis Firestore', e);
-      throw Exception('Impossible de récupérer la ruche depuis Firestore: $e');
+      LoggerService.error('Erreur lors du chargement depuis Realtime Database', e);
+      rethrow;
     }
-  }
-
-  /// Récupère le nom du rucher depuis Firestore
-  Future<String?> _getRucherNomFromFirestore(String? rucherId) async {
-    if (rucherId == null) return null;
-
-    try {
-      final rucherDoc = await getIt<FirebaseService>()
-          .firestore
-          .collection('ruchers')
-          .doc(rucherId)
-          .get();
-
-      if (rucherDoc.exists) {
-        return rucherDoc.data()?['nom'] as String?;
-      }
-    } catch (e) {
-      LoggerService.warning('Impossible de récupérer le nom du rucher: $e');
-    }
-
-    return null;
   }
 
   Future<void> _loadMesures7Jours() async {
@@ -188,126 +155,81 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
 
       // Essayer d'abord l'API Spring Boot
       try {
-        LoggerService.info('🌐 Récupération des mesures via API...');
-        final mesures =
-            await _apiRucheService.obtenirMesures7DerniersJours(widget.rucheId);
+        final mesures = await _apiRucheService.obtenirMesures7DerniersJours(widget.rucheId);
 
         setState(() {
           _mesures = mesures;
           _isLoadingMesures = false;
         });
-
-        LoggerService.info('✅ ${mesures.length} mesures récupérées via API');
+        LoggerService.info('✅ Mesures chargées via API');
         return;
       } catch (apiError) {
         LoggerService.warning(
-            '⚠️ API indisponible, utilisation de Firestore...');
+            '⚠️ API indisponible, utilisation de Realtime Database...');
 
-        // Fallback vers Firestore
+        // Fallback vers Realtime Database
         try {
-          final mesuresFirestore = await _loadMesuresFromFirestore();
+          final mesuresRealtime = await _loadMesuresFromRealtimeDatabase();
 
           setState(() {
-            _mesures = mesuresFirestore;
+            _mesures = mesuresRealtime;
             _isLoadingMesures = false;
           });
 
-          LoggerService.info(
-              '🔥 ${mesuresFirestore.length} mesures récupérées depuis Firestore');
-
-          // Afficher un message d'information sur le fallback
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('API indisponible, utilisation de Firestore'),
-                backgroundColor: Colors.orange,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-          return;
-        } catch (firestoreError) {
-          LoggerService.error('❌ Échec du fallback Firestore', firestoreError);
+          LoggerService.info('🔥 Mesures chargées depuis Realtime Database');
+        } catch (firebaseError) {
+          LoggerService.error('❌ Erreur lors du chargement des mesures depuis Realtime Database', firebaseError);
           rethrow;
         }
       }
     } catch (e) {
-      LoggerService.error('Erreur lors du chargement des mesures', e);
+      LoggerService.error('❌ Erreur lors du chargement des mesures', e);
       setState(() {
         _isLoadingMesures = false;
       });
-      _showErrorSnackBar('Erreur lors du chargement des mesures: $e');
     }
   }
 
-  /// Récupère les mesures depuis Firestore (méthode de fallback)
-  Future<List<DonneesCapteur>> _loadMesuresFromFirestore() async {
+  Future<List<DonneesCapteur>> _loadMesuresFromRealtimeDatabase() async {
     try {
-      // Calculer la date d'il y a 7 jours
-      final dateLimite = DateTime.now().subtract(const Duration(days: 7));
+      final mesuresData = await _firebaseService.getDocuments('mesures', 'idRuche', widget.rucheId);
+      
+      // Filtrer les mesures des 7 derniers jours
+      final maintenant = DateTime.now();
+      final ilYA7Jours = maintenant.subtract(const Duration(days: 7));
+      
+      final mesuresFiltrees = mesuresData.where((mesure) {
+        final timestamp = mesure['timestamp'] as int?;
+        if (timestamp == null) return false;
+        
+        final dateMesure = DateTime.fromMillisecondsSinceEpoch(timestamp);
+        return dateMesure.isAfter(ilYA7Jours);
+      }).toList();
 
-      // Récupérer toutes les mesures de la ruche depuis Firestore
-      final querySnapshot = await getIt<FirebaseService>()
-          .firestore
-          .collection('donneesCapteurs')
-          .where('rucheId', isEqualTo: widget.rucheId)
-          .get();
+      // Trier par timestamp décroissant
+      mesuresFiltrees.sort((a, b) {
+        final timestampA = a['timestamp'] as int? ?? 0;
+        final timestampB = b['timestamp'] as int? ?? 0;
+        return timestampB.compareTo(timestampA);
+      });
 
-      final List<DonneesCapteur> mesures = [];
-
-      for (final doc in querySnapshot.docs) {
-        try {
-          final data = doc.data();
-          final timestamp =
-              (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-
-          // Filtrer côté client pour les 7 derniers jours
-          if (timestamp.isAfter(dateLimite)) {
-            mesures.add(DonneesCapteur(
-              id: doc.id,
-              rucheId: data['rucheId'] ?? widget.rucheId,
-              timestamp: timestamp,
-              temperature: (data['temperature'] as num?)?.toDouble(),
-              humidity: (data['humidity'] as num?)?.toDouble(),
-              couvercleOuvert: data['couvercleOuvert'] as bool?,
-              batterie: (data['batterie'] as num?)?.toInt(),
-              signalQualite: (data['signalQualite'] as num?)?.toInt(),
-              erreur: data['erreur'] as String?,
-            ));
-          }
-        } catch (docError) {
-          LoggerService.warning('⚠️ Erreur document ${doc.id}: $docError');
-          continue; // Passer au document suivant
-        }
-      }
-
-      // Trier par timestamp croissant
-      mesures.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-      // Si aucune mesure, suggérer des solutions
-      if (mesures.isEmpty) {
-        LoggerService.warning(
-            '⚠️ Aucune mesure trouvée. Utilisez le bouton "Générer des données de test"');
-      }
-
-      return mesures;
+      // Convertir en DonneesCapteur
+      return mesuresFiltrees.map((mesure) => DonneesCapteur(
+        id: mesure['id'] ?? '',
+        rucheId: widget.rucheId,
+        temperature: (mesure['temperature'] as num?)?.toDouble() ?? 0.0,
+        humidity: (mesure['humidite'] as num?)?.toDouble() ?? 0.0,
+        timestamp: mesure['timestamp'] != null 
+            ? DateTime.fromMillisecondsSinceEpoch(mesure['timestamp'])
+            : DateTime.now(),
+      )).toList();
     } catch (e) {
-      LoggerService.error('Erreur lors de la récupération depuis Firestore', e);
-      throw Exception(
-          'Impossible de récupérer les mesures depuis Firestore: $e');
+      LoggerService.error('Erreur lors du chargement des mesures depuis Realtime Database', e);
+      rethrow;
     }
   }
 
-  void _showErrorSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-      ),
-    );
-  }
+
 
   String _formatDateTime(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
@@ -1063,8 +985,8 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
 
       LoggerService.info('🧪 Génération de données de test en cours...');
 
-      final firestore = getIt<FirebaseService>().firestore;
-      final batch = firestore.batch();
+             // Utiliser Realtime Database au lieu de Firestore
+       final firebaseService = getIt<FirebaseRealtimeService>();
 
       // Générer 100 mesures sur les 7 derniers jours
       final now = DateTime.now();
@@ -1086,21 +1008,19 @@ class _RucheDetailApiScreenState extends State<RucheDetailApiScreen> {
             humidityVariation +
             (DateTime.now().microsecond % 100) / 100;
 
-        final docRef = firestore.collection('donneesCapteurs').doc();
-        batch.set(docRef, {
+        final mesureId = '${DateTime.now().millisecondsSinceEpoch}_$i';
+        
+        await firebaseService.setDocument('mesures', mesureId, {
           'rucheId': widget.rucheId,
-          'timestamp': Timestamp.fromDate(timestamp),
+          'timestamp': timestamp.millisecondsSinceEpoch,
           'temperature': double.parse(temperature.toStringAsFixed(1)),
-          'humidity': double.parse(humidity.toStringAsFixed(1)),
+          'humidite': double.parse(humidity.toStringAsFixed(1)),
           'couvercleOuvert': i % 20 == 0, // Couvercle ouvert 5% du temps
           'batterie': 100 - (i ~/ 10), // Batterie qui diminue progressivement
           'signalQualite': 80 + (i % 20), // Signal entre 80 et 99
           'erreur': null,
         });
       }
-
-      // Exécuter le batch
-      await batch.commit();
 
       LoggerService.info('✅ Données de test générées avec succès');
 

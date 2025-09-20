@@ -7,7 +7,7 @@ import 'package:ruche_connectee/widgets/auth_debug_widget.dart';
 import 'package:ruche_connectee/models/api_models.dart';
 
 class TestApiScreen extends StatefulWidget {
-  const TestApiScreen({Key? key}) : super(key: key);
+  const TestApiScreen({super.key});
 
   @override
   State<TestApiScreen> createState() => _TestApiScreenState();

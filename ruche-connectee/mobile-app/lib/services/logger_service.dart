@@ -1,28 +1,40 @@
 import 'package:logger/logger.dart';
+import 'package:ruche_connectee/config/logging_config.dart';
 
 class LoggerService {
   static final Logger _logger = Logger(
+    level: LoggingConfig.productionMode ? Level.warning : Level.info,
     printer: PrettyPrinter(
-      methodCount: 2,
-      errorMethodCount: 8,
-      lineLength: 120,
+      methodCount: 1,
+      errorMethodCount: 3,
+      lineLength: 80,
       colors: true,
       printEmojis: true,
-      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
+      dateTimeFormat: DateTimeFormat.onlyTime,
       noBoxingByDefault: true,
       excludeBox: {
         Level.trace: true,
         Level.fatal: true,
+        Level.debug: true,
       },
     ),
   );
 
   static void debug(String message) {
-    _logger.d(message);
+    if (LoggingConfig.enableDebugLogs) {
+      _logger.d(message);
+    }
   }
 
   static void info(String message) {
-    _logger.i(message);
+    if (LoggingConfig.productionMode) {
+      // En production, limiter les logs info
+      if (message.contains('💡') || message.contains('✅')) {
+        _logger.i(message);
+      }
+    } else {
+      _logger.i(message);
+    }
   }
 
   static void warning(String message) {
@@ -34,7 +46,9 @@ class LoggerService {
   }
 
   static void trace(String message) {
-    _logger.t(message);
+    if (LoggingConfig.enableTraceLogs) {
+      _logger.t(message);
+    }
   }
 
   static void fatal(String message) {

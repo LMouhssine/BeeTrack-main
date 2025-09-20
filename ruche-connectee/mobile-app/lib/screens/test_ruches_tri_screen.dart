@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/ruche_service.dart';
 import 'package:ruche_connectee/services/api_ruche_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/models/api_models.dart';
 
 /// Écran de test pour valider le tri des ruches par nom croissant
 class TestRuchesTriScreen extends StatefulWidget {
-  const TestRuchesTriScreen({Key? key}) : super(key: key);
+  const TestRuchesTriScreen({super.key});
 
   @override
   State<TestRuchesTriScreen> createState() => _TestRuchesTriScreenState();
@@ -40,7 +40,7 @@ class _TestRuchesTriScreenState extends State<TestRuchesTriScreen> {
   }
 
   void _initializeServices() {
-    final firebaseService = GetIt.I<FirebaseService>();
+    final firebaseService = GetIt.I<FirebaseRealtimeService>();
     final apiClientService = GetIt.I<ApiClientService>();
 
     _rucheService = RucheService(firebaseService);

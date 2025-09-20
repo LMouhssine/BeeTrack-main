@@ -9,11 +9,11 @@ class SurveillanceCouvercleWidget extends StatelessWidget {
   final String apiculteurId;
 
   const SurveillanceCouvercleWidget({
-    Key? key,
+    super.key,
     required this.rucheId,
     required this.rucheNom,
     required this.apiculteurId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

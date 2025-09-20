@@ -4,7 +4,7 @@ import 'package:ruche_connectee/services/auth_service.dart';
 import 'package:get_it/get_it.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();

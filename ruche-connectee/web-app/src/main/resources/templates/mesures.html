@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Mesures des capteurs - BeeTrack</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="mesures-wrapper">
+        
+        <!-- Header de la page -->
+        <div class="page-header">
+            <div class="page-title">
+                <h1>📊 Mesures IoT</h1>
+                <p>Surveillance en temps réel de vos capteurs ESP32</p>
+            </div>
+            <div class="header-actions">
+                <div class="esp-selector">
+                    <label for="espSelect">ESP32 :</label>
+                    <select id="espSelect" onchange="changerEsp()">
+                        <option value="">Sélectionner un ESP32...</option>
+                        <option value="887D681C0610" selected>ESP32 - 887D681C0610</option>
+                        <option value="R001">ESP32 - R001 (Test)</option>
+                        <option value="R002">ESP32 - R002 (Test)</option>
+                        <option value="R003">ESP32 - R003 (Test)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="actualiserDonnees()" title="Actualiser les données">
+                    <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    Actualiser
+                </button>
+                <button class="btn btn-primary" onclick="creerDonneesTest()" title="Créer des données de test">
+                    <i data-lucide="database" aria-hidden="true"></i>
+                    Données test
+                </button>
+            </div>
+        </div>
+
+        <!-- Sélecteur ESP32 principal -->
+        <div class="esp-selection-section">
+            <div class="section-header">
+                <h2>🔌 Sélection ESP32</h2>
+                <p>Choisissez votre capteur ESP32 pour voir ses mesures</p>
+            </div>
+            
+            <div class="esp-cards">
+                <div class="esp-card active" data-esp="887D681C0610" onclick="selectionnerEsp('887D681C0610')">
+                    <div class="esp-icon">📡</div>
+                    <div class="esp-info">
+                        <h3>ESP32 Principal</h3>
+                        <div class="esp-id">ID: 887D681C0610</div>
+                        <div class="esp-status online">● En ligne</div>
+                    </div>
+                    <div class="esp-actions">
+                        <button class="btn-small" onclick="event.stopPropagation(); voirDetails('887D681C0610')">Détails</button>
+                    </div>
+                </div>
+                
+                <div class="esp-card" data-esp="R001" onclick="selectionnerEsp('R001')">
+                    <div class="esp-icon">📡</div>
+                    <div class="esp-info">
+                        <h3>ESP32 Test 1</h3>
+                        <div class="esp-id">ID: R001</div>
+                        <div class="esp-status offline">● Hors ligne</div>
+                    </div>
+                    <div class="esp-actions">
+                        <button class="btn-small" onclick="event.stopPropagation(); voirDetails('R001')">Détails</button>
+                    </div>
+                </div>
+                
+                <div class="esp-card" data-esp="R002" onclick="selectionnerEsp('R002')">
+                    <div class="esp-icon">📡</div>
+                    <div class="esp-info">
+                        <h3>ESP32 Test 2</h3>
+                        <div class="esp-id">ID: R002</div>
+                        <div class="esp-status offline">● Hors ligne</div>
+                    </div>
+                    <div class="esp-actions">
+                        <button class="btn-small" onclick="event.stopPropagation(); voirDetails('R002')">Détails</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="esp-selected-info">
+                <div class="selected-esp">
+                    <strong>ESP32 sélectionné :</strong> <span id="selectedEspId">887D681C0610</span>
+                    <button class="btn-link" onclick="changerModeAffichage()">Changer le mode d'affichage</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques globales -->
+        <div th:if="${hasGlobalData}" class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card stat-primary">
+                    <div class="stat-content">
+                        <div class="stat-main">
+                            <div class="stat-number" th:text="${totalRuches}">0</div>
+                            <div class="stat-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                                    <polyline points="2,17 12,22 22,17"/>
+                                    <polyline points="2,12 12,17 22,12"/>
+                                </svg>
+                                Ruches totales
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-success">
+                    <div class="stat-content">
+                        <div class="stat-main">
+                            <div class="stat-number" th:text="${ruchesAvecDonnees}">0</div>
+                            <div class="stat-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="16,12 12,8 8,12"/>
+                                    <line x1="12" y1="16" x2="12" y2="8"/>
+                                </svg>
+                                Ruches actives
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-info">
+                    <div class="stat-content">
+                        <div class="stat-main">
+                            <div class="stat-number" th:text="${temperatureMoyenne != null ? temperatureMoyenne + '°C' : 'N/A'}">N/A</div>
+                            <div class="stat-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>
+                                </svg>
+                                Temp. moyenne
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-warning">
+                    <div class="stat-content">
+                        <div class="stat-main">
+                            <div class="stat-number" th:text="${humiditeMoyenne != null ? humiditeMoyenne + '%' : 'N/A'}">N/A</div>
+                            <div class="stat-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12h20M2 6h20M2 18h20"/>
+                                </svg>
+                                Humidité moyenne
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message d'erreur global -->
+        <div th:if="${!hasGlobalData}" class="alert alert-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <span th:text="${globalErrorMessage}">Erreur lors du chargement des données</span>
+        </div>
+
+        <!-- Liste des ruches avec leurs mesures -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2>État des ruches</h2>
+                <p>Dernières mesures de vos capteurs IoT</p>
+            </div>
+
+            <div th:if="${ruches != null && !#lists.isEmpty(ruches)}" class="ruches-grid">
+                <div th:each="ruche : ${ruches}" class="ruche-card" th:classappend="${ruche.hasData} ? 'has-data' : 'no-data'">
+                    <div class="ruche-header">
+                        <div class="ruche-info">
+                            <h3 th:text="${ruche.nom}">Ruche</h3>
+                            <span class="ruche-id" th:text="'ID: ' + ${ruche.id}">ID: XXX</span>
+                        </div>
+                        <div class="ruche-status">
+                            <div th:if="${ruche.hasData}" class="status-badge status-active">Actif</div>
+                            <div th:unless="${ruche.hasData}" class="status-badge status-inactive">Inactif</div>
+                        </div>
+                    </div>
+
+                    <div th:if="${ruche.hasData}" class="ruche-data">
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <div class="data-label">Température</div>
+                                <div class="data-value temperature" th:text="${ruche.temperature != null ? ruche.temperature + '°C' : 'N/A'}">N/A</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">Humidité</div>
+                                <div class="data-value humidity" th:text="${ruche.humidity != null ? ruche.humidity + '%' : 'N/A'}">N/A</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">Couvercle</div>
+                                <div class="data-value couvercle" 
+                                     th:text="${ruche.couvercleOuvert != null ? (ruche.couvercleOuvert ? 'OUVERT' : 'FERMÉ') : 'N/A'}"
+                                     th:classappend="${ruche.couvercleOuvert != null && ruche.couvercleOuvert} ? 'alert' : ''">N/A</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">Batterie</div>
+                                <div class="data-value battery" th:text="${ruche.batterie != null ? ruche.batterie + '%' : 'N/A'}">N/A</div>
+                            </div>
+                        </div>
+
+                        <div class="ruche-timestamp" th:if="${ruche.timestamp != null}">
+                            <small th:text="'Dernière mesure: ' + ${#temporals.format(ruche.timestamp, 'dd/MM/yyyy HH:mm')}">Dernière mesure: --</small>
+                        </div>
+
+                        <div class="ruche-actions">
+                            <a th:href="@{/mesures/ruche/{id}(id=${ruche.id})}" class="btn btn-sm btn-outline-primary">
+                                <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+
+                    <div th:unless="${ruche.hasData}" class="ruche-no-data">
+                        <div class="no-data-message">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            <p>Aucune mesure disponible</p>
+                            <small th:if="${ruche.error}" th:text="${ruche.error}">En attente de données...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${ruches == null || #lists.isEmpty(ruches)}" class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12,2 2,7 12,12 22,7 12,2"/>
+                    <polyline points="2,17 12,22 22,17"/>
+                    <polyline points="2,12 12,17 22,12"/>
+                </svg>
+                <h3>Aucune ruche trouvée</h3>
+                <p>Commencez par ajouter vos ruches et configurer vos capteurs IoT.</p>
+                <a href="/RuchesNew/new" class="btn btn-primary">
+                    <i data-lucide="plus" aria-hidden="true"></i>
+                    Ajouter une ruche
+                </a>
+            </div>
+        </div>
+
+        <!-- Instructions d'utilisation -->
+        <div class="info-section">
+            <div class="info-card">
+                <div class="info-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+                    <h4>Comment voir vos mesures</h4>
+                </div>
+                <div class="info-content">
+                    <ul>
+                        <li>Les mesures s'affichent automatiquement quand vos capteurs IoT envoient des données</li>
+                        <li>Cliquez sur "Voir détails" pour accéder aux graphiques et statistiques détaillées</li>
+                        <li>Utilisez le bouton "Actualiser" pour mettre à jour les données manuellement</li>
+                        <li>En cas de problème, vérifiez la connexion de vos capteurs ESP32</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts spécifiques à la page -->
+    <th:block layout:fragment="scripts">
+    <script>
+        let currentEsp = '887D681C0610';
+        let autoRefreshInterval;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Charger les données initiales
+            chargerDonneesEsp(currentEsp);
+        });
+
+        // Gestion du sélecteur ESP32
+        function changerEsp() {
+            const select = document.getElementById('espSelect');
+            const selectedEsp = select.value;
+            
+            if (selectedEsp && selectedEsp !== currentEsp) {
+                selectionnerEsp(selectedEsp);
+            }
+        }
+
+        // Sélectionner un ESP32
+        function selectionnerEsp(espId) {
+            currentEsp = espId;
+
+            // Mettre à jour l'interface
+            document.getElementById('selectedEspId').textContent = espId;
+            document.getElementById('espSelect').value = espId;
+
+            // Mettre à jour les cartes ESP
+            document.querySelectorAll('.esp-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-esp="${espId}"]`)?.classList.add('active');
+
+            // Rediriger vers la page avec l'ESP sélectionné
+            if (window.location.search !== `?esp=${espId}`) {
+                window.location.href = `/mesures?esp=${espId}`;
+            } else {
+                // Afficher une notification si déjà sur la bonne page
+                showNotification(`ESP32 ${espId} sélectionné`, 'success');
+            }
+        }
+
+        // Charger les données pour un ESP spécifique
+        async function chargerDonneesEsp(espId) {
+            try {
+                showLoading(true);
+
+                // Tester d'abord si des données existent
+                const response = await fetch(`/api/mesures/ruche/${espId}/derniere`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Données reçues:', data);
+                    if (data.status === 'OK') {
+                        showNotification(`Données trouvées pour ESP32 ${espId}`, 'success');
+                        // Rediriger vers la page avec les données filtrées
+                        setTimeout(() => {
+                            window.location.href = `/mesures?esp=${espId}`;
+                        }, 1000);
+                    } else {
+                        showNotification(`Aucune mesure pour ESP32 ${espId}`, 'warning');
+                    }
+                } else {
+                    console.error('Erreur HTTP:', response.status);
+                    showNotification(`Erreur lors du chargement pour ESP32 ${espId}`, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion à Firebase', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Actualiser les données
+        function actualiserDonnees() {
+            showNotification('Actualisation des données...', 'info');
+            // Recharger la page pour obtenir les dernières données
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+
+        // Créer des données de test
+        async function creerDonneesTest() {
+            if (!currentEsp) {
+                showNotification('Veuillez sélectionner un ESP32', 'warning');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                showNotification('Création de données de test...', 'info');
+                
+                const response = await fetch(`/dev/create-test-data/${currentEsp}?nombreJours=2&mesuresParJour=8`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showNotification(`${data.totalMesures} mesures créées pour ESP32 ${currentEsp}`, 'success');
+                    
+                    // Recharger la page après 2 secondes
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error('Erreur lors de la création');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la création des données de test', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Voir les détails d'un ESP
+        function voirDetails(espId) {
+            window.open(`/mesures/ruche/${espId}`, '_blank');
+        }
+
+        // Changer le mode d'affichage
+        function changerModeAffichage() {
+            const section = document.querySelector('.esp-selection-section');
+            section.classList.toggle('compact-mode');
+        }
+
+        // Auto-refresh désactivé
+        function startAutoRefresh() {
+            // Auto-refresh désactivé pour éviter les rechargements automatiques
+            console.log('Auto-refresh désactivé');
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // Utilitaires d'interface
+        function showLoading(show) {
+            const existingLoader = document.querySelector('.loading-overlay');
+            
+            if (show && !existingLoader) {
+                const loader = document.createElement('div');
+                loader.className = 'loading-overlay';
+                loader.innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Chargement...</p>
+                    </div>
+                `;
+                document.body.appendChild(loader);
+            } else if (!show && existingLoader) {
+                existingLoader.remove();
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            // Ajouter au conteneur de notifications ou au body
+            const container = document.getElementById('notifications') || document.body;
+            container.appendChild(notification);
+            
+            // Auto-remove après 5 secondes
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Fonction d'export (à implémenter)
+        function exportData() {
+            if (!currentEsp) {
+                showNotification('Veuillez sélectionner un ESP32', 'warning');
+                return;
+            }
+            
+            showNotification('Export en cours de développement...', 'info');
+            // TODO: Implémenter l'export des données
+        }
+    </script>
+    </th:block>
+
+</body>
+</html>

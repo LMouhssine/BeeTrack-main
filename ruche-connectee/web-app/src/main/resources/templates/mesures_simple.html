@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mesures - BeeTrack</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .stat-label {
+            color: #6b7280;
+            margin-top: 8px;
+        }
+        .ruches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .ruche-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .ruche-card.no-data {
+            opacity: 0.7;
+            border-left: 4px solid #ef4444;
+        }
+        .ruche-card.has-data {
+            border-left: 4px solid #10b981;
+        }
+        .ruche-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .ruche-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .data-item {
+            text-align: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+        .data-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .data-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .temperature { color: #ef4444; }
+        .humidity { color: #3b82f6; }
+        .couvercle { color: #8b5cf6; }
+        .couvercle.alert { color: #f59e0b; }
+        .battery { color: #10b981; }
+        .alert {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐝 BeeTrack - Mesures IoT</h1>
+            <p>Page de test des mesures (sans Firebase)</p>
+        </div>
+
+        <div class="success">
+            ✅ <strong>Page fonctionnelle !</strong> Cette page s'affiche correctement sans erreur ERR_INCOMPLETE_CHUNKED_ENCODING.
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Ruches totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Ruches actives</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">25.5°C</div>
+                <div class="stat-label">Temp. moyenne</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">65%</div>
+                <div class="stat-label">Humidité moyenne</div>
+            </div>
+        </div>
+
+        <h2>État des ruches</h2>
+        
+        <div class="ruches-grid">
+            <!-- Ruche avec données -->
+            <div class="ruche-card has-data">
+                <div class="ruche-header">
+                    <div class="ruche-name">Ruche 887D681C0610</div>
+                    <div class="status-badge status-active">Actif</div>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-value temperature">28.8°C</div>
+                        <div class="data-label">Température</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value humidity">56.6%</div>
+                        <div class="data-label">Humidité</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value couvercle alert">OUVERT</div>
+                        <div class="data-label">Couvercle</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value battery">85%</div>
+                        <div class="data-label">Batterie</div>
+                    </div>
+                </div>
+                <small style="color: #6b7280;">Dernière mesure: Aujourd'hui 14:51</small>
+            </div>
+
+            <!-- Ruche avec données -->
+            <div class="ruche-card has-data">
+                <div class="ruche-header">
+                    <div class="ruche-name">Ruche Jardin</div>
+                    <div class="status-badge status-active">Actif</div>
+                </div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-value temperature">22.3°C</div>
+                        <div class="data-label">Température</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value humidity">72.1%</div>
+                        <div class="data-label">Humidité</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value couvercle">FERMÉ</div>
+                        <div class="data-label">Couvercle</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value battery">92%</div>
+                        <div class="data-label">Batterie</div>
+                    </div>
+                </div>
+                <small style="color: #6b7280;">Dernière mesure: Aujourd'hui 14:46</small>
+            </div>
+
+            <!-- Ruche sans données -->
+            <div class="ruche-card no-data">
+                <div class="ruche-header">
+                    <div class="ruche-name">Ruche Verger</div>
+                    <div class="status-badge status-inactive">Inactif</div>
+                </div>
+                <div style="text-align: center; padding: 20px; color: #6b7280;">
+                    <p>📡 Capteur déconnecté</p>
+                    <small>Aucune mesure disponible</small>
+                </div>
+            </div>
+
+            <!-- Ruche sans données -->
+            <div class="ruche-card no-data">
+                <div class="ruche-header">
+                    <div class="ruche-name">Ruche Prairie</div>
+                    <div class="status-badge status-inactive">Inactif</div>
+                </div>
+                <div style="text-align: center; padding: 20px; color: #6b7280;">
+                    <p>⚙️ En attente de configuration</p>
+                    <small>Configuration Firebase requise</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert" style="margin-top: 30px;">
+            <strong>🔧 Solutions pour ERR_INCOMPLETE_CHUNKED_ENCODING :</strong><br>
+            1. Cette page de test fonctionne → Le problème vient de Firebase<br>
+            2. Testez <a href="/mesures-test">la page avec contrôleur Spring</a><br>
+            3. Vérifiez la configuration Firebase dans application.properties<br>
+            4. Consultez les logs Spring Boot dans la console
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <p>
+                <a href="/test-page" style="margin-right: 20px;">← Page de test basique</a>
+                <a href="/mesures-test" style="margin-right: 20px;">Page mesures avec Spring</a>
+                <a href="/mesures">Page mesures complète →</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

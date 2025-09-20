@@ -7,11 +7,11 @@ class BeeLogo extends StatelessWidget {
   final Color? beeColor;
 
   const BeeLogo({
-    Key? key,
+    super.key,
     this.size = 60.0,
     this.color,
     this.beeColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

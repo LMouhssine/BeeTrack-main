@@ -1,8 +1,12 @@
 package com.rucheconnectee.controller;
 
+import com.rucheconnectee.model.DonneesCapteur;
+import com.rucheconnectee.service.MesuresService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +18,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/mobile")
 public class MobileController {
+
+    @Autowired
+    private MesuresService mesuresService;
 
     /**
      * Récupération des ruches pour l'application mobile
@@ -73,6 +80,49 @@ public class MobileController {
                 "mode", "development"
         );
         return ResponseEntity.ok(health);
+    }
+
+    /**
+     * API mobile - Récupère la dernière mesure avec authentification
+     * GET /api/mobile/ruches/{rucheId}/derniere-mesure
+     */
+    @GetMapping("/ruches/{rucheId}/derniere-mesure")
+    public ResponseEntity<?> getDerniereMesureMobile(@PathVariable String rucheId,
+                                                   @RequestHeader(value = "X-Apiculteur-ID", required = false) String apiculteurId) {
+        try {
+            // TODO: Vérifier que l'apiculteur a accès à cette ruche
+            
+            DonneesCapteur derniereMesure = mesuresService.getDerniereMesure(rucheId);
+            
+            if (derniereMesure == null) {
+                return ResponseEntity.status(404).body(Map.of(
+                    "status", "NOT_FOUND",
+                    "message", "Aucune mesure trouvée",
+                    "rucheId", rucheId
+                ));
+            }
+            
+            // Format simplifié pour le mobile
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", derniereMesure.getId());
+            response.put("rucheId", rucheId);
+            response.put("timestamp", derniereMesure.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            response.put("temperature", derniereMesure.getTemperature());
+            response.put("humidity", derniereMesure.getHumidity());
+            response.put("couvercleOuvert", derniereMesure.getCouvercleOuvert());
+            response.put("batterie", derniereMesure.getBatterie());
+            response.put("signalQualite", derniereMesure.getSignalQualite());
+            response.put("erreur", derniereMesure.getErreur());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "status", "ERROR",
+                "message", "Erreur interne du serveur",
+                "error", e.getMessage()
+            ));
+        }
     }
 
     // --- Méthodes utilitaires ---

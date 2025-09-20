@@ -41,6 +41,14 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/mesures" th:href="@{/mesures}" class="nav-link"
+                   th:classappend="${currentPage == 'mesures' ? 'active' : ''}"
+                   th:aria-current="${currentPage == 'mesures' ? 'page' : 'false'}">
+                    <i data-lucide="activity" class="nav-icon" aria-hidden="true"></i>
+                    <span>Mesures IoT</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/alertes" th:href="@{/alertes}" class="nav-link"
                    th:classappend="${currentPage == 'alertes' ? 'active' : ''}"
                    th:aria-current="${currentPage == 'alertes' ? 'page' : 'false'}">

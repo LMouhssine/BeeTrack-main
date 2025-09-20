@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/api_client_service.dart';
 import 'package:ruche_connectee/services/api_ruche_service.dart';
 import 'package:ruche_connectee/services/auth_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 import 'package:ruche_connectee/services/alerte_couvercle_service.dart';
 
@@ -12,12 +12,12 @@ final GetIt getIt = GetIt.instance;
 
 /// Configure tous les services dans le service locator
 Future<void> setupServiceLocator() async {
-  // Services Firebase existants
-  getIt.registerLazySingleton<FirebaseService>(() => FirebaseService());
+  // Services Firebase Realtime Database
+  getIt.registerLazySingleton<FirebaseRealtimeService>(() => FirebaseRealtimeService());
 
   // Service d'authentification
   getIt.registerLazySingleton<AuthService>(
-    () => AuthService(getIt<FirebaseService>()),
+    () => AuthService(),
   );
 
   // Client API pour Spring Boot

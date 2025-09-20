@@ -1,18 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class RucheService {
-  final FirebaseService _firebaseService;
+  final FirebaseRealtimeService _firebaseService;
 
   RucheService(this._firebaseService);
 
-  // Collection Firestore pour les ruches
+  // Collections Realtime Database pour les ruches
   static const String _collectionRuches = 'ruches';
   static const String _collectionRuchers = 'ruchers';
 
-  /// Ajoute une nouvelle ruche dans Firebase Firestore
+  /// Ajoute une nouvelle ruche dans Firebase Realtime Database
   ///
   /// Paramètres :
   /// - [idRucher] : ID du rucher auquel appartient la ruche
@@ -36,7 +35,7 @@ class RucheService {
           '🐝 Tentative d\'ajout d\'une nouvelle ruche: $nom dans le rucher: $idRucher');
 
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         LoggerService.error(
             'Tentative d\'ajout de ruche sans utilisateur connecté');
@@ -47,20 +46,16 @@ class RucheService {
       LoggerService.debug('Utilisateur connecté: ${currentUser.uid}');
 
       // Vérifier que le rucher existe et appartient à l'utilisateur
-      final DocumentSnapshot rucherDoc = await _firebaseService.firestore
-          .collection(_collectionRuchers)
-          .doc(idRucher)
-          .get();
+      final Map<String, dynamic>? rucherDoc = await _firebaseService
+          .getDocument(_collectionRuchers, idRucher);
 
-      if (!rucherDoc.exists) {
+      if (rucherDoc == null) {
         LoggerService.error('Rucher non trouvé: $idRucher');
         throw Exception('Le rucher spécifié n\'existe pas.');
       }
 
-      final rucherData = rucherDoc.data() as Map<String, dynamic>;
-
       // Vérifier que le rucher appartient à l'utilisateur connecté
-      if (rucherData['idApiculteur'] != currentUser.uid) {
+      if (rucherDoc['idApiculteur'] != currentUser.uid) {
         LoggerService.error(
             'Tentative d\'ajout de ruche dans un rucher non autorisé: $idRucher');
         throw Exception(
@@ -68,7 +63,7 @@ class RucheService {
       }
 
       // Vérifier que le rucher est actif
-      if (rucherData['actif'] != true) {
+      if (rucherDoc['actif'] != true) {
         LoggerService.error(
             'Tentative d\'ajout de ruche dans un rucher inactif: $idRucher');
         throw Exception(
@@ -84,9 +79,9 @@ class RucheService {
         'position': position.trim(),
         'enService': enService,
         'dateInstallation': dateInstallation != null
-            ? Timestamp.fromDate(dateInstallation)
-            : FieldValue.serverTimestamp(),
-        'dateCreation': FieldValue.serverTimestamp(),
+            ? dateInstallation.millisecondsSinceEpoch
+            : DateTime.now().millisecondsSinceEpoch,
+        'dateCreation': DateTime.now().millisecondsSinceEpoch,
         // Champs additionnels pour la compatibilité
         'actif': true,
         'idApiculteur': currentUser.uid, // Pour faciliter les requêtes
@@ -94,26 +89,17 @@ class RucheService {
 
       LoggerService.debug('Données de la ruche à créer: $rucheData');
 
-      // Démarrer une transaction pour maintenir la cohérence
-      final String rucheId = await _firebaseService.firestore
-          .runTransaction<String>((transaction) async {
-        // Ajouter la ruche
-        final DocumentReference rucheRef =
-            _firebaseService.firestore.collection(_collectionRuches).doc();
+      // Générer un ID unique pour la ruche
+      final String rucheId = DateTime.now().millisecondsSinceEpoch.toString();
 
-        transaction.set(rucheRef, rucheData);
+      // Ajouter la ruche
+      await _firebaseService.setDocument(_collectionRuches, rucheId, rucheData);
 
-        // Mettre à jour le nombre de ruches dans le rucher
-        final DocumentReference rucherRef = _firebaseService.firestore
-            .collection(_collectionRuchers)
-            .doc(idRucher);
-
-        transaction.update(rucherRef, {
-          'nombreRuches': FieldValue.increment(1),
-          'dateModification': FieldValue.serverTimestamp(),
-        });
-
-        return rucheRef.id;
+      // Mettre à jour le nombre de ruches dans le rucher
+      final int nombreRuchesActuel = rucherDoc['nombreRuches'] ?? 0;
+      await _firebaseService.updateDocument(_collectionRuchers, idRucher, {
+        'nombreRuches': nombreRuchesActuel + 1,
+        'dateModification': DateTime.now().millisecondsSinceEpoch,
       });
 
       LoggerService.info('🐝 Ruche créée avec succès. ID: $rucheId');
@@ -123,19 +109,6 @@ class RucheService {
       LoggerService.error('Erreur lors de l\'ajout de la ruche', e);
 
       // Gestion spécifique des erreurs Firebase
-      if (e is FirebaseException) {
-        switch (e.code) {
-          case 'permission-denied':
-            throw Exception('Permissions insuffisantes pour créer une ruche');
-          case 'unavailable':
-            throw Exception(
-                'Service temporairement indisponible. Veuillez réessayer.');
-          default:
-            throw Exception('Erreur Firebase: ${e.message}');
-        }
-      }
-
-      // Re-lancer l'exception si elle est déjà formatée
       if (e is Exception) {
         rethrow;
       }
@@ -156,7 +129,7 @@ class RucheService {
       String idRucher) async {
     try {
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         LoggerService.error(
             'Tentative de récupération des ruches sans utilisateur connecté');
@@ -168,33 +141,26 @@ class RucheService {
           '🐝 Récupération des ruches pour le rucher: $idRucher (triées par nom)');
 
       // Vérifier que le rucher existe et appartient à l'utilisateur
-      final DocumentSnapshot rucherDoc = await _firebaseService.firestore
-          .collection(_collectionRuchers)
-          .doc(idRucher)
-          .get();
+      final Map<String, dynamic>? rucherDoc = await _firebaseService
+          .getDocument(_collectionRuchers, idRucher);
 
-      if (!rucherDoc.exists) {
+      if (rucherDoc == null) {
         throw Exception('Le rucher spécifié n\'existe pas.');
       }
 
-      final rucherData = rucherDoc.data() as Map<String, dynamic>;
-      if (rucherData['idApiculteur'] != currentUser.uid) {
+      if (rucherDoc['idApiculteur'] != currentUser.uid) {
         throw Exception(
             'Vous n\'êtes pas autorisé à accéder aux ruches de ce rucher.');
       }
 
-      // Récupérer les ruches du rucher
-      final QuerySnapshot querySnapshot = await _firebaseService.firestore
-          .collection(_collectionRuches)
-          .where('idRucher', isEqualTo: idRucher)
-          .where('actif', isEqualTo: true)
-          .get();
+      // Récupérer toutes les ruches et filtrer par rucher
+      final List<Map<String, dynamic>> toutesRuches = await _firebaseService
+          .getAllDocuments(_collectionRuches);
 
-      final List<Map<String, dynamic>> ruches = querySnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      final List<Map<String, dynamic>> ruches = toutesRuches
+          .where((ruche) =>
+              ruche['idRucher'] == idRucher && ruche['actif'] == true)
+          .toList();
 
       // Trier par nom croissant (insensible à la casse)
       ruches.sort((a, b) {
@@ -210,20 +176,6 @@ class RucheService {
     } catch (e) {
       LoggerService.error(
           'Erreur lors de la récupération des ruches triées par nom', e);
-
-      if (e is FirebaseException) {
-        switch (e.code) {
-          case 'permission-denied':
-            throw Exception(
-                'Permissions insuffisantes pour accéder aux ruches');
-          case 'unavailable':
-            throw Exception(
-                'Service Firestore temporairement indisponible. Veuillez réessayer.');
-          default:
-            throw Exception('Erreur Firestore: ${e.message}');
-        }
-      }
-
       rethrow;
     }
   }
@@ -246,7 +198,7 @@ class RucheService {
   Future<List<Map<String, dynamic>>> obtenirRuchesUtilisateur() async {
     try {
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
@@ -254,18 +206,20 @@ class RucheService {
       LoggerService.info(
           'Récupération de toutes les ruches pour l\'utilisateur: ${currentUser.uid}');
 
-      final QuerySnapshot querySnapshot = await _firebaseService.firestore
-          .collection(_collectionRuches)
-          .where('idApiculteur', isEqualTo: currentUser.uid)
-          .where('actif', isEqualTo: true)
-          .orderBy('dateCreation', descending: true)
-          .get();
+      final List<Map<String, dynamic>> toutesRuches = await _firebaseService
+          .getAllDocuments(_collectionRuches);
 
-      final List<Map<String, dynamic>> ruches = querySnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      final List<Map<String, dynamic>> ruches = toutesRuches
+          .where((ruche) =>
+              ruche['idApiculteur'] == currentUser.uid && ruche['actif'] == true)
+          .toList();
+
+      // Trier par date de création décroissante
+      ruches.sort((a, b) {
+        final dateA = a['dateCreation'] as int? ?? 0;
+        final dateB = b['dateCreation'] as int? ?? 0;
+        return dateB.compareTo(dateA);
+      });
 
       LoggerService.info(
           '${ruches.length} ruche(s) trouvée(s) pour l\'utilisateur');
@@ -287,24 +241,20 @@ class RucheService {
   Future<Map<String, dynamic>?> obtenirRucheParId(String rucheId) async {
     try {
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
 
       LoggerService.info('Récupération de la ruche: $rucheId');
 
-      final DocumentSnapshot docSnapshot = await _firebaseService.firestore
-          .collection(_collectionRuches)
-          .doc(rucheId)
-          .get();
+      final Map<String, dynamic>? data = await _firebaseService
+          .getDocument(_collectionRuches, rucheId);
 
-      if (!docSnapshot.exists) {
+      if (data == null) {
         LoggerService.warning('Ruche non trouvée: $rucheId');
         return null;
       }
-
-      final data = docSnapshot.data() as Map<String, dynamic>;
 
       // Vérifier que la ruche appartient à l'utilisateur connecté
       if (data['idApiculteur'] != currentUser.uid) {
@@ -313,7 +263,7 @@ class RucheService {
         throw Exception('Accès non autorisé à cette ruche');
       }
 
-      data['id'] = docSnapshot.id;
+      data['id'] = rucheId;
 
       LoggerService.info('Ruche récupérée avec succès: $rucheId');
 
@@ -341,7 +291,7 @@ class RucheService {
   }) async {
     try {
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
@@ -356,21 +306,19 @@ class RucheService {
 
       // Préparer les données de mise à jour
       final Map<String, dynamic> updateData = {
-        'dateModification': FieldValue.serverTimestamp(),
+        'dateModification': DateTime.now().millisecondsSinceEpoch,
       };
 
       if (nom != null) updateData['nom'] = nom.trim();
       if (position != null) updateData['position'] = position.trim();
       if (enService != null) updateData['enService'] = enService;
       if (dateInstallation != null) {
-        updateData['dateInstallation'] = Timestamp.fromDate(dateInstallation);
+        updateData['dateInstallation'] = dateInstallation.millisecondsSinceEpoch;
       }
 
       // Mettre à jour le document
-      await _firebaseService.firestore
-          .collection(_collectionRuches)
-          .doc(rucheId)
-          .update(updateData);
+      await _firebaseService.updateDocument(
+          _collectionRuches, rucheId, updateData);
 
       LoggerService.info('Ruche mise à jour avec succès: $rucheId');
     } catch (e) {
@@ -386,7 +334,7 @@ class RucheService {
   Future<void> supprimerRuche(String rucheId) async {
     try {
       // Vérifier que l'utilisateur est connecté
-      final User? currentUser = _firebaseService.auth.currentUser;
+      final User? currentUser = _firebaseService.currentUser;
       if (currentUser == null) {
         throw Exception('Utilisateur non connecté');
       }
@@ -401,28 +349,23 @@ class RucheService {
 
       final String idRucher = rucheExistante['idRucher'];
 
-      // Utiliser une transaction pour maintenir la cohérence
-      await _firebaseService.firestore.runTransaction((transaction) async {
-        // Suppression logique de la ruche
-        final DocumentReference rucheRef = _firebaseService.firestore
-            .collection(_collectionRuches)
-            .doc(rucheId);
-
-        transaction.update(rucheRef, {
-          'actif': false,
-          'dateSuppression': FieldValue.serverTimestamp(),
-        });
-
-        // Décrémenter le nombre de ruches dans le rucher
-        final DocumentReference rucherRef = _firebaseService.firestore
-            .collection(_collectionRuchers)
-            .doc(idRucher);
-
-        transaction.update(rucherRef, {
-          'nombreRuches': FieldValue.increment(-1),
-          'dateModification': FieldValue.serverTimestamp(),
-        });
+      // Suppression logique de la ruche
+      await _firebaseService.updateDocument(_collectionRuches, rucheId, {
+        'actif': false,
+        'dateSuppression': DateTime.now().millisecondsSinceEpoch,
       });
+
+      // Décrémenter le nombre de ruches dans le rucher
+      final Map<String, dynamic>? rucherDoc = await _firebaseService
+          .getDocument(_collectionRuchers, idRucher);
+      
+      if (rucherDoc != null) {
+        final int nombreRuchesActuel = rucherDoc['nombreRuches'] ?? 0;
+        await _firebaseService.updateDocument(_collectionRuchers, idRucher, {
+          'nombreRuches': nombreRuchesActuel - 1,
+          'dateModification': DateTime.now().millisecondsSinceEpoch,
+        });
+      }
 
       LoggerService.info('Ruche supprimée avec succès: $rucheId');
     } catch (e) {
@@ -438,7 +381,7 @@ class RucheService {
   ///
   /// Retourne un stream de la liste des ruches triées par nom croissant
   Stream<List<Map<String, dynamic>>> ecouterRuchesParRucher(String idRucher) {
-    final User? currentUser = _firebaseService.auth.currentUser;
+    final User? currentUser = _firebaseService.currentUser;
     if (currentUser == null) {
       LoggerService.error(
           'Tentative d\'écoute des ruches sans utilisateur connecté');
@@ -449,17 +392,13 @@ class RucheService {
     LoggerService.info(
         '🐝 Démarrage de l\'écoute temps réel des ruches pour le rucher: $idRucher (triées par nom)');
 
-    return _firebaseService.firestore
-        .collection(_collectionRuches)
-        .where('idRucher', isEqualTo: idRucher)
-        .where('actif', isEqualTo: true)
-        .snapshots()
-        .map((querySnapshot) {
-      final ruches = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+    return _firebaseService
+        .watchCollection(_collectionRuches)
+        .map((toutesRuches) {
+      final ruches = toutesRuches
+          .where((ruche) =>
+              ruche['idRucher'] == idRucher && ruche['actif'] == true)
+          .toList();
 
       // Trier par nom croissant (insensible à la casse)
       ruches.sort((a, b) {
@@ -482,7 +421,7 @@ class RucheService {
   ///
   /// Retourne un stream de la liste de toutes les ruches de l'utilisateur
   Stream<List<Map<String, dynamic>>> ecouterRuchesUtilisateur() {
-    final User? currentUser = _firebaseService.auth.currentUser;
+    final User? currentUser = _firebaseService.currentUser;
     if (currentUser == null) {
       return Stream.error(Exception('Utilisateur non connecté'));
     }
@@ -490,18 +429,20 @@ class RucheService {
     LoggerService.info(
         'Démarrage de l\'écoute temps réel de toutes les ruches utilisateur');
 
-    return _firebaseService.firestore
-        .collection(_collectionRuches)
-        .where('idApiculteur', isEqualTo: currentUser.uid)
-        .where('actif', isEqualTo: true)
-        .orderBy('dateCreation', descending: true)
-        .snapshots()
-        .map((querySnapshot) {
-      final ruches = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+    return _firebaseService
+        .watchCollection(_collectionRuches)
+        .map((toutesRuches) {
+      final ruches = toutesRuches
+          .where((ruche) =>
+              ruche['idApiculteur'] == currentUser.uid && ruche['actif'] == true)
+          .toList();
+
+      // Trier par date de création décroissante
+      ruches.sort((a, b) {
+        final dateA = a['dateCreation'] as int? ?? 0;
+        final dateB = b['dateCreation'] as int? ?? 0;
+        return dateB.compareTo(dateA);
+      });
 
       LoggerService.debug(
           'Mise à jour temps réel: ${ruches.length} ruche(s) utilisateur');

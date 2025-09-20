@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:ruche_connectee/services/rucher_service.dart';
-import 'package:ruche_connectee/services/firebase_service.dart';
+import 'package:ruche_connectee/services/firebase_realtime_service.dart';
 import 'package:ruche_connectee/services/logger_service.dart';
 
 class RucherListScreen extends StatefulWidget {
-  const RucherListScreen({Key? key}) : super(key: key);
+  const RucherListScreen({super.key});
 
   @override
   State<RucherListScreen> createState() => _RucherListScreenState();
@@ -19,13 +19,13 @@ class _RucherListScreenState extends State<RucherListScreen> {
   @override
   void initState() {
     super.initState();
-    _rucherService = RucherService(GetIt.I<FirebaseService>());
+    _rucherService = RucherService(GetIt.I<FirebaseRealtimeService>());
     _initializeStream();
   }
 
   void _initializeStream() {
     // Utiliser la version optimisée avec fallback automatique
-    _ruchersStream = _rucherService.ecouterRuchersUtilisateurOptimise();
+    _ruchersStream = _rucherService.ecouterRuchersUtilisateur();
   }
 
   void _refreshStream() {
@@ -154,9 +154,9 @@ class _RucherListScreenState extends State<RucherListScreen> {
               itemCount: ruchers.length,
               itemBuilder: (context, index) {
                 final rucher = ruchers[index];
-                final dateCreation = rucher['dateCreation'] != null
-                    ? (rucher['dateCreation'] as dynamic).toDate()
-                    : DateTime.now();
+                                 final dateCreation = rucher['dateCreation'] != null
+                     ? DateTime.fromMillisecondsSinceEpoch(rucher['dateCreation'])
+                     : DateTime.now();
 
                 return Card(
                   elevation: 2,
