@@ -2,7 +2,6 @@ package com.rucheconnectee.controller;
 
 import com.rucheconnectee.model.DonneesCapteur;
 import com.rucheconnectee.service.MesuresService;
-import com.rucheconnectee.service.RuchesNewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,9 +21,6 @@ public class DashboardController {
 
     @Autowired
     private MesuresService mesuresService;
-    
-    @Autowired(required = false)
-    private RuchesNewService ruchesService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {

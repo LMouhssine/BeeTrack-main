@@ -255,38 +255,6 @@ public class MesuresWebController {
     }
     
     /**
-     * Charge des données par défaut en cas d'erreur Firebase
-     */
-    private void loadDefaultData(Model model) {
-        model.addAttribute("hasGlobalData", true);
-        model.addAttribute("totalRuches", 4);
-        model.addAttribute("ruchesAvecDonnees", 2);
-        model.addAttribute("temperatureMoyenne", 25.5);
-        model.addAttribute("humiditeMoyenne", 65.0);
-        model.addAttribute("totalMesures", 0);
-        
-        // Créer des ruches par défaut
-        java.util.List<java.util.Map<String, Object>> ruchesData = new java.util.ArrayList<>();
-        
-        java.util.Map<String, Object> ruche1 = new java.util.HashMap<>();
-        ruche1.put("id", "887D681C0610");
-        ruche1.put("nom", "Ruche 887D681");
-        ruche1.put("hasData", false);
-        ruche1.put("error", "En attente de données Firebase");
-        ruchesData.add(ruche1);
-        
-        java.util.Map<String, Object> ruche2 = new java.util.HashMap<>();
-        ruche2.put("id", "R001");
-        ruche2.put("nom", "Ruche R001");
-        ruche2.put("hasData", false);
-        ruche2.put("error", "Configuration Firebase requise");
-        ruchesData.add(ruche2);
-        
-        model.addAttribute("ruches", ruchesData);
-        model.addAttribute("dataSource", "Données par défaut (erreur Firebase)");
-    }
-    
-    /**
      * Charge les mesures pour un ESP32 spécifique
      */
     private void loadMesuresForSpecificEsp(Model model, String espId) {

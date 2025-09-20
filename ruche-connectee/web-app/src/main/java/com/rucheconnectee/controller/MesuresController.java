@@ -1,6 +1,7 @@
 package com.rucheconnectee.controller;
 
 import com.rucheconnectee.model.DonneesCapteur;
+import com.rucheconnectee.service.AuthorizationService;
 import com.rucheconnectee.service.MesuresService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class MesuresController {
 
     @Autowired
     private MesuresService mesuresService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     /**
      * Récupère la dernière mesure d'une ruche
@@ -189,7 +193,14 @@ public class MesuresController {
     public ResponseEntity<?> getDerniereMesureMobile(@PathVariable String rucheId,
                                                    @RequestHeader(value = "X-Apiculteur-ID", required = false) String apiculteurId) {
         try {
-            // TODO: Vérifier que l'apiculteur a accès à cette ruche
+            // Vérifier que l'apiculteur a accès à cette ruche
+            if (apiculteurId != null && !authorizationService.hasAccessToRuche(apiculteurId, rucheId)) {
+                return ResponseEntity.status(403).body(Map.of(
+                    "status", "FORBIDDEN",
+                    "message", "Accès refusé à cette ruche",
+                    "rucheId", rucheId
+                ));
+            }
             
             DonneesCapteur derniereMesure = mesuresService.getDerniereMesure(rucheId);
             
