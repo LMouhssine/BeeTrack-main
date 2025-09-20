@@ -12,6 +12,14 @@ Because flutter_lints 6.0.0 requires SDK version ^3.8.0 and no versions of flutt
 ```yaml
 dev_dependencies:
   flutter_lints: ^4.0.0  # Au lieu de ^6.0.0
+
+dependencies:
+  go_router: ^14.2.7     # Au lieu de ^16.2.0
+  firebase_core: ^3.6.0  # Version compatible
+  firebase_auth: ^5.3.1  # Version compatible
+  firebase_database: ^11.1.4  # Version compatible
+  fl_chart: ^0.69.0      # Version compatible
+  intl: ^0.19.0          # Version compatible
 ```
 
 ### 2. **Script automatique de correction**

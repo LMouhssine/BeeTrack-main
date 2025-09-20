@@ -46,7 +46,7 @@ jobs:
       run: flutter test --coverage
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: ruche-connectee/mobile-app/coverage/lcov.info
         flags: flutter
@@ -81,7 +81,7 @@ jobs:
       run: flutter build apk --release
 
     - name: Upload APK artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-apk
         path: ruche-connectee/mobile-app/build/app/outputs/flutter-apk/app-release.apk
@@ -143,7 +143,7 @@ jobs:
       run: flutter build web --release
 
     - name: Upload Web build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: web-build
         path: ruche-connectee/mobile-app/build/web/
