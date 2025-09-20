@@ -34,7 +34,10 @@ jobs:
       with:
         flutter-version: '3.19.x'
         cache: true
-        
+
+    - name: Disable Flutter analytics
+      run: flutter config --no-analytics
+
     - name: Get dependencies
       run: flutter pub get
       working-directory: ruche-connectee/mobile-app
